@@ -5,130 +5,140 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SignUp">
+    tools:context=".SignUp"
+    android:background="@drawable/loginbg">
+
+
+    <TextView
+        android:id="@+id/tvSign"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/opensans"
+        android:text="Sign Up"
+        android:textColor="@color/skyblue"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginTop="160dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="vertical"
-        android:gravity="center">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sign Up"
-            android:textSize="24sp"
-            android:fontFamily="@font/opensans"
-            android:textStyle="bold"
-            android:textColor="@color/skyblue" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSign">
 
         <LinearLayout
             android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_gravity="center"
-            android:layout_marginTop="24dp">
+            android:layout_marginTop="24dp"
+            android:orientation="vertical">
 
             <EditText
                 android:id="@+id/etUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Username"
                 android:autofillHints="Username"
-                android:textSize="15sp"
-                android:fontFamily="@font/opensans"
-                android:inputType="text"
-                android:maxLines="1"
                 android:background="@drawable/round_edit_text"
                 android:drawablePadding="15dp"
-                android:padding="15dp" />
+                android:fontFamily="@font/opensans"
+                android:hint="Username"
+                android:inputType="text"
+                android:maxLines="1"
+                android:padding="15dp"
+                android:textSize="15sp" />
 
             <EditText
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email"
+                android:layout_marginTop="16dp"
                 android:autofillHints="Email"
-                android:textSize="15sp"
-                android:fontFamily="@font/opensans"
-                android:inputType="textEmailAddress"
-                android:maxLines="1"
                 android:background="@drawable/round_edit_text"
                 android:drawablePadding="15dp"
+                android:fontFamily="@font/opensans"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
                 android:padding="15dp"
-                android:layout_marginTop="16dp"/>
+                android:textSize="15sp" />
 
             <EditText
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Password"
+                android:layout_marginTop="16dp"
                 android:autofillHints="Password"
-                android:textSize="15sp"
-                android:fontFamily="@font/opensans"
-                android:inputType="textPassword"
-                android:maxLines="1"
                 android:background="@drawable/round_edit_text"
                 android:drawablePadding="15dp"
+                android:fontFamily="@font/opensans"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:maxLines="1"
                 android:padding="15dp"
-                android:layout_marginTop="16dp"/>
+                android:textSize="15sp" />
 
             <EditText
                 android:id="@+id/etConfirmPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Confirm Password"
+                android:layout_marginTop="16dp"
                 android:autofillHints="Confirm Password"
-                android:textSize="15sp"
-                android:fontFamily="@font/opensans"
-                android:inputType="textPassword"
-                android:maxLines="1"
                 android:background="@drawable/round_edit_text"
                 android:drawablePadding="15dp"
+                android:fontFamily="@font/opensans"
+                android:hint="Confirm Password"
+                android:inputType="textPassword"
+                android:maxLines="1"
                 android:padding="15dp"
-                android:layout_marginTop="16dp"/>
+                android:textSize="15sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="16dp">
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
 
             <Button
                 android:id="@+id/btnSign"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sign Up"
+                android:layout_gravity="center"
                 android:fontFamily="@font/opensans"
+                android:text="Sign Up"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_gravity="center"/>
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/opensans"
                     android:text="Already have an account?"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/opensans"/>
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/othersLog"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Log In"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/opensans"
-                    android:textStyle="bold"
                     android:layout_marginStart="4dp"
                     android:clickable="true"
-                    android:focusable="true"/>
+                    android:focusable="true"
+                    android:fontFamily="@font/opensans"
+                    android:text="Log In"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
