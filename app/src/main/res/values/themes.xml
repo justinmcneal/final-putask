@@ -1,9 +1,22 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.PutTask" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Base.Theme.PutTask" parent="Theme.MaterialComponents.Light.NoActionBar">
+    </style>
+
+    <style name="ToolbarTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/black</item>
     </style>
 
     <style name="Theme.PutTask" parent="Base.Theme.PutTask" />
+    <style name="Theme.PutTask.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="BottomNavigationViewStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemIconSize">26dp</item> <!-- Adjust icon size -->
+    </style>
+
+    <style name="Theme.PutTask.AppBarOverlay"
+        parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.PutTask.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
