@@ -8,8 +8,6 @@
     android:background="@color/superskyblue"
     tools:context=".MainActivity">
 
-
-
     <FrameLayout
         android:id="@+id/flfragment"
         android:layout_width="match_parent"

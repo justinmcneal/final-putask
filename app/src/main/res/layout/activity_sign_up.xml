@@ -111,6 +111,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:fontFamily="@font/opensans"
+                android:backgroundTint="@color/skyblue"
                 android:text="Sign Up"
                 android:textSize="16sp"
                 android:textStyle="bold" />
