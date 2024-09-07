@@ -5,6 +5,5 @@
     <color name="skyblue">#3ABDF4</color>
     <color name="red">#F53226</color>
     <color name="superskyblue">#EBF6FF</color>
-
-
+    <color name="gray">#808080</color>
 </resources>

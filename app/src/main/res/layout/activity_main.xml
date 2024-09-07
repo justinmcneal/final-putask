@@ -14,19 +14,49 @@
         android:layout_height="match_parent">
         <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="70dp"
             android:id="@+id/toolbar"
             android:background="@color/white"
-            android:padding="10dp"
-            android:elevation="10dp"
             android:theme="@style/ToolbarTheme"
-            app:title=""
-            app:titleTextColor="@android:color/transparent"
-            android:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
+            app:titleTextColor="@color/black"
+            android:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+
+
+                <TextView
+                    android:id="@+id/dateTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/gray"
+                    android:layout_gravity="start"
+                    android:textSize="14sp"
+                    android:text="Date"/>
+
+
+                <TextView
+                    android:id="@+id/toolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="start"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:textSize="25sp"
+                    android:layout_marginTop="2dp"
+                    android:text="Title"/>
+            </LinearLayout>
+        </androidx.appcompat.widget.Toolbar>
+
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
 
             <com.google.android.material.bottomappbar.BottomAppBar
                 android:id="@+id/bottomappbar"
@@ -40,6 +70,7 @@
                 app:contentInsetStart="0dp"
                 app:elevation="0dp">
 
+
                 <com.google.android.material.bottomnavigation.BottomNavigationView
                     android:id="@+id/bottomnavigationview"
                     android:layout_width="wrap_content"
@@ -51,7 +82,9 @@
                     android:background="@android:color/transparent"
                     app:elevation="0dp" />
 
+
             </com.google.android.material.bottomappbar.BottomAppBar>
+
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/btnAdd"
@@ -65,6 +98,7 @@
                 app:layout_anchor="@id/bottomappbar" />
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </FrameLayout>
+
 
     <com.google.android.material.navigation.NavigationView
         android:layout_width="wrap_content"
