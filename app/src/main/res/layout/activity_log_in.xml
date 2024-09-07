@@ -84,9 +84,10 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:fontFamily="@font/opensans"
+                android:backgroundTint="@color/skyblue"
                 android:text="Log In"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -102,6 +103,7 @@
                     android:textSize="12sp" />
 
                 <TextView
+                    android:id="@+id/othersSign"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
