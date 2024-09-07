@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         val toggle = ActionBarDrawerToggle(
             this, binding.drawerLayout,
@@ -73,18 +74,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.ic_analytics -> openFragment(Analytics())
             R.id.ic_profile -> openFragment(Profile())
             R.id.ic_contactsupport -> openFragment(ContactSupport())
-            R.id.ic_logout -> logout() // Handle logout click
+            R.id.ic_logout -> logout()
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
 
     private fun logout() {
-        // Clear user session or perform any logout logic here
-        // Then redirect to the LogInSignIn activity
         val intent = Intent(this, LoginSignin::class.java)
         startActivity(intent)
-        finish() // Optional: finish the current activity so the user cannot return to it
+        finish()
     }
 
     private fun openFragment(fragment: Fragment) =
