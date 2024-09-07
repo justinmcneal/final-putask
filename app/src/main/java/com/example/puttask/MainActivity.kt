@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.example.puttask.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -35,6 +37,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false) //Disable the default app title to display a custom title depending on the clicked activity
 
         val toggle = ActionBarDrawerToggle(
             this, binding.drawerLayout,
@@ -48,16 +51,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.bottomnavigationview.background = null
         binding.bottomnavigationview.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.ic_lists -> openFragment(Lists())
-                R.id.ic_analytics -> openFragment(Analytics())
-                R.id.ic_timeline -> openFragment(Timeline())
-                R.id.ic_profile -> openFragment(Profile())
+                R.id.ic_lists -> openFragment(Lists(), "Tasks")
+                R.id.ic_analytics -> openFragment(Analytics(),"Analytics")
+                R.id.ic_timeline -> openFragment(Timeline(),"Timeline")
+                R.id.ic_profile -> openFragment(Profile(),"")
             }
             true
         }
 
         fragmentManager = supportFragmentManager
-        openFragment(Lists())
+        openFragment(Lists(),"Tasks")
 
         binding.btnAdd.setOnClickListener {
             Toast.makeText(this, "Add New Task", Toast.LENGTH_SHORT).show()
@@ -68,11 +71,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.ic_lists -> openFragment(Lists())
-            R.id.ic_timeline -> openFragment(Timeline())
-            R.id.ic_analytics -> openFragment(Analytics())
-            R.id.ic_profile -> openFragment(Profile())
-            R.id.ic_contactsupport -> openFragment(ContactSupport())
+            R.id.ic_lists -> openFragment(Lists(),"Tasks")
+            R.id.ic_timeline -> openFragment(Timeline(), "Timeline")
+            R.id.ic_analytics -> openFragment(Analytics(), "Analytics")
+            R.id.ic_profile -> openFragment(Profile(), "")
+            R.id.ic_contactsupport -> openFragment(ContactSupport(), "Contact Support")
             R.id.ic_logout -> logout() // Handle logout click
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
@@ -87,9 +90,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         finish() // Optional: finish the current activity so the user cannot return to it
     }
 
-    private fun openFragment(fragment: Fragment) =
+    private fun openFragment(fragment: Fragment, title: String) {
         supportFragmentManager.beginTransaction().apply {
             replace(R.id.flfragment, fragment)
             commit()
         }
+        // Set the fragment title based on the clicked activity
+        binding.toolbarTitle.text = title
+
+        // Set the accurate date on the toolbar on top of the title
+        val dateFormat = SimpleDateFormat("d MMMM", Locale.getDefault())
+        val currentDate = dateFormat.format(Date())
+        binding.dateTextView.text = currentDate
+    }
 }

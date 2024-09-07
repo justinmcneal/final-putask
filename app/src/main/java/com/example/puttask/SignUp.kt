@@ -13,6 +13,7 @@ class SignUp : AppCompatActivity() {
 
     private lateinit var btnSign: Button
     private lateinit var othersLog: TextView // Changed from Button to TextView
+    private lateinit var tvGreeting: TextView// for home greeting pero di q pa lalagayn kc wala pa function dito
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +30,7 @@ class SignUp : AppCompatActivity() {
         othersLog = findViewById(R.id.othersLog) // Correctly using TextView
 
         btnSign.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, SignUp::class.java)
             startActivity(intent)
         }
         othersLog.setOnClickListener {
