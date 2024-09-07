@@ -12,10 +12,12 @@
         android:id="@+id/flfragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <!-- Toolbar -->
         <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:id="@+id/toolbar"
             android:background="@color/white"
             android:theme="@style/ToolbarTheme"
             app:titleTextColor="@color/black"
@@ -31,23 +33,55 @@
                     android:id="@+id/dateTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="Date"
+                    android:fontFamily="@font/opensans"
                     android:textColor="@color/gray"
-                    android:layout_gravity="start"
                     android:textSize="14sp"
-                    android:text="Date"/>
+                    android:layout_gravity="start"/>
 
                 <TextView
                     android:id="@+id/toolbarTitle"
                     android:layout_width="wrap_content"
-                    android:layout_gravity="start"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
+                    android:text="Title"
                     android:textColor="@color/black"
+                    android:fontFamily="@font/opensans"
+                    android:textStyle="bold"
                     android:textSize="25sp"
-                    android:layout_marginTop="2dp"
-                    android:text="Title"/>
+                    android:layout_gravity="start"
+                    android:layout_marginTop="2dp"/>
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
+
+        <LinearLayout
+            android:id="@+id/lloutside"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="72dp"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Organize by adding task,"
+                android:textColor="@color/black"
+                android:fontFamily="@font/opensans"
+                android:textSize="12sp"
+                android:paddingLeft="14dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Justin"
+                android:textColor="@color/black"
+                android:fontFamily="@font/opensans"
+                android:textSize="12sp"
+                android:paddingLeft="2dp"
+       />
+        </LinearLayout>
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
@@ -72,7 +106,6 @@
                     app:menu="@menu/bottomnav"
                     app:itemIconTint="@color/black"
                     app:itemTextColor="@color/black"
-                    style="@style/BottomNavigationViewStyle"
                     android:background="@android:color/transparent"
                     app:elevation="0dp" />
             </com.google.android.material.bottomappbar.BottomAppBar>
@@ -84,19 +117,43 @@
                 android:backgroundTint="@color/skyblue"
                 android:src="@drawable/ic_add"
                 app:tint="@color/white"
-                app:maxImageSize="40dp"
                 android:contentDescription="@string/add_button_description"
-                app:layout_anchor="@id/bottomappbar" />
+                app:layout_anchor="@id/bottomappbar"/>
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </FrameLayout>
 
+    <!-- Navigation Drawer with Footer -->
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/hamburgerMenu"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/hamburgerMenu"
         android:layout_gravity="start"
         app:itemIconTint="@color/black"
         app:itemTextColor="@color/black"
         app:headerLayout="@layout/hamburgernav_header"
-        app:menu="@menu/hamburgernav"/>
+        app:menu="@menu/hamburgernav">
+
+        <!-- Footer LinearLayout with TextView -->
+        <LinearLayout
+            android:id="@+id/footerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:background="@color/white"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/footerText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Footer Text"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/opensans" />
+        </LinearLayout>
+
+    </com.google.android.material.navigation.NavigationView>
+
 </androidx.drawerlayout.widget.DrawerLayout>
