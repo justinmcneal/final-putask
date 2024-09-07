@@ -49,9 +49,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.bottomnavigationview.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.ic_lists -> openFragment(Lists())
+                R.id.ic_profile -> openFragment(Profile())
                 R.id.ic_analytics -> openFragment(Analytics())
                 R.id.ic_timeline -> openFragment(Timeline())
-                R.id.ic_profile -> openFragment(Profile())
             }
             true
         }

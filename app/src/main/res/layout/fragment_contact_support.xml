@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ContactSupport"
-    android:background="@color/white">
+    tools:context=".ContactSupport">
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
