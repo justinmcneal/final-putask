@@ -8,71 +8,160 @@
     android:background="@color/superskyblue"
     tools:context=".MainActivity">
 
-    <FrameLayout
-        android:id="@+id/flfragment"
+    <!-- Main Content Area -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Toolbar -->
         <androidx.appcompat.widget.Toolbar
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
             android:id="@+id/toolbar"
-            android:background="@color/white"
-            android:padding="10dp"
-            android:elevation="10dp"
-            android:theme="@style/ToolbarTheme"
-            app:title=""
-            app:titleTextColor="@android:color/transparent"
-            android:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
-
-        <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="70dp"
+            android:background="@color/white"
+            android:theme="@style/ToolbarTheme"
+            app:titleTextColor="@color/black"
+            android:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-            <com.google.android.material.bottomappbar.BottomAppBar
-                android:id="@+id/bottomappbar"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/white"
-                android:layout_gravity="bottom"
-                app:fabCradleRoundedCornerRadius="50dp"
-                app:fabCradleVerticalOffset="5dp"
-                app:fabCradleMargin="13dp"
-                app:contentInsetStart="0dp"
-                app:elevation="0dp">
+                android:orientation="vertical"
+                android:gravity="center">
 
-                <com.google.android.material.bottomnavigation.BottomNavigationView
-                    android:id="@+id/bottomnavigationview"
+                <TextView
+                    android:id="@+id/dateTextView"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    app:menu="@menu/bottomnav"
-                    app:itemIconTint="@color/black"
-                    app:itemTextColor="@color/black"
-                    style="@style/BottomNavigationViewStyle"
-                    android:background="@android:color/transparent"
-                    app:elevation="0dp" />
+                    android:layout_height="wrap_content"
+                    android:text="Date"
+                    android:textColor="@color/gray"
+                    android:textSize="14sp"
+                    android:layout_gravity="start" />
 
-            </com.google.android.material.bottomappbar.BottomAppBar>
+                <TextView
+                    android:id="@+id/toolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Title"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="25sp"
+                    android:layout_gravity="start"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+        </androidx.appcompat.widget.Toolbar>
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/btnAdd"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp"
+            android:background="@color/white">
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/skyblue"
-                android:src="@drawable/ic_add"
-                app:tint="@color/white"
-                app:maxImageSize="40dp"
-                android:contentDescription="@string/add_button_description"
-                app:layout_anchor="@id/bottomappbar" />
-        </androidx.coordinatorlayout.widget.CoordinatorLayout>
-    </FrameLayout>
+                android:text="Add a task"
+                android:fontFamily="@font/opensans"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                android:layout_marginLeft="12dp"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Justin"
+                android:fontFamily="@font/opensans"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginLeft="4dp"/>
+
+
+        </LinearLayout>
+
+        <!-- FrameLayout for fragments -->
+        <FrameLayout
+            android:id="@+id/flfragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <!-- Bottom App Bar and Floating Action Button -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.bottomappbar.BottomAppBar
+            android:id="@+id/bottomappbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white"
+            android:layout_gravity="bottom"
+            app:fabCradleRoundedCornerRadius="50dp"
+            app:fabCradleVerticalOffset="5dp"
+            app:fabCradleMargin="13dp"
+            app:contentInsetStart="0dp"
+            app:elevation="0dp">
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/bottomnavigationview"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:menu="@menu/bottomnav"
+                app:itemIconTint="@color/black"
+                app:itemTextColor="@color/black"
+                android:background="@android:color/transparent"
+                app:elevation="0dp" />
+        </com.google.android.material.bottomappbar.BottomAppBar>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/skyblue"
+            android:src="@drawable/ic_add"
+            app:tint="@color/white"
+            android:contentDescription="@string/add_button_description"
+            app:layout_anchor="@id/bottomappbar"/>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <!-- Navigation Drawer with Footer -->
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/hamburgerMenu"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/hamburgerMenu"
         android:layout_gravity="start"
         app:itemIconTint="@color/black"
         app:itemTextColor="@color/black"
         app:headerLayout="@layout/hamburgernav_header"
-        app:menu="@menu/hamburgernav"/>
+        app:menu="@menu/hamburgernav">
+
+        <!-- Footer LinearLayout with TextView -->
+        <LinearLayout
+            android:id="@+id/footerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:background="@color/white"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/footerText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Footer Text"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/opensans" />
+        </LinearLayout>
+
+    </com.google.android.material.navigation.NavigationView>
+
 </androidx.drawerlayout.widget.DrawerLayout>
