@@ -1,6 +1,6 @@
 package com.example.puttask
 
-import  android.content.Intent
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -83,7 +83,7 @@ class LogIn : AppCompatActivity() {
 
     // Login user using Retrofit
     private fun loginUser(email: String, password: String) {
-        val authService = RetrofitClient.instance.create(AuthService::class.java)
+        val authService = RetrofitClient.authService
         val loginRequest = LoginRequest(email, password)
 
         authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
@@ -92,18 +92,21 @@ class LogIn : AppCompatActivity() {
                     val loginResponse = response.body()
                     loginResponse?.let {
                         Toast.makeText(this@LogIn, "Login Successful", Toast.LENGTH_SHORT).show()
-                        // Proceed to the main activity after successful login
                         val intent = Intent(this@LogIn, MainActivity::class.java)
                         startActivity(intent)
                     }
                 } else {
-                    Toast.makeText(this@LogIn, "Login failed", Toast.LENGTH_SHORT).show()
+                    // Log response code and message
+                    Toast.makeText(this@LogIn, "Login failed: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                Toast.makeText(this@LogIn, "Network Error", Toast.LENGTH_SHORT).show()
+                // Log the exception
+                Toast.makeText(this@LogIn, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                t.printStackTrace()
             }
         })
     }
+
 }
