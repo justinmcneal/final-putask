@@ -12,8 +12,8 @@ import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var usernameEditText: EditText
-    private lateinit var passwordEditText: EditText
+    private lateinit var etEmail: EditText
+    private lateinit var etPassword: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,8 +38,8 @@ class LoginActivity : AppCompatActivity() {
         authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                 if (response.isSuccessful) {
-                    val LoginResponse = response.body()
-                    LoginResponse?.let {
+                    val loginResponse = response.body()
+                    loginResponse?.let {
                         Toast.makeText(this@LoginActivity, "Login Complete", Toast.LENGTH_SHORT).show()
                     }
                 } else {
