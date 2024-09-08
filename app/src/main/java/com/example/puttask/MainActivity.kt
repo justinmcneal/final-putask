@@ -22,8 +22,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                binding.drawerLayout.closeDrawer(GravityCompat.START)
+            if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
+                binding.drawerLayout.closeDrawer(GravityCompat.END)
             } else {
                 onBackPressedDispatcher.onBackPressed()
             }
@@ -39,12 +39,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false) //Disable the default app title to display a custom title depending on the clicked activity
 
-        val toggle = ActionBarDrawerToggle(
-            this, binding.drawerLayout,
-            binding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        )
-        binding.drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
+
+        // Manually control the inputted customized hamburger icon click
+        binding.hamburgerIcon.setOnClickListener {
+            if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
+                binding.drawerLayout.closeDrawer(GravityCompat.END) // Close the drawer if it's open
+            } else {
+                binding.drawerLayout.openDrawer(GravityCompat.END) // Open the drawer when clicked
+            }
+        }
 
         binding.hamburgerMenu.setNavigationItemSelectedListener(this)
 
@@ -78,7 +81,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.ic_contactsupport -> openFragment(ContactSupport(), "Contact Support")
             R.id.ic_logout -> logout() // Handle logout click
         }
-        binding.drawerLayout.closeDrawer(GravityCompat.START)
+        binding.drawerLayout.closeDrawer(GravityCompat.END)
         return true
     }
 

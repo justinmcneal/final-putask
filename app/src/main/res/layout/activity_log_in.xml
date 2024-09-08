@@ -42,21 +42,21 @@
             😁
 
             <EditText
-                android:id="@+id/etUsername"
+                android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:autofillHints="Username"
+                android:autofillHints="Email"
                 android:background="@drawable/round_edit_text"
                 android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
-                android:hint="Username"
-                android:inputType="text"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:padding="15dp"
                 android:textSize="15sp" />
 
             <EditText
-                android:id="@+id/etEmail"
+                android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -64,8 +64,8 @@
                 android:background="@drawable/round_edit_text"
                 android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
-                android:hint="Email"
-                android:inputType="textEmailAddress"
+                android:hint="Password"
+                android:inputType="textPassword"
                 android:maxLines="1"
                 android:padding="15dp"
                 android:textSize="15sp" />
