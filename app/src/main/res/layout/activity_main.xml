@@ -59,24 +59,24 @@
             android:layout_marginTop="4dp"
             android:background="@color/white">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Add a task"
-                android:fontFamily="@font/opensans"
-                android:textColor="@color/black"
-                android:textSize="12sp"
-                android:layout_marginLeft="12dp"/>
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Add a task"-->
+<!--                android:fontFamily="@font/opensans"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:textSize="12sp"-->
+<!--                android:layout_marginLeft="12dp"/>-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Justin"
-                android:fontFamily="@font/opensans"
-                android:textColor="@color/black"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:layout_marginLeft="4dp"/>
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Justin"-->
+<!--                android:fontFamily="@font/opensans"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:textSize="12sp"-->
+<!--                android:textStyle="bold"-->
+<!--                android:layout_marginLeft="4dp"/>-->
 
 
         </LinearLayout>
