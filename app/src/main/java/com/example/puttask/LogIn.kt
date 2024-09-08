@@ -1,6 +1,6 @@
 package com.example.puttask
 
-import android.content.Intent
+import  android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -10,6 +10,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.puttask.api.LoginRequest
+import com.example.puttask.api.LoginResponse
+import com.example.puttask.api.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class LogIn : AppCompatActivity() {
 
@@ -34,28 +40,31 @@ class LogIn : AppCompatActivity() {
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
 
+        // Set up login button click listener
         btnLog.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
             if (validateInputs(email, password)) {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+                loginUser(email, password)
             }
         }
 
+        // Redirect to sign up screen
         othersSign.setOnClickListener {
             val intent = Intent(this, SignUp::class.java)
             startActivity(intent)
         }
     }
+
+    // Input validation
     private fun validateInputs(email: String, password: String): Boolean {
         return when {
             email.isEmpty() -> {
                 Toast.makeText(this, "Please enter an email", Toast.LENGTH_SHORT).show()
                 false
             }
-            !isValidEmail(email) -> {  // Check if the email is valid
+            !isValidEmail(email) -> {
                 Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show()
                 false
             }
@@ -67,7 +76,34 @@ class LogIn : AppCompatActivity() {
         }
     }
 
+    // Email validation method
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    // Login user using Retrofit
+    private fun loginUser(email: String, password: String) {
+        val authService = RetrofitClient.instance.create(AuthService::class.java)
+        val loginRequest = LoginRequest(email, password)
+
+        authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
+            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                if (response.isSuccessful) {
+                    val loginResponse = response.body()
+                    loginResponse?.let {
+                        Toast.makeText(this@LogIn, "Login Successful", Toast.LENGTH_SHORT).show()
+                        // Proceed to the main activity after successful login
+                        val intent = Intent(this@LogIn, MainActivity::class.java)
+                        startActivity(intent)
+                    }
+                } else {
+                    Toast.makeText(this@LogIn, "Login failed", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                Toast.makeText(this@LogIn, "Network Error", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

@@ -1,5 +1,9 @@
-package com.example.putask.api
+package com.example.puttask
 
+import com.example.puttask.api.LoginRequest
+import com.example.puttask.api.LoginResponse
+import com.example.puttask.api.RegistrationRequest
+import com.example.puttask.api.RegistrationResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST

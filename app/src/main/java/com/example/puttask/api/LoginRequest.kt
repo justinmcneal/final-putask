@@ -1,4 +1,4 @@
-package com.example.putask.api
+package com.example.puttask.api
 
 data class LoginRequest(
     val email: String,

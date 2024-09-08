@@ -1,4 +1,4 @@
-package com.example.putask.api
+package com.example.puttask.api
 
 class Users(
     val username: String,

@@ -10,6 +10,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.puttask.api.RegistrationRequest
+import com.example.puttask.api.RegistrationResponse
+import com.example.puttask.api.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SignUp : AppCompatActivity() {
 
@@ -38,6 +44,7 @@ class SignUp : AppCompatActivity() {
         etPassword = findViewById(R.id.etPassword)
         etConfirmPassword = findViewById(R.id.etConfirmPassword)
 
+        // Handle registration on sign-up button click
         btnSign.setOnClickListener {
             val username = etUsername.text.toString().trim()
             val email = etEmail.text.toString().trim()
@@ -45,17 +52,18 @@ class SignUp : AppCompatActivity() {
             val confirmPassword = etConfirmPassword.text.toString().trim()
 
             if (validateInputs(username, email, password, confirmPassword)) {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+                registerUser(username, email, password)
             }
         }
 
+        // Redirect to log in
         othersLog.setOnClickListener {
             val intent = Intent(this, LogIn::class.java)
             startActivity(intent)
         }
     }
 
+    // Input validation logic
     private fun validateInputs(username: String, email: String, password: String, confirmPassword: String): Boolean {
         return when {
             username.isEmpty() -> {
@@ -82,7 +90,36 @@ class SignUp : AppCompatActivity() {
         }
     }
 
+    // Email validation method
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    // Register user using Retrofit
+    private fun registerUser(username: String, email: String, password: String) {
+        val authService = RetrofitClient.instance.create(AuthService::class.java)
+        val registrationRequest = RegistrationRequest(username, email, password)
+
+        authService.register(registrationRequest).enqueue(object : Callback<RegistrationResponse> {
+            override fun onResponse(call: Call<RegistrationResponse>, response: Response<RegistrationResponse>) {
+                if (response.isSuccessful) {
+                    val registrationResponse = response.body()
+                    registrationResponse?.let {
+                        Toast.makeText(this@SignUp, it.message, Toast.LENGTH_SHORT).show()
+                        val token = it.token
+                        // Optionally store the token if needed for future requests
+                    }
+                    // Proceed to the main activity after successful registration
+                    val intent = Intent(this@SignUp, MainActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this@SignUp, "Registration failed", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<RegistrationResponse>, t: Throwable) {
+                Toast.makeText(this@SignUp, "Network Error", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }
