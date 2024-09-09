@@ -7,6 +7,7 @@
     <color name="superskyblue">#EBF6FF</color>
     <color name="lightskyblue">#83daff</color>
     <color name="gray">#808080</color>
+    <color name="lightgray">#dfdfdf</color>
 
 
 </resources>

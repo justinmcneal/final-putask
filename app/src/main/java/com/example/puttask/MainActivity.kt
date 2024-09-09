@@ -66,7 +66,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         openFragment(Lists(),"Tasks")
 
         binding.btnAdd.setOnClickListener {
-            Toast.makeText(this, "Add New Task", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, AddTask2::class.java)//plain activity gamit here
+            startActivity(intent)
         }
 
         onBackPressedDispatcher.addCallback(this, backPressedCallback)
