@@ -1,4 +1,0 @@
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <stroke android:width="3dp" android:color="#000000" /> <!-- Button stroke -->
-    <corners android:radius="50dp" /> <!-- Optional: rounded corners -->
-</shape>
