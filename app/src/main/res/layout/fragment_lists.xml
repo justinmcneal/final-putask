@@ -10,12 +10,10 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="30dp"
-        app:layout_constraintBottom_toTopOf="@+id/tvNotask"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Add this LinearLayout with horizontal orientation -->
         <LinearLayout
             android:id="@+id/linearLayout1"
             android:layout_width="match_parent"
@@ -32,6 +30,7 @@
                 android:layout_marginStart="20dp">
 
                 <TextView
+                    android:id="@+id/tvUsername"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Hi Justinxxx!"
@@ -54,62 +53,69 @@
                     android:textStyle="bold"
                     android:textColor="@color/skyblue"
                     android:textSize="25sp" />
-
             </LinearLayout>
-            <!-- ImageView on the right -->
+
             <ImageView
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:src="@drawable/todo_vector"
-                android:layout_marginStart="6dp" />
+                android:layout_marginStart="48dp" />
         </LinearLayout>
 
-        <!-- Other LinearLayouts -->
         <LinearLayout
-            android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:background="@color/white"
             android:orientation="horizontal"
-            android:padding="6dp">
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp">
 
             <Spinner
                 android:id="@+id/spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
                 android:backgroundTint="@color/black"
-                android:spinnerMode="dropdown"/>
+                android:spinnerMode="dropdown" />
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sort"
+                android:layout_gravity="end"/>
         </LinearLayout>
+
+
+
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvNotask"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No task created."
-        android:textColor="@color/gray"
-        android:textSize="15sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Click + to create new task. "
-        android:textColor="@color/gray"
-        android:textSize="15sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvNotask"
-        app:layout_constraintVertical_bias="0.0" />
+
+
+<!--    <TextView-->
+<!--        android:id="@+id/tvNotask"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="No task created."-->
+<!--        android:textColor="@color/gray"-->
+<!--        android:textSize="15sp"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/textView"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Click + to create new task. "-->
+<!--        android:textColor="@color/gray"-->
+<!--        android:textSize="15sp"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/tvNotask"-->
+<!--        app:layout_constraintVertical_bias="0.0" />-->
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
