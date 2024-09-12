@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="75dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -71,16 +71,20 @@
 
             <Spinner
                 android:id="@+id/spinner"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:backgroundTint="@color/black"
-                android:spinnerMode="dropdown" />
+                android:spinnerMode="dropdown"
+                android:layout_gravity="start"
+                android:layout_marginEnd="128dp"/>
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_sort"
                 android:layout_gravity="end"/>
+
         </LinearLayout>
 
 

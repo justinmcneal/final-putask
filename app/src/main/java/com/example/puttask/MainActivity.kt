@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 R.id.ic_lists -> openFragment(Lists(), "Tasks")
                 R.id.ic_analytics -> openFragment(Analytics(),"Analytics")
                 R.id.ic_timeline -> openFragment(Timeline(),"Timeline")
-                R.id.ic_profile -> openFragment(Profile(),"")
+                R.id.ic_profile -> openFragment(Profile(),"Profile")
             }
             true
         }
