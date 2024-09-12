@@ -20,7 +20,6 @@
         android:layout_marginTop="94dp"
         android:background="@drawable/whitecircle" />
 
-
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="0dp"
@@ -31,13 +30,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginTop="76dp">
+        android:layout_marginTop="76dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="@color/superskyblue">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp">
 
             <TextView
                 android:id="@+id/tvUsername"
@@ -79,7 +82,7 @@
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:autofillHints="Username"
+                android:autofillHints="Password"
                 android:background="@drawable/round_edit_text"
                 android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
@@ -100,7 +103,6 @@
                     android:id="@+id/btnSave"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
                     android:fontFamily="@font/opensans"
                     android:backgroundTint="@color/skyblue"
                     android:text="Save"
@@ -109,19 +111,17 @@
                     android:textAllCaps="false"
                     android:layout_marginEnd="16dp"/>
 
-
                 <Button
                     android:id="@+id/btnDeleteAccount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
                     android:fontFamily="@font/opensans"
                     android:backgroundTint="@color/red"
                     android:text="Delete Account"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textAllCaps="false"
-                    android:layout_marginStart="16dp" />
+                    android:layout_marginStart="16dp"/>
 
             </LinearLayout>
         </LinearLayout>
