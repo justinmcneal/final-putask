@@ -13,28 +13,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="start"
-        android:orientation="vertical">
+        android:layout_marginStart="10dp"
+        android:orientation="horizontal">
 
-    <ImageView
-        android:id="@+id/putasklogo"
-        android:layout_width="130dp"
-        android:layout_height="150dp"
-        android:scaleType="centerCrop"
-        android:layout_marginStart="38dp"
-        android:src="@drawable/putasklogo" />
+        <ImageView
+            android:id="@+id/putasklogo"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:scaleType="centerCrop"
+            android:layout_marginStart="38dp"
+            android:src="@drawable/putasklogo" />
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="PUTASK"
+            android:textColor="@color/black"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:visibility="invisible" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="150dp"
-        android:layout_marginTop="50dp"
-        android:text="PUTASK"
-        android:textColor="@color/black"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:visibility="invisible" />
+
 
 
 </RelativeLayout>
