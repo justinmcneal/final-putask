@@ -9,9 +9,9 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface AuthService {
-    @POST("/login")
+    @POST("/loginPost")  // Match the route for loginPost
     fun login(@Body loginRequest: LoginRequest): Call<LoginResponse>
 
-    @POST("/register")
+    @POST("/registrationPost")  // Match the route for registrationPost
     fun register(@Body registrationRequest: RegistrationRequest): Call<RegistrationResponse>
 }

@@ -7,22 +7,16 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "https://127.0.0.1:8000/api/" // Update with correct URL
+    private const val BASE_URL = "https://192.168.209.139:8000"  // Update with the correct URL
 
+    // Logging interceptor for seeing request/response in logcat
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
+    // OkHttpClient to attach interceptors
     private val client = OkHttpClient.Builder()
-        .addInterceptor(loggingInterceptor)
-        .addInterceptor { chain ->
-            val requestBuilder = chain.request().newBuilder()
-            val token = AuthUtils.getToken()
-            if (token != null) {
-                requestBuilder.addHeader("Authorization", "Bearer $token")
-            }
-            chain.proceed(requestBuilder.build())
-        }
+        .addInterceptor(loggingInterceptor)  // For logging HTTP requests and responses
         .build()
 
     val authService: AuthService by lazy {
