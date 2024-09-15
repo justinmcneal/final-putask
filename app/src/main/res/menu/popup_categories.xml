@@ -1,0 +1,15 @@
+<!-- res/menu/popup_menu.xml -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/personal"
+        android:title="Personal" />
+    <item
+        android:id="@+id/school"
+        android:title="School" />
+    <item
+        android:id="@+id/work"
+        android:title="Work" />
+    <item
+        android:id="@+id/social"
+        android:title="Social" />
+</menu>

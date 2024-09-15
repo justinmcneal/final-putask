@@ -54,7 +54,7 @@
             android:id="@+id/btnSignIn"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:text="Sign In"
+            android:text="Sign Up"
             android:fontFamily="@font/opensans"
             android:backgroundTint="@color/skyblue"
             android:textStyle="bold"

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Spin the logo -->
+    <rotate
+        android:duration="2000"
+        android:fromDegrees="360"
+        android:toDegrees="0"
+        android:pivotX="50%"
+        android:pivotY="50%" />
+
+
+    <!-- Move the logo from the left to the center -->
+    <translate
+        android:duration="2000"
+        android:fromXDelta="100%"
+        android:toXDelta="-1%" />
+</set>
