@@ -1,6 +1,7 @@
 package com.example.puttask.api
 
 import com.example.puttask.AuthService
+import com.example.puttask.api.ContactApiService
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -21,15 +22,14 @@ object RetrofitClient {
         .create()
 
     // OkHttpClient to attach interceptors
-    // Updated OkHttpClient with timeout settings
     private val client = OkHttpClient.Builder()
-        .addInterceptor(loggingInterceptor)  // For logging HTTP requests and responses
-        .connectTimeout(30, TimeUnit.SECONDS)  // Connection timeout of 30 seconds
-        .readTimeout(30, TimeUnit.SECONDS)     // Read timeout of 30 seconds
-        .writeTimeout(30, TimeUnit.SECONDS)    // Write timeout of 30 seconds
+        .addInterceptor(loggingInterceptor)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-
+    // For Authentication
     val authService: AuthService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -37,5 +37,15 @@ object RetrofitClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(AuthService::class.java)
+    }
+
+    // For Contact Form
+    val ContactApiService: ContactApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ContactApiService::class.java)
     }
 }
