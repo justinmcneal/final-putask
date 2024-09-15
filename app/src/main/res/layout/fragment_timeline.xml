@@ -67,37 +67,4 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
-    <TextView
-        android:id="@+id/selectedDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Selected Date : "
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/recyclerView"
-        app:layout_constraintBottom_toTopOf="@id/selectedDD"/>
-
-    <TextView
-        android:id="@+id/selectedDD"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Selected DD : "
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/selectedDate"
-        app:layout_constraintBottom_toTopOf="@id/selectedDay"/>
-
-    <TextView
-        android:id="@+id/selectedDay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Selected Day : "
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/selectedDD"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

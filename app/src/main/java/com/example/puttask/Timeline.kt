@@ -26,7 +26,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         ivCalendarNext = view.findViewById(R.id.iv_calendar_next)
         ivCalendarPrevious = view.findViewById(R.id.iv_calendar_previous)
 
-        // Set up RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
         val calendarSetUp = HorizontalCalendarSetUp()
@@ -38,9 +37,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         }
     }
 
+    // Handle date selection
     override fun onItemClick(ddMmYy: String, dd: String, day: String) {
-        view?.findViewById<TextView>(R.id.selectedDate)?.text = "Selected date: $ddMmYy"
-        view?.findViewById<TextView>(R.id.selectedDD)?.text = "Selected DD: $dd"
-        view?.findViewById<TextView>(R.id.selectedDay)?.text = "Selected day: $day"
+        // You can handle the selected date here without updating any TextViews
+        // For example, you can log the date or trigger some other action
+        // Log.d("Timeline", "Selected date: $ddMmYy, day: $day")
     }
 }
