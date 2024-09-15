@@ -6,12 +6,18 @@ import com.example.puttask.api.RegistrationRequest
 import com.example.puttask.api.RegistrationResponse
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
 interface AuthService {
-    @POST("/loginPost")  // Match the route for loginPost
-    fun login(@Body loginRequest: LoginRequest): Call<LoginResponse>
+    @FormUrlEncoded
+    @POST("api/loginPost")  // Match the route for loginPost
+    fun login(
+        @Field("email") email: String,
+        @Field("password") password: String
+    ): Call<LoginResponse>
 
-    @POST("/registrationPost")  // Match the route for registrationPost
+    @POST("api/registrationPost")
     fun register(@Body registrationRequest: RegistrationRequest): Call<RegistrationResponse>
 }

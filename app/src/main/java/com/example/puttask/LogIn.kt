@@ -10,7 +10,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.puttask.api.LoginRequest
 import com.example.puttask.api.LoginResponse
 import com.example.puttask.api.RetrofitClient
 import retrofit2.Call
@@ -29,12 +28,14 @@ class LogIn : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_log_in)
 
+        // Set up window insets for edge-to-edge layout
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
+        // Initialize UI components
         btnLog = findViewById(R.id.btnLog)
         othersSign = findViewById(R.id.othersSign)
         etEmail = findViewById(R.id.etEmail)
@@ -50,63 +51,63 @@ class LogIn : AppCompatActivity() {
             }
         }
 
-        // Redirect to sign up screen
+        // Redirect to sign-up screen
         othersSign.setOnClickListener {
-            val intent = Intent(this, SignUp::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, SignUp::class.java))
         }
     }
 
-    // Input validation
+    // Validate email and password inputs
     private fun validateInputs(email: String, password: String): Boolean {
         return when {
             email.isEmpty() -> {
-                Toast.makeText(this, "Please enter an email", Toast.LENGTH_SHORT).show()
+                showToast("Please enter an email")
                 false
             }
             !isValidEmail(email) -> {
-                Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show()
+                showToast("Please enter a valid email")
                 false
             }
             password.isEmpty() -> {
-                Toast.makeText(this, "Please enter a password", Toast.LENGTH_SHORT).show()
+                showToast("Please enter a password")
                 false
             }
             else -> true
         }
     }
 
-    // Email validation method
+    // Check if email is valid
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    // Login user using Retrofit
+    // Show toast message
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    // Perform login using Retrofit
     private fun loginUser(email: String, password: String) {
         val authService = RetrofitClient.authService
-        val loginRequest = LoginRequest(email, password)
 
-        authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
+        authService.login(email, password).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                 if (response.isSuccessful) {
-                    val loginResponse = response.body()
-                    loginResponse?.let {
-                        Toast.makeText(this@LogIn, "Login Successful", Toast.LENGTH_SHORT).show()
-                        val intent = Intent(this@LogIn, MainActivity::class.java)
-                        startActivity(intent)
+                    response.body()?.let {
+                        showToast("Login Successful")
+                        startActivity(Intent(this@LogIn, MainActivity::class.java))
                     }
                 } else {
-                    // Log response code and message
-                    Toast.makeText(this@LogIn, "Login failed: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    // Handle non-200 responses
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    showToast("Login failed: ${response.code()} ${response.message()}\n$errorBody")
                 }
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                // Log the exception
-                Toast.makeText(this@LogIn, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                t.printStackTrace()
+                // Handle network or other failures
+                showToast("Network Error: ${t.message}")
             }
         })
     }
-
 }

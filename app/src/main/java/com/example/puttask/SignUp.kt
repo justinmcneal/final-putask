@@ -27,12 +27,14 @@ class SignUp : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
 
+        // Initialize UI components
         btnSign = findViewById(R.id.btnSign)
         etUsername = findViewById(R.id.etUsername)
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
         etConfirmPassword = findViewById(R.id.etConfirmPassword)
 
+        // Set click listener for the sign-up button
         btnSign.setOnClickListener {
             val username = etUsername.text.toString().trim()
             val email = etEmail.text.toString().trim()
@@ -40,10 +42,11 @@ class SignUp : AppCompatActivity() {
             val confirmPassword = etConfirmPassword.text.toString().trim()
 
             if (validateInputs(username, email, password, confirmPassword)) {
-                registerUser(username, email, password)
+                registerUser(username, email, password, confirmPassword)
             }
         }
 
+        // Set click listener for the login redirect
         findViewById<TextView>(R.id.othersLog).setOnClickListener {
             startActivity(Intent(this, LogIn::class.java))
         }
@@ -79,8 +82,14 @@ class SignUp : AppCompatActivity() {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    private fun registerUser(username: String, email: String, password: String) {
-        val registrationRequest = RegistrationRequest(username = username, email= email, password = password)
+    private fun registerUser(username: String, email: String, password: String, confirmPassword: String) {
+        val registrationRequest = RegistrationRequest(
+            username = username,
+            email = email,
+            password = password,
+            password_confirmation = confirmPassword
+        )
+
         RetrofitClient.authService.register(registrationRequest).enqueue(object : Callback<RegistrationResponse> {
             override fun onResponse(call: Call<RegistrationResponse>, response: Response<RegistrationResponse>) {
                 if (response.isSuccessful) {
@@ -88,18 +97,15 @@ class SignUp : AppCompatActivity() {
                     showToast(message)
                     startActivity(Intent(this@SignUp, MainActivity::class.java))
                 } else {
-                    showToast("Registration failed")
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    showToast("Registration failed: $errorBody")
                 }
             }
 
             override fun onFailure(call: Call<RegistrationResponse>, t: Throwable) {
-                // Log detailed error information
                 Log.e("SignUpError", "Network Error: ${t.message}", t)
-
-                // Show a user-friendly message
                 showToast("Network Error: ${t.localizedMessage}")
             }
-
         })
     }
 
