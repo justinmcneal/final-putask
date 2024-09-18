@@ -14,10 +14,7 @@
 
         android:theme="@style/Theme.PutTask"
         tools:targetApi="31">
-        <activity
-            android:name=".SwitchTest"
-            android:exported="false"
-            android:theme="@style/Theme.PutTask" />
+
         <activity
             android:name=".AddTask2"
             android:exported="false" />

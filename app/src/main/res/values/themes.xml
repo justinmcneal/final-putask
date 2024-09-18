@@ -5,6 +5,7 @@
 
     <style name="ToolbarTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/black</item>
+        <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
     </style>
 
     <style name="Theme.PutTask" parent="Base.Theme.PutTask" />
@@ -15,7 +16,17 @@
     <style name="BottomNavigationViewStyle" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="itemIconSize">26dp</item> <!-- Adjust icon size -->
     </style>
+    <style name="FloatingActionButtonStyle" parent= "Widget.Design.FloatingActionButton">
+        <item name="shapeAppearanceOverlay">@style/FabShape</item>
+    </style>
+    <style name="FabShape" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerSize">50%</item>
+        <item name="cornerFamilyTopLeft">rounded</item>
+        <item name="cornerFamilyTopRight">rounded</item>
+        <item name="cornerFamilyBottomLeft">rounded</item>
+        <item name="cornerFamilyBottomRight">rounded</item>
 
+    </style>
     <style name="Theme.PutTask.AppBarOverlay"
         parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="Theme.PutTask.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

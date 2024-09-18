@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -23,6 +22,21 @@ import java.util.Calendar
 class AddTask2 : AppCompatActivity() {
     private lateinit var selectedImageView: ImageView
     private lateinit var imageContainer : LinearLayout
+    private lateinit var addIcon : ImageView
+    private lateinit var tvList : TextView
+    private lateinit var switchRepeat : SwitchCompat
+    private lateinit var tvCancel :TextView
+
+    private lateinit var tvDone : TextView
+    private lateinit var btnRepeatt : AppCompatButton
+    private lateinit var btnattach : ImageButton
+    private lateinit var tvDueDate : TextView
+    private lateinit var addDueIcon :ImageButton
+    private lateinit var tvTimeReminder : TextView
+    private lateinit var addTimeIcon : ImageButton
+    private lateinit var dimBackground : View
+    private lateinit var popupCardView : CardView
+    private lateinit var btnRepeat : AppCompatButton
     private val imageUris: MutableList<Uri> = mutableListOf()  // List to store image URIs
     private val maxImages = 10
 
@@ -30,137 +44,10 @@ class AddTask2 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task2)
-        val dimBackground = findViewById<View>(R.id.dimBackground)
-        val popupCardView = findViewById<CardView>(R.id.popupCardView)
-        var btnRepeat = findViewById<AppCompatButton>(R.id.btnRepeat)
-
-        dimBackground.visibility = View.GONE
-        popupCardView.visibility = View.GONE
 
 
-
-
-
-        btnRepeat.setOnClickListener {
-            visibilityChecker()
-        }
-
-        val switchRepeat = findViewById<Switch>(R.id.switchRepeat)
-        var btnRepeatt = findViewById<AppCompatButton>(R.id.btnRepeat)
-
-        // SwitchCompat functionality
-        switchRepeat.setOnCheckedChangeListener { _, isCheck ->
-            if (isCheck) {
-
-                btnRepeatt.text = "YES"
-            } else {
-                // The switch is OFF
-                btnRepeatt.text = "NO"
-            }
-        }
-
-        val tvCancel = findViewById<TextView>(R.id.tvCancel)
-        val tvDone = findViewById<TextView>(R.id.tvDone)
-
-        tvCancel.setOnClickListener{
-            visibilityChecker()
-
-
-        }
-        tvDone.setOnClickListener{
-            visibilityChecker()
-
-
-        }
-         selectedImageView = findViewById(R.id.selectedImageView)
-        selectedImageView.visibility = View.GONE
-        imageContainer = findViewById(R.id.imageContainer)
-
-
-        val btnattach = findViewById<ImageButton>(R.id.btnattach)
-        btnattach.setOnClickListener {
-            if (imageUris.size < maxImages) {
-                openFileChooser()
-            } else {
-                Toast.makeText(
-                    this,
-                    "You can only attach up to $maxImages images.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-            val calendar = Calendar.getInstance()
-
-        // Date and Time Picker logic
-        val addDueIcon: ImageButton = findViewById(R.id.addDueIcon)
-        val tvDueDate: TextView = findViewById(R.id.tvStartDate)  // TextView to show the due date
-        val tvTimeReminder: TextView = findViewById(R.id.tvEndDate)  // TextView to show the time reminder
-
-        addDueIcon.setOnClickListener {
-            // Open DatePicker when the icon is clicked
-            val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH)
-            val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-            val datePickerDialog = DatePickerDialog(
-                this,
-                { _, selectedYear, selectedMonth, selectedDay ->
-                    // Set the selected date in TextView
-                    tvDueDate.text = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-
-                    // Open TimePicker after the date is selected
-                    val timePickerDialog = TimePickerDialog(
-                        this,
-                        { _, hourOfDay, minute ->
-                            // Determine AM/PM
-                            val amPm = if (hourOfDay >= 12) "PM" else "AM"
-                            // Convert hour into 12-hour format
-                            val hour = if (hourOfDay > 12) hourOfDay - 12 else if (hourOfDay == 0) 12 else hourOfDay
-                            // Set the selected time with AM/PM
-                            tvTimeReminder.text = String.format("%02d:%02d %s", hour, minute, amPm)
-                        },
-                        calendar.get(Calendar.HOUR_OF_DAY),
-                        calendar.get(Calendar.MINUTE),
-                        false
-                    )
-                    timePickerDialog.show()
-                }, year, month, day
-            )
-            datePickerDialog.show()
-        }
-
-        val addTimeIcon: ImageButton = findViewById(R.id.addTimeIcon)
-        addTimeIcon.setOnClickListener {
-            val timePickerDialog = TimePickerDialog(
-                this,
-                { _, hourOfDay, minute ->
-                    // Determine AM/PM
-                    val amPm = if (hourOfDay >= 12) "PM" else "AM"
-                    // Convert hour into 12-hour format
-                    val hour = if (hourOfDay > 12) hourOfDay - 12 else if (hourOfDay == 0) 12 else hourOfDay
-                    // Set the selected time with AM/PM
-                    tvTimeReminder.text = String.format("%02d:%02d %s", hour, minute, amPm)
-                },
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                false
-            )
-            timePickerDialog.show()
-        }
-
-        val addIcon: ImageView = findViewById(R.id.imListAdd)
-        val tvList = findViewById<TextView>(R.id.tvList) // TextView to display the selected category
-
+        addIcon = findViewById(R.id.imListAdd)
+        tvList = findViewById(R.id.tvList)
         addIcon.setOnClickListener {
             val dropdownMenu = PopupMenu(this, addIcon)
             dropdownMenu.menuInflater.inflate(R.menu.popup_categories, dropdownMenu.menu)
@@ -196,7 +83,120 @@ class AddTask2 : AppCompatActivity() {
             }
             dropdownMenu.show()
         }
+        val calendar = Calendar.getInstance()
 
+        // Date and Time Picker logic
+        addDueIcon = findViewById(R.id.addDueIcon)
+        tvDueDate = findViewById(R.id.tvStartDate)  // TextView to show the due date
+        tvTimeReminder = findViewById(R.id.tvEndDate)  // TextView to show the time reminder
+
+        addDueIcon.setOnClickListener {
+            // Open DatePicker when the icon is clicked
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            val datePickerDialog = DatePickerDialog(
+                this,
+                { _, selectedYear, selectedMonth, selectedDay ->
+                    // Set the selected date in TextView
+                    tvDueDate.text = "$selectedDay/${selectedMonth + 1}/$selectedYear"
+
+                    // Open TimePicker after the date is selected
+                    val timePickerDialog = TimePickerDialog(
+                        this,
+                        { _, hourOfDay, minute ->
+                            // Determine AM/PM
+                            val amPm = if (hourOfDay >= 12) "PM" else "AM"
+                            // Convert hour into 12-hour format
+                            val hour = if (hourOfDay > 12) hourOfDay - 12 else if (hourOfDay == 0) 12 else hourOfDay
+                            // Set the selected time with AM/PM
+                            tvTimeReminder.text = String.format("%02d:%02d %s", hour, minute, amPm)
+                        },
+                        calendar.get(Calendar.HOUR_OF_DAY),
+                        calendar.get(Calendar.MINUTE),
+                        false
+                    )
+                    timePickerDialog.show()
+                }, year, month, day
+            )
+            datePickerDialog.show()
+        }
+
+        addTimeIcon= findViewById(R.id.addTimeIcon)
+        addTimeIcon.setOnClickListener {
+            val timePickerDialog = TimePickerDialog(
+                this,
+                { _, hourOfDay, minute ->
+                    // Determine AM/PM
+                    val amPm = if (hourOfDay >= 12) "PM" else "AM"
+                    // Convert hour into 12-hour format
+                    val hour = if (hourOfDay > 12) hourOfDay - 12 else if (hourOfDay == 0) 12 else hourOfDay
+                    // Set the selected time with AM/PM
+                    tvTimeReminder.text = String.format("%02d:%02d %s", hour, minute, amPm)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                false
+            )
+            timePickerDialog.show()
+        }
+
+
+        dimBackground = findViewById(R.id.dimBackground)
+        popupCardView = findViewById(R.id.popupCardView)
+        btnRepeat = findViewById(R.id.btnRepeat)
+        dimBackground.visibility = View.GONE
+        popupCardView.visibility = View.GONE
+
+        btnRepeat.setOnClickListener {
+            visibilityChecker()
+        }
+
+        switchRepeat = findViewById(R.id.switchRepeat)
+         btnRepeatt = findViewById(R.id.btnRepeat)
+
+        // SwitchCompat functionality
+        switchRepeat.setOnCheckedChangeListener { _, isCheck ->
+            if (isCheck) {
+
+                btnRepeatt.text = "YES"
+            } else {
+                // The switch is OFF
+                btnRepeatt.text = "NO"
+            }
+        }
+
+        tvCancel = findViewById(R.id.tvCancel)
+        tvDone = findViewById(R.id.tvDone)
+
+        tvCancel.setOnClickListener{
+            visibilityChecker()
+
+
+        }
+        tvDone.setOnClickListener{
+            visibilityChecker()
+
+
+        }
+         selectedImageView = findViewById(R.id.selectedImageView)
+        selectedImageView.visibility = View.GONE
+        imageContainer = findViewById(R.id.imageContainer)
+
+
+        btnattach = findViewById(R.id.btnattach)
+        btnattach.setOnClickListener {
+            if (imageUris.size < maxImages) {
+                openFileChooser()
+            } else {
+                Toast.makeText(
+                    this,
+                    "You can only attach up to $maxImages images.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
     var popUp = false
     private fun visibilityChecker(){

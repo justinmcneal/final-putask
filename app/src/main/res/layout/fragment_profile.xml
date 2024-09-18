@@ -9,65 +9,66 @@
 
     <ImageView
         android:id="@+id/imageProfile"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@drawable/baseline_account_circle_24"
-        android:scaleType="centerCrop"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/whitecircle"
         android:elevation="8dp"
         android:onClick="changeProfileImage"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="94dp"
-        android:background="@drawable/whitecircle" />
+        android:scaleType="centerCrop"
+        android:src="@drawable/baseline_account_circle_24"
+        app:layout_constraintBottom_toTopOf="@+id/guideline10"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@+id/guideline8"
+        app:layout_constraintStart_toStartOf="@+id/guideline7"
+        app:layout_constraintTop_toTopOf="@+id/guideline9"
+        app:layout_constraintVertical_bias="1.0" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="0dp"
-        android:layout_height="480dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="@color/superskyblue"
         app:cardBackgroundColor="@color/white"
         app:cardCornerRadius="15dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/guideline6"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginTop="76dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:backgroundTint="@color/superskyblue">
+        app:layout_constraintStart_toStartOf="@+id/guideline3"
+        app:layout_constraintTop_toTopOf="@+id/guideline5">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
             android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp">
+            android:layout_marginEnd="24dp"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tvUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="64dp"
                 android:fontFamily="@font/opensans"
-                android:text="Username"
-                android:textSize="25sp"
                 android:gravity="center"
-                android:layout_marginTop="64dp"/>
+                android:text="Username"
+                android:textSize="25sp" />
 
             <TextView
                 android:id="@+id/tvEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="16dp"
                 android:background="@drawable/round_edit_text"
                 android:fontFamily="@font/opensans"
-                android:text="Email"
                 android:padding="15dp"
-                android:textSize="15sp"
-                android:layout_margin="16dp" />
+                android:text="Email"
+                android:textSize="15sp" />
 
             <EditText
                 android:id="@+id/etUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="16dp"
                 android:autofillHints="Username"
                 android:background="@drawable/round_edit_text"
                 android:drawablePadding="15dp"
@@ -76,13 +77,13 @@
                 android:inputType="text"
                 android:maxLines="1"
                 android:padding="15dp"
-                android:textSize="15sp"
-                android:layout_margin="16dp"/>
+                android:textSize="15sp" />
 
             <EditText
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="16dp"
                 android:autofillHints="Password"
                 android:background="@drawable/round_edit_text"
                 android:drawablePadding="15dp"
@@ -91,40 +92,96 @@
                 android:inputType="textPassword"
                 android:maxLines="1"
                 android:padding="15dp"
-                android:textSize="15sp"
-                android:layout_margin="16dp"/>
+                android:textSize="15sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
+                android:gravity="center"
+                android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/btnSave"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/opensans"
+                    android:layout_marginEnd="16dp"
                     android:backgroundTint="@color/skyblue"
+                    android:fontFamily="@font/opensans"
                     android:text="Save"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     android:textAllCaps="false"
-                    android:layout_marginEnd="16dp"/>
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/btnDeleteAccount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/opensans"
+                    android:layout_marginStart="16dp"
                     android:backgroundTint="@color/red"
+                    android:fontFamily="@font/opensans"
                     android:text="Delete Account"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
                     android:textAllCaps="false"
-                    android:layout_marginStart="16dp"/>
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.05" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.95" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.22" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.88" />
+
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.35" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.65" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.13" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.29" />
 </androidx.constraintlayout.widget.ConstraintLayout>
