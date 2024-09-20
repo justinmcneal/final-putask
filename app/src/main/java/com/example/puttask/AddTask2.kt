@@ -26,7 +26,6 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var tvList : TextView
     private lateinit var switchRepeat : SwitchCompat
     private lateinit var tvCancel :TextView
-
     private lateinit var tvDone : TextView
     private lateinit var btnRepeatt : AppCompatButton
     private lateinit var btnattach : ImageButton
