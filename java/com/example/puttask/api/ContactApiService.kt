@@ -6,6 +6,6 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface ContactApiService {
-    @POST("api/send")
-    fun sendContactForm(@Body contactRequest: ContactRequest): Call<ResponseBody>
+    @POST("/send")
+    fun sendContactForm(@Body contactRequest: ContactRequest): Call<ContactResponse>
 }

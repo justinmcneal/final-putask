@@ -33,17 +33,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Check if the user is logged in
-        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
-
-        if (!isLoggedIn) {
-            // Redirect to login page if not logged in
-            val intent = Intent(this, LogIn::class.java)
-            startActivity(intent)
-            finish() // End MainActivity to prevent back navigation
-        }
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -98,18 +87,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun logout() {
-        // Clear login status from SharedPreferences
-        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.clear() // This removes all data, including the login status
-        editor.apply()
-
-        // Redirect to LogIn activity
-        val intent = Intent(this, LogIn::class.java)
+        // Clear user session or perform any logout logic here
+        // Then redirect to the LogInSignIn activity
+        val intent = Intent(this, LoginSignin::class.java)
         startActivity(intent)
-        finish() // End MainActivity
+        finish() // Optional: finish the current activity so the user cannot return to it
     }
-
 
     private fun openFragment(fragment: Fragment, title: String) {
         supportFragmentManager.beginTransaction().apply {

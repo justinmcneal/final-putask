@@ -1,6 +1,5 @@
 package com.example.puttask.api
 
-data class LoginResponse(
-    val token: String,
+data class ContactResponse(
     val message: String
 )

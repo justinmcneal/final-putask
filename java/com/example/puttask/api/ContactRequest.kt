@@ -1,7 +1,7 @@
 package com.example.puttask.api
 
 data class ContactRequest(
-    val username: String,
+    val name: String,
     val email: String,
     val message: String
 )
