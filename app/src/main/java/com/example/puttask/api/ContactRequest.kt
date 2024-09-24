@@ -1,7 +1,7 @@
 package com.example.puttask.api
 
-class Registration(
+data class ContactRequest(
     val username: String,
     val email: String,
-    val password: Any,
+    val message: String
 )

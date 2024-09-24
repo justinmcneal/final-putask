@@ -64,17 +64,14 @@ class LogIn : AppCompatActivity() {
                 showToast("Please enter an email")
                 false
             }
-
             !isValidEmail(email) -> {
                 showToast("Please enter a valid email")
                 false
             }
-
             password.isEmpty() -> {
                 showToast("Please enter a password")
                 false
             }
-
             else -> true
         }
     }
@@ -97,21 +94,8 @@ class LogIn : AppCompatActivity() {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                 if (response.isSuccessful) {
                     response.body()?.let {
-                        val token = it.token
-
-                        // Save token and login status in SharedPreferences
-                        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-                        val editor = sharedPreferences.edit()
-                        editor.putString("auth_token", token) // Save the token
-                        editor.putBoolean(
-                            "isLoggedIn",
-                            true
-                        ) // Save a boolean flag indicating the user is logged in
-                        editor.apply()
-
                         showToast("Login Successful")
                         startActivity(Intent(this@LogIn, MainActivity::class.java))
-                        finish() // Optionally close the login activity
                     }
                 } else {
                     // Handle non-200 responses
@@ -121,7 +105,8 @@ class LogIn : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                showToast("Login failed: ${t.message}")
+                // Handle network or other failures
+                showToast("Network Error: ${t.message}")
             }
         })
     }
