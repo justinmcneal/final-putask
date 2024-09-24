@@ -54,16 +54,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.bottomnavigationview.background = null
         binding.bottomnavigationview.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.ic_lists -> openFragment(Lists(), "Tasks")
-                R.id.ic_analytics -> openFragment(Analytics(),"Analytics")
+                R.id.ic_lists -> openFragment(Lists(), "Lists")
                 R.id.ic_timeline -> openFragment(Timeline(),"Timeline")
+                R.id.ic_analytics -> openFragment(Analytics(),"Analytics")
                 R.id.ic_profile -> openFragment(Profile(),"Profile")
             }
             true
         }
 
         fragmentManager = supportFragmentManager
-        openFragment(Lists(),"Tasks")
+        openFragment(Lists(),"Lists")
 
         binding.btnAdd.setOnClickListener {
             val intent = Intent(this, AddTask2::class.java)//plain activity gamit here
@@ -75,10 +75,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.ic_lists -> openFragment(Lists(),"Tasks")
+            R.id.ic_lists -> openFragment(Lists(),"Lists")
             R.id.ic_timeline -> openFragment(Timeline(), "Timeline")
             R.id.ic_analytics -> openFragment(Analytics(), "Analytics")
-            R.id.ic_profile -> openFragment(Profile(), "")
+            R.id.ic_profile -> openFragment(Profile(), "Profile")
             R.id.ic_contactsupport -> openFragment(ContactSupport(), "Contact Support")
             R.id.ic_logout -> logout() // Handle logout click
         }
