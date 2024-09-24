@@ -6,16 +6,20 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupMenu
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
-import androidx.appcompat.widget.SwitchCompat
 import androidx.cardview.widget.CardView
 import java.util.Calendar
 
@@ -24,7 +28,8 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var imageContainer : LinearLayout
     private lateinit var addIcon : ImageView
     private lateinit var tvList : TextView
-    private lateinit var switchRepeat : SwitchCompat
+    private lateinit var switchRepeat : Switch
+    private lateinit var tvBack : TextView
     private lateinit var tvCancel :TextView
     private lateinit var tvDone : TextView
     private lateinit var btnRepeatt : AppCompatButton
@@ -36,8 +41,15 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var dimBackground : View
     private lateinit var popupCardView : CardView
     private lateinit var btnRepeat : AppCompatButton
+    private lateinit var llButtonEnd : LinearLayout
+    private lateinit var llBtn : LinearLayout
+    private lateinit var llDaily : LinearLayout
+    private lateinit var hsvDaily : HorizontalScrollView
+
+    private lateinit var radioGroup : RadioGroup
     private val imageUris: MutableList<Uri> = mutableListOf()  // List to store image URIs
     private val maxImages = 10
+    private var lastcheckedRadioButton: RadioButton? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -154,32 +166,79 @@ class AddTask2 : AppCompatActivity() {
 
         switchRepeat = findViewById(R.id.switchRepeat)
          btnRepeatt = findViewById(R.id.btnRepeat)
+        llButtonEnd = findViewById(R.id.llButtonEnd)
+        llDaily = findViewById(R.id.llDaily)
+        llBtn = findViewById(R.id.llBtn)
+
+        hsvDaily = findViewById(R.id.hsvDaily)
+        hsvDaily.visibility = View.GONE
+        llButtonEnd.visibility = View.GONE
+        llDaily.visibility = View.GONE
+        llBtn.visibility = View.VISIBLE
+
 
         // SwitchCompat functionality
         switchRepeat.setOnCheckedChangeListener { _, isCheck ->
             if (isCheck) {
-
                 btnRepeatt.text = "YES"
+                hsvDaily.visibility = View.VISIBLE
+                llButtonEnd.visibility = View.VISIBLE
+                llDaily.visibility = View.VISIBLE
+                llBtn.visibility = View.GONE
+                val targetHeight = 900
+                val layoutParams = popupCardView.layoutParams
+                layoutParams.height = targetHeight
+                popupCardView.layoutParams = layoutParams
             } else {
                 // The switch is OFF
                 btnRepeatt.text = "NO"
+                hsvDaily.visibility = View.GONE
+                llButtonEnd.visibility = View.GONE
+                llDaily.visibility = View.GONE
+                llBtn.visibility = View.VISIBLE
+                val collapsedHeight = 300
+                val layoutParams = popupCardView.layoutParams
+                layoutParams.height = collapsedHeight
+                popupCardView.layoutParams = layoutParams
+
             }
         }
 
+
+        radioGroup = findViewById(R.id.radioGroup)
+
+        for (i in 0 until radioGroup.childCount) {
+            // Find the RadioButton inside each LinearLayout
+            val linearLayout = radioGroup.getChildAt(i) as LinearLayout
+            val radioButton = linearLayout.getChildAt(1) as RadioButton
+
+            radioButton.setOnClickListener {
+                handleRadioButtonSelection(radioButton)
+            }
+        }
+
+
+
+
+
         tvCancel = findViewById(R.id.tvCancel)
         tvDone = findViewById(R.id.tvDone)
+        tvBack = findViewById(R.id.tvBack)
 
+
+        tvBack.setOnClickListener {
+            visibilityChecker()
+        }
         tvCancel.setOnClickListener{
             visibilityChecker()
-
-
+            switchRepeat.isChecked = false
         }
         tvDone.setOnClickListener{
             visibilityChecker()
 
 
         }
-         selectedImageView = findViewById(R.id.selectedImageView)
+        selectedImageView = findViewById(R.id.selectedImageView)
         selectedImageView.visibility = View.GONE
         imageContainer = findViewById(R.id.imageContainer)
 
@@ -249,6 +308,19 @@ class AddTask2 : AppCompatActivity() {
                     Toast.makeText(this, "You can only attach up to $maxImages images.", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+    }
+
+    private fun handleRadioButtonSelection(radioButton: RadioButton) {
+        // If the currently selected button is the one already checked, uncheck it
+        if (lastcheckedRadioButton == radioButton && radioButton.isChecked) {
+            radioButton.isChecked = false
+            lastcheckedRadioButton = null
+        } else {
+            // Otherwise, set this button as checked and keep track of it
+            lastcheckedRadioButton?.isChecked = false
+            radioButton.isChecked = true
+            lastcheckedRadioButton = radioButton
         }
     }
 
