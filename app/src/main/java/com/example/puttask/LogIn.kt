@@ -95,6 +95,30 @@ class LogIn : AppCompatActivity() {
 
         authService.login(email, password).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+              password
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 if (response.isSuccessful) {
                     response.body()?.let {
                         val token = it.token
