@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
