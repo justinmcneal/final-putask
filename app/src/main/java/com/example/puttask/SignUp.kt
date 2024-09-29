@@ -8,9 +8,9 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.puttask.api.RegistrationRequest
-import com.example.puttask.api.RegistrationResponse
 import com.example.puttask.api.RetrofitClient
+import com.example.puttask.data.RegistrationRequest
+import com.example.puttask.data.RegistrationResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

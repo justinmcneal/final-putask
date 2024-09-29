@@ -1,4 +1,4 @@
-package com.example.puttask
+package com.example.puttask.fragments
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -6,8 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -21,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
+import com.example.puttask.R
 import java.util.Calendar
 
 class AddTask2 : AppCompatActivity() {

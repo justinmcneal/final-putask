@@ -10,8 +10,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.puttask.api.LoginResponse
 import com.example.puttask.api.RetrofitClient
+import com.example.puttask.data.LoginRequest
+import com.example.puttask.data.LoginResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -93,32 +94,11 @@ class LogIn : AppCompatActivity() {
     private fun loginUser(email: String, password: String) {
         val authService = RetrofitClient.authService
 
-        authService.login(email, password).enqueue(object : Callback<LoginResponse> {
+        // Create an instance of LoginRequest
+        val loginRequest = LoginRequest(email, password)
+
+        authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-              password
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 if (response.isSuccessful) {
                     response.body()?.let {
                         val token = it.token
@@ -127,10 +107,7 @@ class LogIn : AppCompatActivity() {
                         val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
                         val editor = sharedPreferences.edit()
                         editor.putString("auth_token", token) // Save the token
-                        editor.putBoolean(
-                            "isLoggedIn",
-                            true
-                        ) // Save a boolean flag indicating the user is logged in
+                        editor.putBoolean("isLoggedIn", true) // Save a boolean flag indicating the user is logged in
                         editor.apply()
 
                         showToast("Login Successful")

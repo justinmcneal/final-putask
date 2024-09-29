@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/superskyblue"
-    tools:context=".AddTask2">
+    tools:context=".fragments.AddTask2">
 
     <ScrollView
         android:id="@+id/scrollView2"

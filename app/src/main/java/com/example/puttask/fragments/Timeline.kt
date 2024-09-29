@@ -1,4 +1,4 @@
-package com.example.puttask
+package com.example.puttask.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arjungupta08.horizontal_calendar_date.HorizontalCalendarAdapter
 import com.arjungupta08.horizontal_calendar_date.HorizontalCalendarSetUp
+import com.example.puttask.R
 
 class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter.OnItemClickListener {
 

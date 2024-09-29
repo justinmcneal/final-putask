@@ -1,6 +1,6 @@
-package com.example.puttask.api
+package com.example.puttask.data
 
-data class User(
+data class UserData(
     val id: Int,
     val username: String,
     val email: String,
