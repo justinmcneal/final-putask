@@ -1,6 +1,7 @@
 package com.example.puttask.data
 
-data class UserData(
+
+data class UserInfo (
     val id: Int,
     val username: String,
     val email: String,
@@ -9,4 +10,5 @@ data class UserData(
     val updated_at: String,
     val password: String,
     val password_confirmation: String
+
 )
