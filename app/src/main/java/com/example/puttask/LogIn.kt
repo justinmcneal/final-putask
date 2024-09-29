@@ -28,102 +28,85 @@ class LogIn : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_log_in)
-
-        // Set up window insets for edge-to-edge layout
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        // Initialize UI components
         btnLog = findViewById(R.id.btnLog)
         othersSign = findViewById(R.id.othersSign)
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
 
-        // Set up login button click listener
+        //Login Button
         btnLog.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
+            //Validation and Retrofit
             if (validateInputs(email, password)) {
-                loginUser(email, password)
+                val authService = RetrofitClient.authService
+                val loginRequest = LoginRequest(email, password)
+
+                authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
+                    override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                        if (response.isSuccessful) {
+                            response.body()?.let {
+                                val token = it.token
+
+                                // Save token and login status in SharedPreferences
+                                getSharedPreferences("user_prefs", MODE_PRIVATE).edit().apply {
+                                    putString("auth_token", token) // Save the token
+                                    putBoolean("isLoggedIn", true) // Save login status
+                                    apply()
+                                }
+
+                                showToast("Login Successful")
+                                startActivity(Intent(this@LogIn, MainActivity::class.java))
+                                finish() // Close the login activity
+                            }
+                        } else {
+                            val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                            showToast("Login failed: ${response.code()} ${response.message()}\n$errorBody")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                        showToast("Login failed: ${t.message}")
+                    }
+                })
             }
         }
 
-        // Redirect to sign-up screen
         othersSign.setOnClickListener {
             startActivity(Intent(this, SignUp::class.java))
         }
     }
 
-    // Validate email and password inputs
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
     private fun validateInputs(email: String, password: String): Boolean {
         return when {
             email.isEmpty() -> {
                 showToast("Please enter an email")
                 false
             }
-
             !isValidEmail(email) -> {
                 showToast("Please enter a valid email")
                 false
             }
-
             password.isEmpty() -> {
                 showToast("Please enter a password")
                 false
             }
-
             else -> true
         }
     }
 
-    // Check if email is valid
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-
-    // Show toast message
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
-
-    // Perform login using Retrofit
-    private fun loginUser(email: String, password: String) {
-        val authService = RetrofitClient.authService
-
-        // Create an instance of LoginRequest
-        val loginRequest = LoginRequest(email, password)
-
-        authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
-            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-                if (response.isSuccessful) {
-                    response.body()?.let {
-                        val token = it.token
-
-                        // Save token and login status in SharedPreferences
-                        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-                        val editor = sharedPreferences.edit()
-                        editor.putString("auth_token", token) // Save the token
-                        editor.putBoolean("isLoggedIn", true) // Save a boolean flag indicating the user is logged in
-                        editor.apply()
-
-                        showToast("Login Successful")
-                        startActivity(Intent(this@LogIn, MainActivity::class.java))
-                        finish() // Optionally close the login activity
-                    }
-                } else {
-                    // Handle non-200 responses
-                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                    showToast("Login failed: ${response.code()} ${response.message()}\n$errorBody")
-                }
-            }
-
-            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                showToast("Login failed: ${t.message}")
-            }
-        })
     }
 }

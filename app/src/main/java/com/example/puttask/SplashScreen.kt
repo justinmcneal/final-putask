@@ -46,7 +46,7 @@ class SplashScreen : AppCompatActivity() {
 
         // Delay before navigating to the next activity
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, LoginSignin::class.java))
+            startActivity(Intent(this, AuthenticationPage::class.java))
             finish()
         }, 8000)  // Total delay of 7 seconds before transitioning
     }

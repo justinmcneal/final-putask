@@ -30,7 +30,7 @@
             android:name=".SignUp"
             android:exported="false" />
         <activity
-            android:name=".LoginSignin"
+            android:name=".AuthenticationPage"
             android:exported="false" />
         <activity
             android:name=".SplashScreen"

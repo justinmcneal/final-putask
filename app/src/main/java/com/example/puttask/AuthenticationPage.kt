@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
-class LoginSignin : AppCompatActivity() {
+class AuthenticationPage : AppCompatActivity() {
 
     private lateinit var btnSignUp: Button
     private lateinit var btnLogIn: Button
@@ -16,7 +16,7 @@ class LoginSignin : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_login_signin)
+        setContentView(R.layout.activity_authentication_page)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
