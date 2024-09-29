@@ -33,17 +33,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Check if the user is logged in
-        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
-
-        if (!isLoggedIn) {
-            // Redirect to login page if not logged in
-            val intent = Intent(this, LogIn::class.java)
-            startActivity(intent)
-            finish() // End MainActivity to prevent back navigation
-        }
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -65,16 +54,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.bottomnavigationview.background = null
         binding.bottomnavigationview.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.ic_lists -> openFragment(Lists(), "Lists")
-                R.id.ic_timeline -> openFragment(Timeline(),"Timeline")
+                R.id.ic_lists -> openFragment(Lists(), "Tasks")
                 R.id.ic_analytics -> openFragment(Analytics(),"Analytics")
+                R.id.ic_timeline -> openFragment(Timeline(),"Timeline")
                 R.id.ic_profile -> openFragment(Profile(),"Profile")
             }
             true
         }
 
         fragmentManager = supportFragmentManager
-        openFragment(Lists(),"Lists")
+        openFragment(Lists(),"Tasks")
 
         binding.btnAdd.setOnClickListener {
             val intent = Intent(this, AddTask2::class.java)//plain activity gamit here
@@ -86,10 +75,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.ic_lists -> openFragment(Lists(),"Lists")
+            R.id.ic_lists -> openFragment(Lists(),"Tasks")
             R.id.ic_timeline -> openFragment(Timeline(), "Timeline")
             R.id.ic_analytics -> openFragment(Analytics(), "Analytics")
-            R.id.ic_profile -> openFragment(Profile(), "Profile")
+            R.id.ic_profile -> openFragment(Profile(), "")
             R.id.ic_contactsupport -> openFragment(ContactSupport(), "Contact Support")
             R.id.ic_logout -> logout() // Handle logout click
         }
@@ -98,18 +87,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun logout() {
-        // Clear login status from SharedPreferences
-        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.clear() // This removes all data, including the login status
-        editor.apply()
-
-        // Redirect to LogIn activity
-        val intent = Intent(this, LogIn::class.java)
+        // Clear user session or perform any logout logic here
+        // Then redirect to the LogInSignIn activity
+        val intent = Intent(this, LoginSignin::class.java)
         startActivity(intent)
-        finish() // End MainActivity
+        finish() // Optional: finish the current activity so the user cannot return to it
     }
-
 
     private fun openFragment(fragment: Fragment, title: String) {
         supportFragmentManager.beginTransaction().apply {
