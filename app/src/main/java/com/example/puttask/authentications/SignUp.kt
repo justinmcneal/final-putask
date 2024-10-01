@@ -1,4 +1,4 @@
-package com.example.puttask
+package com.example.puttask.authentications
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,8 +10,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.puttask.MainActivity
+import com.example.puttask.R
 import com.example.puttask.api.AuthUtils
 import com.example.puttask.api.RetrofitClient
+import com.example.puttask.data.RegistrationRequest
+import com.example.puttask.data.RegistrationResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

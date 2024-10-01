@@ -21,13 +21,13 @@
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".LogIn"
+            android:name=".authentications.LogIn"
             android:exported="false" />
         <activity
-            android:name=".SignUp"
+            android:name=".authentications.SignUp"
             android:exported="false" />
         <activity
-            android:name=".LoginSignin"
+            android:name=".authentications.LoginSignin"
             android:exported="false" />
         <activity
             android:name=".SplashScreen"

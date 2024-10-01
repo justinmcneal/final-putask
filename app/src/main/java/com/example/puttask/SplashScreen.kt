@@ -10,6 +10,7 @@ import android.view.animation.Animation
 import android.widget.ImageView
 import android.widget.TextView
 import android.view.View
+import com.example.puttask.authentications.LoginSignin
 
 class SplashScreen : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
