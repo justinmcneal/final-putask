@@ -1,10 +1,11 @@
-package com.example.puttask
+package com.example.puttask.fragments
 
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
+import com.example.puttask.R
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
