@@ -6,20 +6,230 @@
     android:layout_height="match_parent"
     tools:context=".Analytics">
 
-
-    <TextView
-        android:id="@+id/tvFragmentAnalytics"
-        android:layout_width="wrap_content"
+    <HorizontalScrollView
+        android:id="@+id/hsvAnalytics"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Analytics"
-        android:layout_gravity="center"
-        android:textSize="30sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:scrollbars="none"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5" />
+        app:layout_constraintTop_toTopOf="parent">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="100dp"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:paddingTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvsevenDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/corners_for_greeting"
+                android:backgroundTint="@color/superlightgray"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="7 days"
+                android:textColor="@color/black"
+                android:textSize="14dp"
+                app:cornerRadius="10dp" />
+
+            <TextView
+                android:id="@+id/tvtwentyeightDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/corners_for_greeting"
+                android:backgroundTint="@color/superlightgray"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="28 days"
+                android:textColor="@color/black"
+                android:textSize="14dp"
+                app:cornerRadius="10dp" />
+
+            <TextView
+                android:id="@+id/tvsixtyDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/corners_for_greeting"
+                android:backgroundTint="@color/superlightgray"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="60 days"
+                android:textColor="@color/black"
+                android:textSize="14dp"
+                app:cornerRadius="10dp" />
+
+            <TextView
+                android:id="@+id/tvthreesixtyfiveDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/corners_for_greeting"
+                android:backgroundTint="@color/superlightgray"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="365 days"
+                android:textColor="@color/black"
+                android:textSize="14dp"
+                app:cornerRadius="10dp" />
+
+            <TextView
+                android:id="@+id/tvCustom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/corners_for_greeting"
+                android:backgroundTint="@color/superlightgray"
+                android:drawableRight="@drawable/ic_arrowdown"
+                android:paddingStart="14dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="8dp"
+                android:text="Custom"
+                android:textColor="@color/black"
+                android:textSize="14dp" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        android:backgroundTint="@color/superskyblue"
+        app:layout_constraintTop_toBottomOf="@id/hsvAnalytics">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/tvTaskOverview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tasks Overview"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:textSize="18dp"
+            android:textColor="@color/black"
+            android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/tvTaskOverviewDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="5dp"
+            android:textSize="14dp"
+            android:textColor="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@android:color/transparent"> <!-- Makes CardView transparent so the inner layout shows the border -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/cardview_border"
+                    android:orientation="vertical"
+                    android:paddingBottom="10dp"> <!-- You can adjust padding as needed -->
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Completed Tasks"
+                        android:textSize="12dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="10dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="20dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="10dp"/>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@android:color/transparent"> <!-- Makes CardView transparent so the inner layout shows the border -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/cardview_border"
+                    android:orientation="vertical"
+                    android:paddingBottom="10dp"> <!-- You can adjust padding as needed -->
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Pending Tasks"
+                        android:textSize="12dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="10dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="20dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="10dp"/>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/lineChart"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_centerInParent="true"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginTop="10dp"
+            android:elevation="4dp" />
+
+
+    </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
