@@ -11,8 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.puttask.api.AuthUtils
-import com.example.puttask.api.RegistrationRequest
-import com.example.puttask.api.RegistrationResponse
 import com.example.puttask.api.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback

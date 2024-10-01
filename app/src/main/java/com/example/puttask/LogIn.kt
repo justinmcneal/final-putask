@@ -10,8 +10,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.puttask.api.LoginRequest
-import com.example.puttask.api.LoginResponse
 import com.example.puttask.api.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
