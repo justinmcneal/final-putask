@@ -1,6 +1,5 @@
 package com.example.puttask.api
 
-import com.example.puttask.AuthService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
