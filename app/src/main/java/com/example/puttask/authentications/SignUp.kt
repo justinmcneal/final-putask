@@ -103,7 +103,7 @@ class SignUp : AppCompatActivity() {
                     val registrationResponse = response.body()
                     registrationResponse?.let { regResponse ->
                         Toast.makeText(this@SignUp, regResponse.message, Toast.LENGTH_SHORT).show()
-                        AuthUtils.storeToken(regResponse.token) // No context needed
+//                        AuthUtils.storeToken(regResponse.token) // No context needed
                     }
                     val intent = Intent(this@SignUp, MainActivity::class.java)
                     startActivity(intent)

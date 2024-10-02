@@ -1,4 +1,4 @@
-package com.example.puttask
+package com.example.puttask.fragments
 
 import android.os.Bundle
 import android.view.View
