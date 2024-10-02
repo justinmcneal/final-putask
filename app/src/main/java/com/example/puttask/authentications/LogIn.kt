@@ -59,14 +59,13 @@ class LogIn : AppCompatActivity() {
 
                                 // Save token and login status in SharedPreferences
                                 getSharedPreferences("user_prefs", MODE_PRIVATE).edit().apply {
-                                    putString("auth_token", token) // Save the token
-                                    putBoolean("isLoggedIn", true) // Save login status
+                                    putString("auth_token", token)
+                                    putBoolean("isLoggedIn", true)
                                     apply()
                                 }
-
                                 showToast("Login Successful")
                                 startActivity(Intent(this@LogIn, MainActivity::class.java))
-                                finish() // Close the login activity
+                                finish()
                             }
                         } else {
                             val errorBody = response.errorBody()?.string() ?: "Unknown error"
