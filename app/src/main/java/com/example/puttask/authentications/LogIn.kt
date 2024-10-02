@@ -55,7 +55,7 @@ class LogIn : AppCompatActivity() {
                     override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                         if (response.isSuccessful) {
                             response.body()?.let {
-                                val token = it.token
+                                val valtoken = it.token
 
                                 // Save token and login status in SharedPreferences
                                 getSharedPreferences("user_prefs", MODE_PRIVATE).edit().apply {

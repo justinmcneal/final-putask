@@ -24,17 +24,6 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Check if the user is logged in
-        //val sharedPreferences = requireContext().getSharedPreferences("user_prefs", MODE_PRIVATE)
-        //val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
-
-//        if (!isLoggedIn) {
-//            // Redirect to login page if not logged in
-//            val intent = Intent(requireContext(), LogIn::class.java)
-//            startActivity(intent)
-//            requireActivity().finish() // End current activity
-//        }
-
         // Initialize the submit button
         btnSubmit = view.findViewById(R.id.btnSubmit)
 

@@ -54,28 +54,38 @@ class SignUp : AppCompatActivity() {
         }
     }
 
-    private fun validateInputs(username: String, email: String, password: String, confirmPassword: String): Boolean {
+    private fun validateInputs(
+        username: String,
+        email: String,
+        password: String,
+        confirmPassword: String
+    ): Boolean {
         return when {
             username.isEmpty() -> {
                 showToast("Please enter a username")
                 false
             }
+
             email.isEmpty() -> {
                 showToast("Please enter an email")
                 false
             }
+
             !isValidEmail(email) -> {
                 showToast("Please enter a valid email")
                 false
             }
+
             password.isEmpty() || password.length < 8 -> {
                 showToast("Password must be at least 8 characters")
                 false
             }
+
             confirmPassword.isEmpty() || password != confirmPassword -> {
                 showToast("Passwords do not match")
                 false
             }
+
             else -> true
         }
     }
@@ -84,7 +94,12 @@ class SignUp : AppCompatActivity() {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    private fun registerUser(username: String, email: String, password: String, confirmPassword: String) {
+    private fun registerUser(
+        username: String,
+        email: String,
+        password: String,
+        confirmPassword: String
+    ) {
         val registrationRequest = RegistrationRequest(
             username = username,
             email = email,
@@ -92,25 +107,30 @@ class SignUp : AppCompatActivity() {
             password_confirmation = confirmPassword
         )
 
-        RetrofitClient.authService.register(registrationRequest).enqueue(object : Callback<RegistrationResponse> {
-            override fun onResponse(call: Call<RegistrationResponse>, response: Response<RegistrationResponse>) {
-                if (response.isSuccessful) {
-                    val message = response.body()?.message ?: "Registration successful"
-                    showToast(message)
-                    startActivity(Intent(this@SignUp, MainActivity::class.java))
-                } else {
-                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                    showToast("Registration failed: $errorBody")
+        RetrofitClient.authService.register(registrationRequest)
+            .enqueue(object : Callback<RegistrationResponse> {
+                override fun onResponse(
+                    call: Call<RegistrationResponse>,
+                    response: Response<RegistrationResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        val message = response.body()?.message ?: "Registration successful"
+                        showToast(message)
+                        startActivity(Intent(this@SignUp, MainActivity::class.java))
+                    } else {
+                        val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                        showToast("Registration failed: $errorBody")
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<RegistrationResponse>, t: Throwable) {
-                Log.e("SignUpError", "Network Error: ${t.message}", t)
-                showToast("Network Error: ${t.localizedMessage}")
-            }
-        })
+                override fun onFailure(call: Call<RegistrationResponse>, t: Throwable) {
+                    Log.e("SignUpError", "Network Error: ${t.message}", t)
+                    showToast("Network Error: ${t.localizedMessage}")
+                }
+            })
     }
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+}
