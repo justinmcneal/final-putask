@@ -30,7 +30,6 @@ class LogIn : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_log_in)
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -42,73 +41,74 @@ class LogIn : AppCompatActivity() {
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
 
-        // Set up login button click listener
+        //Login Button
         btnLog.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
+            //Validation and Retrofit
             if (validateInputs(email, password)) {
-                loginUser(email, password)
+                val authService = RetrofitClient.authService
+                val loginRequest = LoginRequest(email, password)
+
+                authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
+                    override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                        if (response.isSuccessful) {
+                            response.body()?.let {
+                                val token = it.token
+
+                                // Save token and login status in SharedPreferences
+                                getSharedPreferences("user_prefs", MODE_PRIVATE).edit().apply {
+                                    putString("auth_token", token) // Save the token
+                                    putBoolean("isLoggedIn", true) // Save login status
+                                    apply()
+                                }
+
+                                showToast("Login Successful")
+                                startActivity(Intent(this@LogIn, MainActivity::class.java))
+                                finish() // Close the login activity
+                            }
+                        } else {
+                            val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                            showToast("Login failed: ${response.code()} ${response.message()}\n$errorBody")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                        showToast("Login failed: ${t.message}")
+                    }
+                })
             }
         }
 
-        // Redirect to sign up screen
         othersSign.setOnClickListener {
-            val intent = Intent(this, SignUp::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, SignUp::class.java))
         }
     }
 
-    // Input validation
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
     private fun validateInputs(email: String, password: String): Boolean {
         return when {
             email.isEmpty() -> {
-                Toast.makeText(this, "Please enter an email", Toast.LENGTH_SHORT).show()
+                showToast("Please enter an email")
                 false
             }
             !isValidEmail(email) -> {
-                Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show()
+                showToast("Please enter a valid email")
                 false
             }
             password.isEmpty() -> {
-                Toast.makeText(this, "Please enter a password", Toast.LENGTH_SHORT).show()
+                showToast("Please enter a password")
                 false
             }
             else -> true
         }
     }
 
-    // Email validation method
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
-
-    // Login user using Retrofit
-    private fun loginUser(email: String, password: String) {
-        val authService = RetrofitClient.authService
-        val loginRequest = LoginRequest(email, password)
-
-        authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
-            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-                if (response.isSuccessful) {
-                    val loginResponse = response.body()
-                    loginResponse?.let {
-                        Toast.makeText(this@LogIn, "Login Successful", Toast.LENGTH_SHORT).show()
-                        val intent = Intent(this@LogIn, MainActivity::class.java)
-                        startActivity(intent)
-                    }
-                } else {
-                    // Log response code and message
-                    Toast.makeText(this@LogIn, "Login failed: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                // Log the exception
-                Toast.makeText(this@LogIn, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                t.printStackTrace()
-            }
-        })
-    }
-
 }
