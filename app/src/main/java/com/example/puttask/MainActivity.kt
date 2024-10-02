@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.example.puttask.authentications.LoginSignin
 import com.example.puttask.databinding.ActivityMainBinding
+import com.example.puttask.fragments.AddTask2
 import com.example.puttask.fragments.Analytics
 import com.example.puttask.fragments.ContactSupport
 import com.example.puttask.fragments.Lists
