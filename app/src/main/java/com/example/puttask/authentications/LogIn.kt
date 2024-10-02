@@ -91,20 +91,13 @@ class LogIn : AppCompatActivity() {
 
     private fun validateInputs(email: String, password: String): Boolean {
         return when {
-            email.isEmpty() -> {
-                showToast("Please enter an email")
-                false
-            }
-            !isValidEmail(email) -> {
-                showToast("Please enter a valid email")
-                false
-            }
-            password.isEmpty() -> {
-                showToast("Please enter a password")
-                false
-            }
-            else -> true
-        }
+            email.isEmpty() -> "Please enter an email"
+            !isValidEmail(email) -> "Please enter a valid email"
+            password.isEmpty() -> "Please enter a password"
+            else -> null
+        }?.apply {
+            showToast(this)
+        } == null
     }
 
     private fun isValidEmail(email: String): Boolean {

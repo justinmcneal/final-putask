@@ -9,8 +9,6 @@ import androidx.recyclerview.widget.RecyclerView
 
 class ListsAdapter(private val taskList: List<Task.Task>) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
-
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.lists_recyclerview, parent, false)

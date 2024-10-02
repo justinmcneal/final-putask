@@ -35,17 +35,6 @@ class SignUp : AppCompatActivity() {
         etPassword = findViewById(R.id.etPassword)
         etConfirmPassword = findViewById(R.id.etConfirmPassword)
 
-        // Set click listener for the sign-up button
-//        btnSign.setOnClickListener {
-//            val username = etUsername.text.toString().trim()
-//            val email = etEmail.text.toString().trim()
-//            val password = etPassword.text.toString().trim()
-//            val confirmPassword = etConfirmPassword.text.toString().trim()
-//
-//            if (validateInputs(username, email, password, confirmPassword)) {
-//                registerUser(username, email, password, confirmPassword)
-//            }
-//        }
         //alternate if successful, ito ikekeep
         btnSign.setOnClickListener {
             val (username, email, password, confirmPassword) = listOf(
@@ -90,42 +79,6 @@ class SignUp : AppCompatActivity() {
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
-
-//    private fun registerUser(
-//        username: String,
-//        email: String,
-//        password: String,
-//        confirmPassword: String
-//    ) {
-//        val registrationRequest = RegistrationRequest(
-//            username = username,
-//            email = email,
-//            password = password,
-//            password_confirmation = confirmPassword
-//        )
-//
-//        RetrofitClient.authService.register(registrationRequest)
-//            .enqueue(object : Callback<RegistrationResponse> {
-//                override fun onResponse(
-//                    call: Call<RegistrationResponse>,
-//                    response: Response<RegistrationResponse>
-//                ) {
-//                    if (response.isSuccessful) {
-//                        val message = response.body()?.message ?: "Registration successful"
-//                        showToast(message)
-//                        startActivity(Intent(this@SignUp, MainActivity::class.java))
-//                    } else {
-//                        val errorBody = response.errorBody()?.string() ?: "Unknown error"
-//                        showToast("Registration failed: $errorBody")
-//                    }
-//                }
-//
-//                override fun onFailure(call: Call<RegistrationResponse>, t: Throwable) {
-//                    Log.e("SignUpError", "Network Error: ${t.message}", t)
-//                    showToast("Network Error: ${t.localizedMessage}")
-//                }
-//            })
-//    }
 
     private fun registerUser(
         username: String,
