@@ -7,6 +7,9 @@ import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.puttask.ListsAdapter
+import com.example.puttask.R
+import com.example.puttask.Task
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
