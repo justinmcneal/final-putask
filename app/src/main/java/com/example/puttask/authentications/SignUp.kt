@@ -76,7 +76,7 @@ class SignUp : AppCompatActivity() {
             username.isEmpty() -> showError("Please enter a username")
             email.isEmpty() -> showError("Please enter an email")
             !isValidEmail(email) -> showError("Please enter a valid email")
-            password.length <= 8 -> showError("Password must be at least 8 characters")
+            password.length < 8 -> showError("Password must be at least 8 characters")
             password != confirmPassword -> showError("Passwords do not match")
             else -> true
         }
