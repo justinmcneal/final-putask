@@ -1,16 +1,15 @@
-package com.example.puttask
+package com.example.puttask.fragments
 
-import android.content.Context.MODE_PRIVATE
-import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.example.puttask.api.ContactRequest
-import com.example.puttask.api.ContactResponse
+import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
+import com.example.puttask.data.ContactRequest
+import com.example.puttask.data.ContactResponse
 import com.google.gson.Gson
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -20,21 +19,10 @@ import retrofit2.Response
 class ContactSupport : Fragment(R.layout.fragment_contact_support) {
 
     private lateinit var btnSubmit: Button
-    private val contactApiService = RetrofitClient.contactApiService // Fixed variable name
+    private val contactApiService = RetrofitClient.contactService
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Check if the user is logged in
-        val sharedPreferences = requireContext().getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
-
-        if (!isLoggedIn) {
-            // Redirect to login page if not logged in
-            val intent = Intent(requireContext(), LogIn::class.java)
-            startActivity(intent)
-            requireActivity().finish() // End current activity
-        }
 
         // Initialize the submit button
         btnSubmit = view.findViewById(R.id.btnSubmit)
