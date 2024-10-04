@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
-import com.example.puttask.Task
+import com.example.puttask.data.Task
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
@@ -17,12 +17,12 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var listsAdapter: ListsAdapter
 
     private val taskList = mutableListOf(
-        Task("Title 1", "Description 1", "10:00 AM", false),
-        Task("Title 2", "Description 2", "12:00 PM", true),
-        Task("Title 3", "Description 3", "3:00 PM", false),
-        Task("Title 4", "Description 4", "10:00 AM", false),
-        Task("Title 5", "Description 5", "10:00 AM", false),
-        Task("Title 6", "Description 6", "10:00 AM", false),
+        Task(1, "Title 1", "Description 1", "10:00 AM", "11:00 AM", null, false),
+        Task(2, "Title 2", "Description 2", "12:00 PM", "1:00 PM", null, true),
+        Task(3, "Title 3", "Description 3", "3:00 PM", "4:00 PM", null, false),
+        Task(4, "Title 4", "Description 4", "10:00 AM", "11:00 AM", null, false),
+        Task(5, "Title 5", "Description 5", "10:00 AM", "11:00 AM", null, false),
+        Task(6, "Title 6", "Description 6", "10:00 AM", "11:00 AM", null, false)
     )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
