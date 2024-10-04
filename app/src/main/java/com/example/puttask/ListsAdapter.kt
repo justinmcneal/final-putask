@@ -7,7 +7,10 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ListsAdapter(private val taskList: List<Task.Task>) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
+class ListsAdapter(
+    private val taskList: MutableList<Task>,
+    private val onTaskCheckedChange: (Task, Boolean) -> Unit
+) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -21,9 +24,16 @@ class ListsAdapter(private val taskList: List<Task.Task>) : RecyclerView.Adapter
         holder.tvTaskDescription.text = task.description
         holder.tvTime.text = task.time
         holder.checkBox.isChecked = task.isChecked
+
+        // Handle checkbox state change
+        holder.checkBox.setOnCheckedChangeListener(null) // Clear previous listener
+        holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
+            onTaskCheckedChange(task, isChecked) // Notify the listener of the change
+        }
     }
 
     override fun getItemCount(): Int = taskList.size
+
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
