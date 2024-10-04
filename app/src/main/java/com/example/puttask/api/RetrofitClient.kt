@@ -47,4 +47,13 @@ object RetrofitClient {
             .build()
             .create(ContactService::class.java)
     }
+
+    val taskService: TaskService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(TaskService::class.java)
+    }
 }
