@@ -1,4 +1,4 @@
-package com.example.puttask
+package com.example.puttask.authentications
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,6 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.puttask.MainActivity
+import com.example.puttask.R
 
 class LoginSignin : AppCompatActivity() {
 
@@ -24,10 +26,9 @@ class LoginSignin : AppCompatActivity() {
             insets
         }
 
-
         btnSignUp = findViewById(R.id.btnSignIn)
         btnLogIn = findViewById(R.id.btnLogIn)
-        
+
         btnSignUp.setOnClickListener {
             // Start SignUpActivity
             val intent = Intent(this, MainActivity::class.java)
@@ -41,3 +42,4 @@ class LoginSignin : AppCompatActivity() {
         }
     }
 }
+

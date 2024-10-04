@@ -10,13 +10,13 @@ import android.view.animation.Animation
 import android.widget.ImageView
 import android.widget.TextView
 import android.view.View
+import com.example.puttask.authentications.LoginSignin
 
 class SplashScreen : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
 
-        // Find the logo and title by ID
         val putasklogo: ImageView = findViewById(R.id.putasklogo)
         val title: TextView = findViewById(R.id.tvTitle)  // Title text view
 
