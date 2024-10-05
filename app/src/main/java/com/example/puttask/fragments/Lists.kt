@@ -3,7 +3,9 @@ package com.example.puttask.fragments
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.PopupMenu
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +17,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private lateinit var listsrecyclerView: RecyclerView
     private lateinit var listsAdapter: ListsAdapter
+    private lateinit var tvDropdownLists: TextView
 
     private val taskList = mutableListOf(
         Task(1, "Title 1", "Description 1", "10:00 AM", "11:00 AM", null, false),
@@ -28,20 +31,27 @@ class Lists : Fragment(R.layout.fragment_lists) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Find the Spinner by ID
-        val spinner: Spinner = view.findViewById(R.id.spinner)
+        //updated this lists dropdown as a customized
+        tvDropdownLists = view.findViewById(R.id.tvDropdownLists)
+        val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
 
-        // List of items for the Spinner
-        val items = listOf("All Items", "Today", "Personal", "School", "Work", "Social")
-
-        // Create an ArrayAdapter using the custom item layout
-        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_dropdown_item, items)
-
-        // Apply the adapter to the Spinner
-        spinner.adapter = adapter
-
-        // Set a custom background for the Spinner dropdown
-        spinner.setPopupBackgroundResource(R.drawable.spinnerbg)
+        val menuMap = mapOf(
+            R.id.allItems to "All Items",
+            R.id.personal to "Personal",
+            R.id.work to "Work",
+            R.id.school to "School",
+            R.id.social to "Social"
+        )
+        dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)
+        tvDropdownLists.setOnClickListener{
+            dropdownLists.setOnMenuItemClickListener{ menuItem ->
+                menuMap[menuItem.itemId]?.let {
+                    tvDropdownLists.text = it
+                    true
+                } ?: false
+            }
+            dropdownLists.show()
+        }
 
         // Set up the RecyclerView
         listsrecyclerView = view.findViewById(R.id.listsrecyclerView)
