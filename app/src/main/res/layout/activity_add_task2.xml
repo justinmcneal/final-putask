@@ -147,8 +147,8 @@
                     android:layout_marginBottom="16dp"
                     android:layout_weight="1"
                     android:fontFamily="@font/opensans"
-                    android:text="List:"
-                    android:textColor="@color/black"
+                    android:hint="List:"
+                    android:textColorHint="@color/black"
                     android:textSize="16sp" />
 
                 <ImageView
@@ -194,8 +194,8 @@
                     android:layout_marginBottom="16dp"
                     android:layout_weight="1"
                     android:fontFamily="@font/opensans"
-                    android:text="Due Date"
-                    android:textColor="@color/black"
+                    android:hint="Due Date"
+                    android:textColorHint="@color/black"
                     android:textSize="16sp" />
 
                 <ImageButton
@@ -226,8 +226,8 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
                     android:layout_weight="1"
-                    android:text="Time and Reminder"
-                    android:textColor="@color/black"
+                    android:hint="Time and Reminder"
+                    android:textColorHint="@color/black"
                     android:textSize="16sp" />
 
                 <ImageButton
@@ -362,12 +362,13 @@
             android:background="@color/white"
             android:elevation="0.1dp"
             app:cardCornerRadius="20dp"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="MissingConstraints">
+            app:layout_constraintTop_toTopOf="parent">
+
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -390,8 +391,9 @@
                     android:id="@+id/switchRepeat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="45dp"
-                    tools:ignore="UseSwitchCompatOrMaterialXml" />
+                    android:layout_marginStart="60dp"
+                    />
+
 
             </LinearLayout>
             <LinearLayout
@@ -453,6 +455,7 @@
                 android:elevation="0.1dp"
                 android:scrollbars="none"
                 android:visibility="gone">
+
 
                 <RadioGroup
                     android:id="@+id/radioGroup"
