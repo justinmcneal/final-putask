@@ -29,18 +29,23 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
 
         // Set the click listener for the submit button
         btnSubmit.setOnClickListener {
-            // Get input data from EditText fields
-            val username = view.findViewById<EditText>(R.id.etUsername).text.toString()
-            val email = view.findViewById<EditText>(R.id.etEmail).text.toString()
+            // Get input data from the message EditText field
             val message = view.findViewById<EditText>(R.id.etMessage).text.toString()
 
-            // Call the sendContactForm function with the input data
-            sendContactForm(username, email, message)
+            // Validate input
+            if (message.isNotEmpty()) {
+                // Call the sendContactForm function with the message
+                sendContactForm(message)
+            } else {
+                Toast.makeText(context, "Please enter a message", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    private fun sendContactForm(username: String, email: String, message: String) {
-        val contactReq = ContactRequest(username, email, message)
+    // Function to send the message to the API
+    private fun sendContactForm(message: String) {
+        val contactReq = ContactRequest(message) // Only passing the message
+        
 
         contactApiService.sendContactForm(contactReq).enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {

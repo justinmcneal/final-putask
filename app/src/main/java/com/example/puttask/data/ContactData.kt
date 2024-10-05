@@ -7,8 +7,6 @@ data class ContactFormData(
 )
 
 data class ContactRequest(
-    val username: String,
-    val email: String,
     val message: String
 )
 
