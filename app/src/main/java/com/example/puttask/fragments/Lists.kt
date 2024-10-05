@@ -31,7 +31,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //updated this lists dropdown as a customized
+        //updated this lists dropdown as a customized so that icon would be inside
         tvDropdownLists = view.findViewById(R.id.tvDropdownLists)
         val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
 

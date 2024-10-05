@@ -74,22 +74,38 @@
                 android:layout_marginEnd="20dp"
                 android:orientation="horizontal">
 
-                <Spinner
-                    android:id="@+id/spinner"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="start"
-                    android:layout_marginEnd="128dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/black"
-                    android:spinnerMode="dropdown" />
-
-                <ImageView
+                <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_sort" />
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/superskyblue">
+
+                    <TextView
+                        android:id="@+id/tvDropdownLists"
+                        android:layout_width="130dp"
+                        android:layout_height="wrap_content"
+                        android:text="All Items"
+                        android:textAlignment="center"
+                        android:padding="10dp"
+                        android:drawableRight="@drawable/ic_arrowdown"/>
+
+                </androidx.cardview.widget.CardView>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/ic_sort"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_sort"
+                    android:layout_gravity="center_vertical"/>
             </LinearLayout>
+
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/listsrecyclerView"
@@ -124,5 +140,6 @@
 
         </LinearLayout>
     </ScrollView>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
