@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/superskyblue"
-    tools:context=".AddTask2">
+    tools:context=".fragments.AddTask2">
 
     <ScrollView
         android:id="@+id/scrollView2"
@@ -22,6 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:padding="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -54,7 +55,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
+                android:background="@drawable/corners_for_greeting"
+                android:backgroundTint="@color/white"
+                android:layout_marginTop="10dp"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -113,10 +116,7 @@
                 </LinearLayout>
 
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/black" />
+
             </LinearLayout>
 
             <TextView
@@ -130,16 +130,12 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
             <!--List -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/black" />
-
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
+                android:background="@drawable/corners_for_greeting"
+                android:backgroundTint="@color/white"
                 android:orientation="horizontal">
 
                 <TextView
@@ -168,10 +164,6 @@
             </LinearLayout>
 
             <!--Schedule-->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/black" />
 
             <TextView
                 android:id="@+id/tvSchedule"
@@ -184,15 +176,13 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/black" />
+
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
+                android:background="@drawable/corners_for_greeting"
+                android:backgroundTint="@color/white"
                 android:orientation="horizontal">
 
                 <TextView
@@ -220,15 +210,12 @@
                     android:src="@drawable/ic_add" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/black" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/corners_for_greeting"
+                android:backgroundTint="@color/white"
                 android:orientation="horizontal">
 
                 <TextView
@@ -255,11 +242,6 @@
                     android:src="@drawable/ic_add" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/black" />
-
             <!--Advanced-->
             <TextView
                 android:id="@+id/tvAdvanced"
@@ -271,16 +253,11 @@
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/black" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
+                android:backgroundTint="@color/white"
+                android:background="@drawable/corners_for_greeting"
                 android:orientation="horizontal">
 
                 <TextView
@@ -312,16 +289,13 @@
 
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/black" />
-
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
+                android:backgroundTint="@color/white"
+                android:background="@drawable/corners_for_greeting"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -345,10 +319,6 @@
                     android:layout_marginEnd="10dp" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/black" />
         </LinearLayout>
     </ScrollView>
 
@@ -392,6 +362,7 @@
             android:background="@color/white"
             android:elevation="0.1dp"
             app:cardCornerRadius="20dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
