@@ -78,7 +78,7 @@
                 android:gravity="center_vertical"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/round_edit_text"
-                android:padding="6dp">
+                android:padding="4dp">
 
                 <!-- Password EditText -->
                 <EditText
@@ -110,7 +110,7 @@
                 android:gravity="center_vertical"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/round_edit_text"
-                android:padding="6dp">
+                android:padding="4dp">
 
                 <!-- Password EditText -->
                 <EditText

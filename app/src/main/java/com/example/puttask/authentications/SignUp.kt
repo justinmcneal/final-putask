@@ -2,9 +2,11 @@ package com.example.puttask.authentications
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +26,11 @@ class SignUp : AppCompatActivity() {
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var etConfirmPassword: EditText
+    private lateinit var ivTogglePasswordVisibility: ImageView
+    private lateinit var ivToggleConfirmPasswordVisibility: ImageView
+    private var isPasswordVisible: Boolean = false
+    private var isConfirmPasswordVisible: Boolean = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +41,10 @@ class SignUp : AppCompatActivity() {
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
         etConfirmPassword = findViewById(R.id.etConfirmPassword)
+        ivTogglePasswordVisibility = findViewById(R.id.ivTogglePasswordVisibility)
+        ivToggleConfirmPasswordVisibility = findViewById(R.id.ivToggleConfirmPasswordVisibility)
+
+
 
         //alternate if successful, ito ikekeep
         btnSign.setOnClickListener {
@@ -52,6 +63,42 @@ class SignUp : AppCompatActivity() {
         // Set click listener for the login redirect
         findViewById<TextView>(R.id.othersLog).setOnClickListener {
             startActivity(Intent(this, LogIn::class.java))
+        }
+        // Set an onClickListener on the eye icon forpassword
+        ivTogglePasswordVisibility.setOnClickListener {
+            if (isPasswordVisible) {
+                // Hide password
+                etPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                ivTogglePasswordVisibility.setImageResource(R.drawable.hide)
+            } else {
+                // Show password
+                etPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                ivTogglePasswordVisibility.setImageResource(R.drawable.view)
+            }
+
+            // Move the cursor to the end of the text
+            etPassword.setSelection(etPassword.text.length)
+
+            // Toggle the boolean value
+            isPasswordVisible = !isPasswordVisible
+        }
+        // Set an onClickListener on the eye icon forpassword
+        ivToggleConfirmPasswordVisibility.setOnClickListener {
+            if (isConfirmPasswordVisible) {
+                // Hide password
+                etConfirmPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                ivToggleConfirmPasswordVisibility.setImageResource(R.drawable.hide)
+            } else {
+                // Show password
+                etConfirmPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                ivToggleConfirmPasswordVisibility.setImageResource(R.drawable.view)
+            }
+
+            // Move the cursor to the end of the text
+            etConfirmPassword.setSelection(etPassword.text.length)
+
+            // Toggle the boolean value
+            isConfirmPasswordVisible = !isConfirmPasswordVisible
         }
     }
 
