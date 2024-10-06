@@ -49,6 +49,8 @@
                 android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
                 android:hint="Email"
+                android:textColorHint="@color/gray"
+                android:textColor="@color/darkgray"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:padding="15dp"
@@ -64,17 +66,32 @@
                 android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
                 android:hint="Password"
+                android:textColorHint="@color/gray"
+                android:textColor="@color/darkgray"
                 android:inputType="textPassword"
                 android:maxLines="1"
                 android:padding="15dp"
                 android:textSize="15sp" />
 
+            <TextView
+                android:id="@+id/tvForgotPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/opensans"
+                android:text="Forgot Password?"
+                android:layout_gravity="end"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:textSize="12sp"
+                android:clickable="true"
+                android:focusable="true"/>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:orientation="vertical">
 
             <Button

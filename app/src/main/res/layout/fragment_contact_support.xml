@@ -56,7 +56,8 @@
             android:background="@drawable/round_edit_text"
             android:gravity="top"
             android:hint="Your Message"
-            android:padding="16dp"
+            android:textColorHint="@color/gray"
+            android:textColor="@color/darkgray"            android:padding="16dp"
             android:layout_margin="12dp"
             android:maxLines="4"/>
 

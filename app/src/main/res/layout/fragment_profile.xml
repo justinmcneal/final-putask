@@ -12,26 +12,16 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/skyblue"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Settings"
-        android:textSize="18sp"
-        android:textColor="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title">
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -64,25 +54,27 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
                             android:layout_weight="1"
                             android:text="Email"
-                            android:textSize="20sp"
-                            android:layout_marginLeft="8dp" />
+                            android:textColor="@color/black"
+                            android:textSize="20sp" />
 
                         <TextView
                             android:id="@+id/emailTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
                             android:text="neon@gmail.com"
-                            android:textSize="20sp"
-                            android:layout_marginLeft="8dp" />
+                            android:textColor="@color/darkgray"
+                            android:textSize="20sp" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="32dp">
+                        android:layout_marginTop="32dp"
+                        android:orientation="horizontal">
 
                         <ImageView
                             android:layout_width="24dp"
@@ -92,48 +84,60 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
                             android:layout_weight="1"
                             android:text="Username"
-                            android:textSize="20sp"
-                            android:layout_marginLeft="8dp" />
+                            android:textColor="@color/black"
+                            android:textSize="20sp" />
 
                         <TextView
                             android:id="@+id/usernameTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
                             android:text="neon"
-                            android:textSize="20sp"
-                            android:layout_marginLeft="8dp" />
+                            android:textColor="@color/darkgray"
+                            android:textSize="20sp" />
                     </LinearLayout>
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/cardView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:backgroundTint="@color/superskyblue"
                         app:cardBackgroundColor="@color/white"
-                        app:cardCornerRadius="15dp"
-                        android:layout_marginTop="16dp">
+                        app:cardCornerRadius="15dp">
 
-                        <androidx.constraintlayout.widget.ConstraintLayout
+                        <FrameLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
 
-                            <TextView
-                                android:id="@+id/passwordTextView"
-                                android:layout_width="0dp"
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <TextView
+                                    android:id="@+id/passwordTextView"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="titbobobobobobe"
+                                    android:textColor="@color/black"
+                                    android:textSize="20sp"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent" />
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                            <ProgressBar
+                                android:id="@+id/loadingIndicator"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="titbobobobobe"
-                                android:textColor="@color/black"
-                                android:textSize="20sp"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="parent" />
-
-
-                        </androidx.constraintlayout.widget.ConstraintLayout>
+                                android:layout_gravity="center"
+                                android:visibility="gone"
+                                android:indeterminate="true" />
+                        </FrameLayout>
                     </androidx.cardview.widget.CardView>
-
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -149,6 +153,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp"
+                    android:backgroundTint="@color/skyblue"
                     android:text="Save"
                     android:textAllCaps="false"
                     android:textSize="16sp"
@@ -159,6 +164,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
+                    android:backgroundTint="@color/red"
                     android:text="Delete Account"
                     android:textAllCaps="false"
                     android:textSize="16sp"
