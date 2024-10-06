@@ -28,7 +28,7 @@ class Profile : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        passwordTextView = view.findViewById(R.id.passwordTextView)
+        passwordTextView = view.findViewById(R.id.tvPassword)
         loadingIndicator = view.findViewById(R.id.loadingIndicator)
 
         // Initialize DataManager
