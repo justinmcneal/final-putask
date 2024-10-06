@@ -59,4 +59,5 @@ class Profile : Fragment() {
             }
         }
     }
+
 }

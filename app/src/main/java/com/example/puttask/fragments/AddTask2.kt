@@ -26,7 +26,6 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var llButtonEnd: LinearLayout
     private lateinit var llBtn: LinearLayout
     private lateinit var llDaily: LinearLayout
-    private lateinit var radioGroup: RadioGroup
     private lateinit var btnRepeat: AppCompatButton
     private lateinit var hsvDaily: HorizontalScrollView
     private val taskList: MutableList<Task> = mutableListOf()
@@ -47,7 +46,6 @@ class AddTask2 : AppCompatActivity() {
         llBtn = findViewById(R.id.llBtn)
         llDaily = findViewById(R.id.llDaily)
         btnRepeat = findViewById(R.id.btnRepeat)
-        radioGroup = findViewById(R.id.radioGroup)
         tvCancel = findViewById(R.id.tvCancel)
         tvDone = findViewById(R.id.tvDone)
         switchRepeat = findViewById(R.id.switchRepeat)

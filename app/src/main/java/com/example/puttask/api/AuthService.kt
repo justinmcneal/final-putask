@@ -3,6 +3,8 @@ package com.example.puttask.api
 import com.example.puttask.data.*
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface AuthService {
@@ -14,6 +16,9 @@ interface AuthService {
     // User Registration
     @POST("api/registrationPost")
     fun register(@Body registrationRequest: RegistrationRequest): Call<RegistrationResponse>
+
+    @GET("api/user")
+    suspend fun getUser(@Header("Authorization") token: String): UserInfo
 
     // Forgot Password - Validate Email (this could potentially send OTP)
     @POST("api/forgotPassword")

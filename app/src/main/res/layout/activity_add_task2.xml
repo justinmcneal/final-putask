@@ -370,8 +370,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -393,11 +391,9 @@
                     android:id="@+id/switchRepeat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="60dp"
-                    />
-
-
+                    android:layout_marginStart="60dp" />
             </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/llBtn"
                 android:layout_width="wrap_content"
@@ -418,8 +414,6 @@
                     android:textSize="20dp"
                     android:textStyle="bold" />
             </LinearLayout>
-
-
 
             <LinearLayout
                 android:id="@+id/llDaily"
@@ -442,10 +436,6 @@
                     android:textColor="@color/gray"
                     android:textStyle="bold"
                     android:textSize="18sp" />
-
-
-
-
             </LinearLayout>
 
             <HorizontalScrollView
@@ -458,9 +448,8 @@
                 android:scrollbars="none"
                 android:visibility="gone">
 
-
-                <RadioGroup
-                    android:id="@+id/radioGroup"
+                <LinearLayout
+                    android:id="@+id/checkboxGroup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@color/white"
@@ -482,7 +471,7 @@
                             android:layout_marginStart="20dp"
                             android:text="Monday" />
 
-                        <RadioButton
+                        <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="30dp"
@@ -501,7 +490,7 @@
                             android:layout_marginStart="20dp"
                             android:text="Tuesday" />
 
-                        <RadioButton
+                        <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="30dp"
@@ -520,7 +509,7 @@
                             android:layout_marginStart="20dp"
                             android:text="Wednesday" />
 
-                        <RadioButton
+                        <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="30dp"
@@ -539,7 +528,7 @@
                             android:layout_marginStart="20dp"
                             android:text="Thursday" />
 
-                        <RadioButton
+                        <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="30dp"
@@ -558,7 +547,7 @@
                             android:layout_marginStart="20dp"
                             android:text="Friday" />
 
-                        <RadioButton
+                        <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="30dp"
@@ -577,7 +566,7 @@
                             android:layout_marginStart="20dp"
                             android:text="Saturday" />
 
-                        <RadioButton
+                        <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="30dp"
@@ -596,17 +585,15 @@
                             android:layout_marginStart="20dp"
                             android:text="Sunday" />
 
-                        <RadioButton
+                        <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="30dp"
                             android:backgroundTint="@color/lightgray" />
                     </LinearLayout>
-                </RadioGroup>
+                </LinearLayout>
 
             </HorizontalScrollView>
-
-
 
             <LinearLayout
                 android:id="@+id/llButtonEnd"
@@ -645,11 +632,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/white">
-
             </LinearLayout>
 
-
         </androidx.cardview.widget.CardView>
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
