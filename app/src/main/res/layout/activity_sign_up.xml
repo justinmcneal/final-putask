@@ -48,6 +48,8 @@
                 android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
                 android:hint="Username"
+                android:textColorHint="@color/gray"
+                android:textColor="@color/darkgray"
                 android:inputType="text"
                 android:maxLines="1"
                 android:padding="15dp"
@@ -64,7 +66,8 @@
                 android:fontFamily="@font/opensans"
                 android:hint="Email"
                 android:inputType="textEmailAddress"
-                android:maxLines="1"
+                android:textColorHint="@color/gray"
+                android:textColor="@color/darkgray"                android:maxLines="1"
                 android:padding="15dp"
                 android:textSize="15sp" />
 
@@ -78,6 +81,7 @@
                 android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
                 android:hint="Password"
+                android:textColorHint="@color/darkgray"
                 android:inputType="textPassword"
                 android:maxLines="1"
                 android:padding="15dp"
@@ -93,7 +97,8 @@
                 android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
                 android:hint="Confirm Password"
-                android:inputType="textPassword"
+                android:textColorHint="@color/gray"
+                android:textColor="@color/darkgray"                android:inputType="textPassword"
                 android:maxLines="1"
                 android:padding="15dp"
                 android:textSize="15sp" />

@@ -1,4 +1,4 @@
-package com.example.puttask.authentications
+package com.example.puttask
 
 import android.os.Bundle
 import android.widget.Button
