@@ -3,6 +3,7 @@ package com.example.puttask
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -14,6 +15,7 @@ import com.example.puttask.data.EmailRequest
 import com.example.puttask.data.EmailResponse
 import com.example.puttask.data.OTPRequest
 import com.example.puttask.data.OTPResponse
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -68,11 +70,11 @@ class ForgotPassword : AppCompatActivity() {
 
         // Verify OTP button listener
         btnVerifyOTP.setOnClickListener {
-            val otp = etOTP.text.toString().trim()
-
-            if (otp.isNotEmpty()) {
+            val otp = etOTP.text.toString().toIntOrNull()
+            val email = etForgotEmail.text.toString()
+            if (otp != null) {
                 // Call function to verify OTP
-                verifyOTP(otp)
+                verifyOTP(email, otp)
             } else {
                 Toast.makeText(this, "Please enter the OTP", Toast.LENGTH_SHORT).show()
             }
@@ -87,6 +89,10 @@ class ForgotPassword : AppCompatActivity() {
             override fun onResponse(call: Call<EmailResponse>, response: Response<EmailResponse>) {
                 if (response.isSuccessful) {
                     val emailResponse = response.body()
+
+                    // Log the JSON response for debugging
+                    val jsonResponse = Gson().toJson(emailResponse)
+                    Log.d("EmailCheckResponse", "JSON Response: $jsonResponse")
 
                     if (emailResponse?.email_exists == true) {
                         Toast.makeText(this@ForgotPassword, emailResponse.message, Toast.LENGTH_SHORT).show()
@@ -107,11 +113,13 @@ class ForgotPassword : AppCompatActivity() {
                 } else {
                     val errorBody = response.errorBody()?.string() ?: "Unknown error"
                     Toast.makeText(this@ForgotPassword, "Error: ${response.message()}\n$errorBody", Toast.LENGTH_SHORT).show()
+                    Log.d("Error", "Error: ${response.message()}\n$errorBody")
                 }
             }
 
             override fun onFailure(call: Call<EmailResponse>, t: Throwable) {
                 Toast.makeText(this@ForgotPassword, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("EmailCheckFailure", "Error: ${t.message}", t)
             }
         })
     }
@@ -127,6 +135,10 @@ class ForgotPassword : AppCompatActivity() {
         RetrofitClient.authService.sendOTP(emailRequest).enqueue(object : Callback<EmailResponse> {
             override fun onResponse(call: Call<EmailResponse>, response: Response<EmailResponse>) {
                 if (response.isSuccessful) {
+                    // Log the JSON response for debugging
+                    val jsonResponse = Gson().toJson(response.body())
+                    Log.d("SendOTPResponse", "JSON Response: $jsonResponse")
+
                     // Reset retry count on successful OTP send
                     retryCount = 0
                     lastFailedAttemptTime = 0
@@ -175,15 +187,19 @@ class ForgotPassword : AppCompatActivity() {
         }, cooldownTimeMillis)
     }
 
-    private fun verifyOTP(otp: String) {
+    private fun verifyOTP(email: String, otp: Int) {
         // Create OTPRequest with the entered OTP
-        val otpRequest = OTPRequest(otp)
+        val otpRequest = OTPRequest(email, otp);
 
         // Call the API to verify the OTP
         RetrofitClient.authService.verifyOTP(otpRequest).enqueue(object : Callback<OTPResponse> {
             override fun onResponse(call: Call<OTPResponse>, response: Response<OTPResponse>) {
                 if (response.isSuccessful) {
                     val otpResponse = response.body()
+
+                    // Log the JSON response for debugging
+                    val jsonResponse = Gson().toJson(otpResponse)
+                    Log.d("VerifyOTPResponse", "JSON Response: $jsonResponse")
 
                     if (otpResponse?.otp_valid == true) {
                         Toast.makeText(this@ForgotPassword, "OTP Verified. Proceed to reset password.", Toast.LENGTH_SHORT).show()
@@ -194,11 +210,13 @@ class ForgotPassword : AppCompatActivity() {
                 } else {
                     val errorBody = response.errorBody()?.string() ?: "Unknown error"
                     Toast.makeText(this@ForgotPassword, "Error: ${response.message()}\n$errorBody", Toast.LENGTH_SHORT).show()
+                    Log.d("OTPVerifyError", "Error: ${response.message()}\n$errorBody")
                 }
             }
 
             override fun onFailure(call: Call<OTPResponse>, t: Throwable) {
                 Toast.makeText(this@ForgotPassword, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("OTPVerifyFailure", "Error message: ${t.message}", t) // Log error with stack trace
             }
         })
     }

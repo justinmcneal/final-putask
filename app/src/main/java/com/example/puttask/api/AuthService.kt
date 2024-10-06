@@ -20,15 +20,22 @@ interface AuthService {
     @GET("api/user")
     suspend fun getUser(@Header("Authorization") token: String): UserInfo
 
+
+
+
+
     // Forgot Password - Validate Email (this could potentially send OTP)
-    @POST("api/forgotPassword")
+    @POST("api/check-email")
     fun checkEmail(@Body emailRequest: EmailRequest): Call<EmailResponse>
 
     // Send OTP separately (if needed, but often combined with forgotPassword)
-    @POST("api/sendOTP")
+    @POST("api/send-otp")
     fun sendOTP(@Body emailRequest: EmailRequest): Call<EmailResponse>
 
     // Verify the OTP entered by the user
-    @POST("api/verifyOTP")
+    @POST("api/verify-otp")
     fun verifyOTP(@Body otpRequest: OTPRequest): Call<OTPResponse>
+
+    @POST("/reset-password")
+    fun resetPassword(@Body resetRequest: ForgotPasswordRequest): Call<ForgotPasswordResponse>
 }
