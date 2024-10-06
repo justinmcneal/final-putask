@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
 import com.example.puttask.R
 import com.example.puttask.data.Task
@@ -26,6 +27,8 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var llBtn: LinearLayout
     private lateinit var llDaily: LinearLayout
     private lateinit var radioGroup: RadioGroup
+    private lateinit var btnRepeat: AppCompatButton
+    private lateinit var hsvDaily: HorizontalScrollView
     private val taskList: MutableList<Task> = mutableListOf()
     private var currentTaskIndex: Int? = null // Track current task index for update
 
@@ -40,13 +43,15 @@ class AddTask2 : AppCompatActivity() {
         tvTimeReminder = findViewById(R.id.tvEndDate)
         dimBackground = findViewById(R.id.dimBackground)
         popupCardView = findViewById(R.id.popupCardView)
-        switchRepeat = findViewById(R.id.switchRepeat)
         llButtonEnd = findViewById(R.id.llButtonEnd)
         llBtn = findViewById(R.id.llBtn)
         llDaily = findViewById(R.id.llDaily)
+        btnRepeat = findViewById(R.id.btnRepeat)
         radioGroup = findViewById(R.id.radioGroup)
         tvCancel = findViewById(R.id.tvCancel)
         tvDone = findViewById(R.id.tvDone)
+        switchRepeat = findViewById(R.id.switchRepeat)
+        hsvDaily = findViewById(R.id.hsvDaily)
 
         // Set up the PopupMenu for category selection
         addIcon.setOnClickListener {
@@ -79,17 +84,32 @@ class AddTask2 : AppCompatActivity() {
         }
 
         // Repeat switch logic
+        popupCardView.visibility = View.GONE
+        hsvDaily.visibility = View.GONE
         switchRepeat.setOnCheckedChangeListener { _, isChecked ->
+            hsvDaily.visibility = if (isChecked) View.VISIBLE else View.GONE
             llButtonEnd.visibility = if (isChecked) View.VISIBLE else View.GONE
             llDaily.visibility = if (isChecked) View.VISIBLE else View.GONE
             llBtn.visibility = if (isChecked) View.GONE else View.VISIBLE
             popupCardView.layoutParams.height = if (isChecked) 900 else 300
+            if (isChecked){
+                btnRepeat.text = "Yes"
+            }
+            else{
+                btnRepeat.text = "No"
+            }
         }
 
         // Popup visibility handling
         findViewById<TextView>(R.id.tvBack).setOnClickListener { visibilityChecker() }
         tvCancel.setOnClickListener { clearFields(); visibilityChecker(); switchRepeat.isChecked = false }
         tvDone.setOnClickListener { handleTaskAction() }
+
+        btnRepeat.setOnClickListener{
+            visibilityChecker()
+            popupCardView.visibility = View.VISIBLE
+
+        }
     }
 
     private fun showDatePicker(calendar: Calendar) {
@@ -159,7 +179,7 @@ class AddTask2 : AppCompatActivity() {
         tvList.text = ""
         tvTimeReminder.text = ""
         tvDueDate.text = ""
-    }
+        }
 
     // Function to handle popup visibility
     private fun visibilityChecker() {
