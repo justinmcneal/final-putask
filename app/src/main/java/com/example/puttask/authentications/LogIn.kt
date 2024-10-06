@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.puttask.ForgotPassword
 import com.example.puttask.MainActivity
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
@@ -25,6 +26,7 @@ class LogIn : AppCompatActivity() {
     private lateinit var othersSign: TextView
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
+    private lateinit var tvForgotPassword: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +42,7 @@ class LogIn : AppCompatActivity() {
         othersSign = findViewById(R.id.othersSign)
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
+        tvForgotPassword = findViewById(R.id.tvForgotPassword)
 
         //Login Button
         btnLog.setOnClickListener {
@@ -82,6 +85,11 @@ class LogIn : AppCompatActivity() {
 
         othersSign.setOnClickListener {
             startActivity(Intent(this, SignUp::class.java))
+        }
+
+        tvForgotPassword.setOnClickListener {
+            // Start LogInActivity
+            startActivity(Intent(this, ForgotPassword::class.java))
         }
     }
 
