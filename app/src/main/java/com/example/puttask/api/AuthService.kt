@@ -18,5 +18,5 @@ interface AuthService {
     fun register(@Body registrationRequest: RegistrationRequest): Call<RegistrationResponse>
 
     @GET("api/user")
-    fun getUser(): Call<UserInfo>
+    suspend fun getUser(): UserInfo
 }
