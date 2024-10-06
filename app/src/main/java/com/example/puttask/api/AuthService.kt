@@ -6,6 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 
 interface AuthService {
 
@@ -36,6 +37,7 @@ interface AuthService {
     @POST("api/verify-otp")
     fun verifyOTP(@Body otpRequest: OTPRequest): Call<OTPResponse>
 
-    @POST("/reset-password")
-    fun resetPassword(@Body resetRequest: ForgotPasswordRequest): Call<ForgotPasswordResponse>
+    @POST("/password/reset")
+    fun resetPassword(@Body request: ResetPasswordRequest): Call<ResetPasswordResponse>
+
 }
