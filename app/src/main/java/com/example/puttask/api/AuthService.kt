@@ -6,7 +6,6 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.PUT
 
 interface AuthService {
 
@@ -21,23 +20,18 @@ interface AuthService {
     @GET("api/user")
     suspend fun getUser(@Header("Authorization") token: String): UserInfo
 
-
-
-
-
-    // Forgot Password - Validate Email (this could potentially send OTP)
+    // Forgot Password - Validate Email
     @POST("api/check-email")
-    fun checkEmail(@Body emailRequest: EmailRequest): Call<EmailResponse>
+    fun checkEmail(@Body forgotPasswordRequest: ForgotPasswordRequest): Call<ForgotPasswordResponse>
 
-    // Send OTP separately (if needed, but often combined with forgotPassword)
+    // Send OTP
     @POST("api/send-otp")
     fun sendOTP(@Body emailRequest: EmailRequest): Call<EmailResponse>
 
-    // Verify the OTP entered by the user
+    // Verify the OTP
     @POST("api/verify-otp")
     fun verifyOTP(@Body otpRequest: OTPRequest): Call<OTPResponse>
 
-    @POST("/password/reset")
+    @POST("api/password/reset")
     fun resetPassword(@Body request: ResetPasswordRequest): Call<ResetPasswordResponse>
-
 }
