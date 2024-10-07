@@ -60,14 +60,13 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    val navVersion = "2.7.7"
-    implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
-    implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
+    // Corrected navigation dependencies
+    implementation(libs.uiktx)
+    implementation(libs.fragmentktx)
 
+    // For MPAndroidChart
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
-    //this is a hosted library
-
-    implementation ("com.github.ArjunGupta08:Horizontal-CalendarDate-With-Click-listener:1.1.0")
-
+    // Horizontal Calendar Date Picker with Click Listener
+    implementation("com.github.ArjunGupta08:Horizontal-CalendarDate-With-Click-listener:1.1.0")
 }
-
