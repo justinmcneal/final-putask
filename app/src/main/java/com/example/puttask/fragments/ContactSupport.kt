@@ -49,26 +49,24 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
         contactApiService.getUserDetails().enqueue(object : Callback<User> {
             override fun onResponse(call: Call<User>, response: Response<User>) {
                 if (response.isSuccessful) {
-                    val user = response.body()
-                    if (user != null) {
+                    response.body()?.let { user ->
                         // Successfully retrieved user, now send the contact form
                         sendContactForm(message, user.username, user.email)
-                    } else {
-                        // Handle null user case
+                    } ?: run {
                         Toast.makeText(context, "Failed to retrieve user data", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    // Handle non-successful API response
                     Toast.makeText(context, "Failed to get user info: ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<User>, t: Throwable) {
-                // Handle failure to communicate with the API
+                Log.e("ContactSupport", "Error retrieving user details: ${t.message}", t)
                 Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
+
 
     private fun sendContactForm(message: String, username: String, email: String) {
         val contactReq = ContactRequest(message, username, email)
@@ -76,20 +74,35 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
         contactApiService.sendContactForm(contactReq).enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
-                    val jsonString = response.body()?.string()
-                    try {
-                        val jsonResponse = Gson().fromJson(jsonString, ContactResponse::class.java)
-                        Toast.makeText(context, "Message: ${jsonResponse.message}", Toast.LENGTH_SHORT).show()
-                    } catch (e: Exception) {
-                        Toast.makeText(context, "Response was not JSON: $jsonString", Toast.LENGTH_SHORT).show()
+                    response.body()?.string()?.let { jsonString ->
+                        try {
+                            val jsonResponse =
+                                Gson().fromJson(jsonString, ContactResponse::class.java)
+                            Toast.makeText(
+                                context,
+                                "Message: ${jsonResponse.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } catch (e: Exception) {
+                            Toast.makeText(
+                                context,
+                                "Response was not JSON: $jsonString",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            Log.e("ContactSupport", "Error parsing JSON: ${e.message}", e)
+                        }
+                    }?: run {
+                        Toast.makeText(context, "Failed to retrieve response body", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Toast.makeText(context, "Failed: ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
+
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("ContactSupport", "Error sending contact form: ${t.message}", t)
             }
         })
     }
