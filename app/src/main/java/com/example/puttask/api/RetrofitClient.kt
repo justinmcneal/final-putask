@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.68.102:8000"
+    private const val BASE_URL = "http://192.168.0.144:8000"
 
     // Logging interceptor for seeing request/response in logcat
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
@@ -33,7 +33,7 @@ object RetrofitClient {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(AuthService::class.java)
     }
@@ -48,10 +48,11 @@ object RetrofitClient {
             .create(ContactService::class.java)
     }
 
-    val api: TaskService by lazy {
+    val taskService: TaskService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(TaskService::class.java)
     }

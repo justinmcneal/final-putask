@@ -29,44 +29,37 @@
             android:layout_gravity="center" />
 
         <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/baseline_account_circle_24"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
             android:layout_gravity="center"
-            android:layout_margin="16dp" />
+            android:layout_marginTop="12dp"
+            android:src="@drawable/contactsupportlogo" />
 
-        <EditText
-            android:id="@+id/etUsername"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/round_edit_text"
-            android:hint="Your Username"
-            android:inputType="text"
-            android:padding="16dp"
-            android:layout_margin="12dp"/>
-
-        <EditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/round_edit_text"
-            android:hint="Your Email"
-            android:inputType="textEmailAddress"
-            android:padding="16dp"
-            android:layout_margin="12dp" />
+            android:fontFamily="@font/opensans"
+            android:text="@string/contactsupport"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            android:justificationMode="inter_word"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="12dp"/>
 
         <EditText
             android:id="@+id/etMessage"
             android:layout_width="match_parent"
             android:layout_height="120dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="20dp"
             android:background="@drawable/round_edit_text"
             android:gravity="top"
             android:hint="Your Message"
-            android:padding="16dp"
-            android:layout_margin="12dp" />
+            android:textColorHint="@color/gray"
+            android:textColor="@color/darkgray"            android:padding="16dp"
+            android:layout_margin="12dp"
+            android:maxLines="4"/>
 
         <Button
             android:id="@+id/btnSubmit"

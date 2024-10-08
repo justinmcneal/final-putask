@@ -1,5 +1,6 @@
 package com.example.puttask
 
+import com.example.puttask.fragments.Profile
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
@@ -22,7 +23,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
                 binding.drawerLayout.closeDrawer(GravityCompat.END)
             } else {
-                onBackPressedDispatcher.onBackPressed()
             }
         }
     }
