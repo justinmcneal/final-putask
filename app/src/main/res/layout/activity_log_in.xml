@@ -46,9 +46,10 @@
                 android:layout_height="wrap_content"
                 android:autofillHints="Email"
                 android:background="@drawable/round_edit_text"
-                android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
                 android:hint="Email"
+                android:drawablePadding="14dp"
+                android:drawableLeft="@drawable/ic_profile"
                 android:textColorHint="@color/gray"
                 android:textColor="@color/darkgray"
                 android:inputType="textEmailAddress"
@@ -76,6 +77,8 @@
                     android:background="@null"
                     android:textSize="15dp"
                     android:layout_marginStart="10dp"
+                    android:drawablePadding="14dp"
+                    android:drawableLeft="@drawable/ic_password"
                     android:paddingEnd="8dp" />
 
                 <!-- Eye Icon ImageView -->

@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/opensans"
-            android:text="Contact Us"
+            android:text="Need Help?"
             android:textColor="@color/skyblue"
             android:textSize="32sp"
             android:textStyle="bold"

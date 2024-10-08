@@ -18,7 +18,7 @@ data class CreateResponse(
 data class Task(
     val id: Int,
     val task_name: String,
-    val task_description: String,
+    val task_description: String?,
     val start_datetime: String,
     val end_datetime: String,
     val repeat_days: List<String>?,  // Nullable in case it's not required

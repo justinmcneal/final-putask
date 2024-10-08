@@ -2,10 +2,8 @@ package com.example.puttask.fragments
 
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.PopupMenu
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
@@ -23,14 +21,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var ic_sort: ImageView
     private lateinit var popupcardviewLists: CardView
 
-
     private val taskList = mutableListOf(
-        Task(1, "Title 1", "Description 1", "10:00 AM", "11:00 AM", null, false),
-        Task(2, "Title 2", "Description 2", "12:00 PM", "1:00 PM", null, true),
-        Task(3, "Title 3", "Description 3", "3:00 PM", "4:00 PM", null, false),
-        Task(4, "Title 4", "Description 4", "10:00 AM", "11:00 AM", null, false),
-        Task(5, "Title 5", "Description 5", "10:00 AM", "11:00 AM", null, false),
-        Task(6, "Title 6", "Description 6", "10:00 AM", "11:00 AM", null, false)
+        Task(1, "Title 1", null, "10:00 AM", "11:00 AM", null, false),
+        Task(2, "Title 2", null, "12:00 PM", "1:00 PM", null, true),
+        Task(3, "Title 3", null, "3:00 PM", "4:00 PM", null, false),
+        Task(4, "Title 4", null, "10:00 AM", "11:00 AM", null, false),
+        Task(5, "Title 5", null, "10:00 AM", "11:00 AM", null, false),
+        Task(6, "Title 6", null, "10:00 AM", "11:00 AM", null, false)
     )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -39,9 +36,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         // Initialize views
         ic_sort = view.findViewById(R.id.ic_sort)
         tvDropdownLists = view.findViewById(R.id.tvDropdownLists)
-        popupcardviewLists = view.findViewById(R.id.popupcardviewLists) // Initialize here
-
-
+        popupcardviewLists = view.findViewById(R.id.popupcardviewLists)
 
         // Updated this lists dropdown as a customized so that icon would be inside
         val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
@@ -64,7 +59,8 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
             dropdownLists.show()
         }
-        //sort options
+
+        // Sort options
         ic_sort.setOnClickListener {
             visibilityChecker()
         }
@@ -82,13 +78,10 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
         listsrecyclerView.adapter = listsAdapter
-
     }
 
-    // cardview pop up for sort options
+    // CardView pop up for sort options
     private fun visibilityChecker() {
         popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-
     }
-
 }
