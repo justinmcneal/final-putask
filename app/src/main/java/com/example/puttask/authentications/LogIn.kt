@@ -4,14 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.puttask.ForgotPassword
 import com.example.puttask.MainActivity
 import com.example.puttask.R
@@ -19,9 +18,10 @@ import com.example.puttask.api.DataManager
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.data.LoginRequest
 import com.example.puttask.data.LoginResponse
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LogIn : AppCompatActivity() {
 
@@ -32,6 +32,7 @@ class LogIn : AppCompatActivity() {
     private lateinit var ivTogglePasswordVisibility: ImageView
     private lateinit var tvForgotPassword: TextView
     private lateinit var dataManager: DataManager
+    private lateinit var rememberMeCheckBox: CheckBox
     private var isPasswordVisible: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,40 +49,58 @@ class LogIn : AppCompatActivity() {
         etPassword = findViewById(R.id.etPassword)
         ivTogglePasswordVisibility = findViewById(R.id.ivTogglePasswordVisibility)
         tvForgotPassword = findViewById(R.id.tvForgotPassword)
+        rememberMeCheckBox = findViewById(R.id.rememberMeCheckBox) // Add CheckBox for "Remember Me"
+
+        // Load saved email and password (if any)
+        loadSavedCredentials()
 
         // Login Button
         btnLog.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
-            // Validation and Retrofit
+            // Validation
             if (validateInputs(email, password)) {
-                val authService = RetrofitClient.authService
                 val loginRequest = LoginRequest(email, password)
 
-                authService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
-                    override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-                        if (response.isSuccessful) {
-                            response.body()?.let {
-                                val token = it.token
+                // Use CoroutineScope to call the suspend function
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        // Make the login request
+                        val response = RetrofitClient.authService.login(loginRequest)
 
-                                // Save token using DataManager
-                                dataManager.saveToken(token) // Save token in SharedPreferences
+                        withContext(Dispatchers.Main) {
+                            // Check if the response is successful
+                            if (response.isSuccessful) {
+                                response.body()?.let { loginResponse ->
+                                    // Access the token and save it in SharedPreferences
+                                    dataManager.saveToken(loginResponse.token)
 
-                                showToast("Login Successful")
-                                startActivity(Intent(this@LogIn, MainActivity::class.java))
-                                finish()
+                                    // Remember Me feature
+                                    if (rememberMeCheckBox.isChecked) {
+                                        dataManager.saveCredentials(email, password) // Save email and password
+                                    } else {
+                                        dataManager.clearCredentials() // Clear saved credentials if not checked
+                                    }
+
+                                    showToast("Login Successful")
+                                    startActivity(Intent(this@LogIn, MainActivity::class.java))
+                                    finish()
+                                } ?: run {
+                                    showToast("Login failed: Empty response body")
+                                }
+                            } else {
+                                // Handle unsuccessful login
+                                showToast("Login failed: ${response.errorBody()?.string() ?: "Unknown error"}")
                             }
-                        } else {
-                            val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                            showToast("Login failed: ${response.code()} ${response.message()}\n$errorBody")
+                        }
+                    } catch (e: Exception) {
+                        // Handle error
+                        withContext(Dispatchers.Main) {
+                            showToast("Login failed: ${e.message}")
                         }
                     }
-
-                    override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                        showToast("Login failed: ${t.message}")
-                    }
-                })
+                }
             }
         }
 
@@ -141,5 +160,16 @@ class LogIn : AppCompatActivity() {
 
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    private fun loadSavedCredentials() {
+        // Load saved email and password using DataManager
+        val savedEmail = dataManager.getSavedEmail()
+        val savedPassword = dataManager.getSavedPassword()
+        etEmail.setText(savedEmail)
+        etPassword.setText(savedPassword)
+
+        // Check if credentials are saved and set checkbox accordingly
+        rememberMeCheckBox.isChecked = savedEmail.isNotEmpty()
     }
 }

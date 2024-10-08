@@ -27,11 +27,9 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
-
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvLogIn">
-
 
         <LinearLayout
             android:layout_width="250dp"
@@ -87,19 +85,42 @@
                     android:src="@drawable/hide" /> <!-- Add eye closed icon initially -->
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvForgotPassword"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/opensans"
-                android:text="Forgot Password?"
-                android:layout_gravity="end"
-                android:textAlignment="textEnd"
-                android:textStyle="bold"
-                android:layout_marginTop="8dp"
-                android:textSize="12sp"
-                android:clickable="true"
-                android:focusable="true"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="12dp">
+
+                <!-- Remember Me Checkbox -->
+                <CheckBox
+                    android:id="@+id/rememberMeCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/opensans"
+                    android:text="Remember Me"
+                    android:textSize="12sp"
+                    android:textColor="@color/darkgray"/>
+
+                <!-- Spacer for balance -->
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" /> <!-- This will take up remaining space -->
+
+                <TextView
+                    android:id="@+id/tvForgotPassword"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/opensans"
+                    android:text="Forgot Password?"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:clickable="true"
+                    android:focusable="true"/>
+            </LinearLayout>
+
+
         </LinearLayout>
 
         <LinearLayout

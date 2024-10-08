@@ -7,7 +7,4 @@ data class UserInfo (
     val email_verified_at: String?,
     val created_at: String,
     val updated_at: String,
-    val password: String,
-    val password_confirmation: String
-
 )

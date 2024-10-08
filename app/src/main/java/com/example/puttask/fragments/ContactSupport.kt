@@ -61,12 +61,10 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
             }
 
             override fun onFailure(call: Call<User>, t: Throwable) {
-                Log.e("ContactSupport", "Error retrieving user details: ${t.message}", t)
                 Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
-
 
     private fun sendContactForm(message: String, username: String, email: String) {
         val contactReq = ContactRequest(message, username, email)
@@ -91,13 +89,18 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
                             ).show()
                             Log.e("ContactSupport", "Error parsing JSON: ${e.message}", e)
                         }
-                    }?: run {
+                    } ?: run {
                         Toast.makeText(context, "Failed to retrieve response body", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Toast.makeText(context, "Failed: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    // Handle error response
+                    response.errorBody()?.let { errorBody ->
+                        val errorMessage = errorBody.string()
+                        Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+                    } ?: run {
+                        Toast.makeText(context, "Failed: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
                 }
-
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
@@ -106,5 +109,4 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
             }
         })
     }
-
 }
