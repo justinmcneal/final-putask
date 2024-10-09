@@ -11,6 +11,7 @@ import com.example.puttask.data.RegistrationResponse
 import com.example.puttask.data.ResetPasswordRequest
 import com.example.puttask.data.ResetPasswordResponse
 import com.example.puttask.data.UserInfo
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -31,16 +32,16 @@ interface AuthService {
 
     // Forgot Password - Validate Email
     @POST("api/check-email")
-    suspend fun checkEmail(@Body forgotPasswordRequest: ForgotPasswordRequest): Response<ForgotPasswordResponse>
+    fun checkEmail(@Body forgotPasswordRequest: ForgotPasswordRequest): Call<ForgotPasswordResponse>
 
     // Send OTP
     @POST("api/send-otp")
-    suspend fun sendOTP(@Body emailRequest: EmailRequest): Response<EmailResponse>
+    fun sendOTP(@Body emailRequest: EmailRequest): Call<EmailResponse>
 
     // Verify the OTP
     @POST("api/verify-otp")
-    suspend fun verifyOTP(@Body otpRequest: OTPRequest): Response<OTPResponse>
+    fun verifyOTP(@Body otpRequest: OTPRequest): Call<OTPResponse>
 
     @POST("api/password/reset")
-    suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<ResetPasswordResponse>
+    fun resetPassword(@Body request: ResetPasswordRequest): Call<ResetPasswordResponse>
 }

@@ -12,9 +12,7 @@ import com.example.puttask.R
 import com.example.puttask.api.DataManager
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.data.UserInfo
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class Profile : Fragment() {
 
@@ -44,18 +42,32 @@ class Profile : Fragment() {
     private fun fetchUserInfo() {
         lifecycleScope.launch {
             try {
-                // Call the suspend function with the token from DataManager
-                val userInfo: UserInfo = RetrofitClient.authService.getUser("Bearer ${dataManager.getToken()}")
+                // Make the network call to fetch user info using the token from DataManager
+                val response = RetrofitClient.authService.getUser("Bearer ${dataManager.getToken()}")
 
-                // Update the UI after fetching the user info
-                passwordTextView.text = "*".repeat(userInfo.password.length)
+                if (response.isSuccessful) {
+                    // Get the user info from the response body
+                    val userInfo = response.body()
+
+                    // Check if the userInfo is not null before updating the UI
+                    if (userInfo != null) {
+                        // Update the UI with the user's password (masked with *)
+                        passwordTextView.text = "*".repeat(userInfo.password.length)
+                    } else {
+                        // Handle case where userInfo is null
+                        Toast.makeText(requireContext(), "User info is missing", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    // Handle unsuccessful response
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    Toast.makeText(requireContext(), "Error: ${response.message()}\n$errorBody", Toast.LENGTH_SHORT).show()
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Handle errors and show the toast message
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Error fetching user info", Toast.LENGTH_SHORT).show()
-                }
+                // Show an error message if fetching user info fails
+                Toast.makeText(requireContext(), "Error fetching user info: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 }
