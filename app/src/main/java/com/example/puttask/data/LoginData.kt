@@ -9,6 +9,7 @@ data class LoginRequest(
 data class LoginResponse(
     val message: String,
     val token: String,
-    val userId: String? = null, // Optional user ID
-    val username: String? = null // Optional username if needed
+    val user: UserInfo // Include UserInfo class here
 )
+
+

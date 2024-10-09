@@ -4,13 +4,7 @@ data class ContactRequest(
     val message: String,
     val username: String,
     val email: String
+//    val token: String
 )
 
-data class ContactResponse(
-    val message: String
-)
 
-data class User(
-    val username: String,
-    val email: String
-)

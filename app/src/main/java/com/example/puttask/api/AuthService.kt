@@ -20,15 +20,16 @@ import retrofit2.http.POST
 
 interface AuthService {
     // User Login
-    @POST("api/loginPost")
-    suspend fun login(@Body loginRequest: LoginRequest): Response<LoginResponse> // Changed to Response
+    @POST("api/login") // Match this with your backend route
+    suspend fun login(@Body loginRequest: LoginRequest): Response<LoginResponse>
 
     // User Registration
-    @POST("api/registrationPost")
+    @POST("api/register") // Match this with your backend route
     suspend fun register(@Body registrationRequest: RegistrationRequest): Response<RegistrationResponse>
 
-    @GET("api/user")
-    suspend fun getUser(@Header("Authorization") token: String): Response<UserInfo> // Changed to Response
+    // Get Authenticated User
+    @GET("api/user") // Match this with your backend route
+    suspend fun getUser(@Header("Authorization") token: String): Response<UserInfo>
 
     // Forgot Password - Validate Email
     @POST("api/check-email")
@@ -45,3 +46,4 @@ interface AuthService {
     @POST("api/password/reset")
     fun resetPassword(@Body request: ResetPasswordRequest): Call<ResetPasswordResponse>
 }
+

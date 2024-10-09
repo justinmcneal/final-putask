@@ -1,6 +1,6 @@
 package com.example.puttask
 
-import ContactSupport
+import com.example.puttask.fragments.ContactSupport
 import com.example.puttask.fragments.Profile
 import android.content.Intent
 import android.os.Bundle

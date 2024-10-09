@@ -11,6 +11,9 @@ data class RegistrationRequest(
 data class RegistrationResponse(
     val message: String,
     val token: String,
-    val userId: String? = null, // Optional user ID
-    val username: String? = null // Optional username
+    val userId: String? = null, // Make userId nullable if it might not always be present
+    val username: String,
+    val email: String,
+    // Add any other fields your API might return
 )
+

@@ -13,9 +13,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.puttask.MainActivity
 import com.example.puttask.R
+import com.example.puttask.api.DataManager
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.data.RegistrationRequest
-import com.example.puttask.data.RegistrationResponse
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -121,6 +121,11 @@ class SignUp : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val responseBody = response.body()
                     if (responseBody != null) {
+                        // Save the username in DataManager
+                        val dataManager = DataManager(this@SignUp)
+                        dataManager.saveUsername(username) // Save the username here
+                        Log.d("SignUp", "Saved username: $username") // Log for debugging
+
                         showToast(responseBody.message)
                         startActivity(Intent(this@SignUp, MainActivity::class.java))
                     } else {

@@ -3,6 +3,7 @@ package com.example.puttask.authentications
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -49,7 +50,7 @@ class LogIn : AppCompatActivity() {
         etPassword = findViewById(R.id.etPassword)
         ivTogglePasswordVisibility = findViewById(R.id.ivTogglePasswordVisibility)
         tvForgotPassword = findViewById(R.id.tvForgotPassword)
-        rememberMeCheckBox = findViewById(R.id.rememberMeCheckBox) // Add CheckBox for "Remember Me"
+        rememberMeCheckBox = findViewById(R.id.rememberMeCheckBox)
 
         // Load saved email and password (if any)
         loadSavedCredentials()
@@ -61,46 +62,9 @@ class LogIn : AppCompatActivity() {
 
             // Validation
             if (validateInputs(email, password)) {
-                val loginRequest = LoginRequest(email, password)
+                val loginRequest = LoginRequest(email, password, rememberMeCheckBox.isChecked)
 
-                // Use CoroutineScope to call the suspend function
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        // Make the login request
-                        val response = RetrofitClient.authService.login(loginRequest)
-
-                        withContext(Dispatchers.Main) {
-                            // Check if the response is successful
-                            if (response.isSuccessful) {
-                                response.body()?.let { loginResponse ->
-                                    // Access the token and save it in SharedPreferences
-                                    dataManager.saveToken(loginResponse.token)
-
-                                    // Remember Me feature
-                                    if (rememberMeCheckBox.isChecked) {
-                                        dataManager.saveCredentials(email, password) // Save email and password
-                                    } else {
-                                        dataManager.clearCredentials() // Clear saved credentials if not checked
-                                    }
-
-                                    showToast("Login Successful")
-                                    startActivity(Intent(this@LogIn, MainActivity::class.java))
-                                    finish()
-                                } ?: run {
-                                    showToast("Login failed: Empty response body")
-                                }
-                            } else {
-                                // Handle unsuccessful login
-                                showToast("Login failed: ${response.errorBody()?.string() ?: "Unknown error"}")
-                            }
-                        }
-                    } catch (e: Exception) {
-                        // Handle error
-                        withContext(Dispatchers.Main) {
-                            showToast("Login failed: ${e.message}")
-                        }
-                    }
-                }
+                performLogin(loginRequest)
             }
         }
 
@@ -171,5 +135,54 @@ class LogIn : AppCompatActivity() {
 
         // Check if credentials are saved and set checkbox accordingly
         rememberMeCheckBox.isChecked = savedEmail.isNotEmpty()
+    }
+
+    private fun performLogin(loginRequest: LoginRequest) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Make the login request
+                val response = RetrofitClient.authService.login(loginRequest)
+
+                withContext(Dispatchers.Main) {
+                    // Check if the response is successful
+                    if (response.isSuccessful) {
+                        response.body()?.let { loginResponse ->
+                            Log.d("LogIn", "Login successful, user: ${loginResponse.user.username}, email: ${loginResponse.user.email}")
+
+                            // Save the token and user details
+                            dataManager.saveToken(loginResponse.token)
+                            Log.d("DataManager", "Token saved: ${dataManager.getToken()}") // Correctly access getToken
+
+                            dataManager.saveUsername(loginResponse.user.username)
+                            dataManager.saveEmail(loginResponse.user.email) // Ensure email is saved
+
+                            // Remember Me feature
+                            if (rememberMeCheckBox.isChecked) {
+                                dataManager.saveCredentials(loginRequest.email, loginRequest.password)
+                            } else {
+                                dataManager.clearCredentials() // Clear saved credentials if not checked
+                            }
+
+                            showToast("Login Successful")
+                            startActivity(Intent(this@LogIn, MainActivity::class.java))
+                            finish()
+                        } ?: run {
+                            showToast("Login failed: Empty response body")
+                        }
+                    } else {
+                        // Handle unsuccessful login
+                        val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                        showToast("Login failed: $errorMsg")
+                        Log.e("LogIn", "Login failed: $errorMsg")
+                    }
+                }
+            } catch (e: Exception) {
+                // Handle error
+                withContext(Dispatchers.Main) {
+                    showToast("Login failed: ${e.message}")
+                    Log.e("LogIn", "Login error: ${e.message}", e)
+                }
+            }
+        }
     }
 }
