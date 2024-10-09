@@ -70,7 +70,7 @@ class SignUp : AppCompatActivity() {
     private fun togglePasswordVisibility(editText: EditText, imageView: ImageView) {
         if (editText.inputType == InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD) {
             editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-            imageView.setImageResource(R.drawable.view)
+            imageView.setImageResource(R.drawable.show)
         } else {
             editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
             imageView.setImageResource(R.drawable.hide)
