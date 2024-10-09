@@ -44,12 +44,12 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
     private suspend fun submitContactForm(message: String) {
         try {
             // Retrieve the token
-            val token = dataManager.getToken()
+            val token = "Bearer ${dataManager.getToken()}"
 
             Log.d("ContactSupport", "Retrieving user details") // Debug log
 
             // Fetch user details
-            val userResponse = contactApiService.getUserDetails("Bearer $token")
+            val userResponse = contactApiService.getUserDetails(token)
             if (userResponse.isSuccessful) {
                 val user: UserInfo? = userResponse.body() // Change this to match your UserInfo data class
                 user?.let {

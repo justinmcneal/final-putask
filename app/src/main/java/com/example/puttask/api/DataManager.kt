@@ -6,6 +6,10 @@ import android.content.SharedPreferences
 class DataManager(context: Context) {
     private val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
+    fun getToken(): String? {
+        return sharedPreferences.getString("token", null)
+    }
+
     fun saveToken(token: String) {
         sharedPreferences.edit().putString("token", token).apply()
     }
@@ -23,10 +27,6 @@ class DataManager(context: Context) {
             .remove("saved_password")
             .remove("username") // Clear username too
             .apply()
-    }
-
-    fun getToken(): String {
-        return sharedPreferences.getString("token", "") ?: ""
     }
 
     fun saveEmail(email: String) {
