@@ -90,7 +90,7 @@ class LogIn : AppCompatActivity() {
         } else {
             // Show password
             etPassword.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-            ivTogglePasswordVisibility.setImageResource(R.drawable.view) // Change to view icon
+            ivTogglePasswordVisibility.setImageResource(R.drawable.show) // Change to view icon
         }
 
         // Move cursor to the end of the password field
