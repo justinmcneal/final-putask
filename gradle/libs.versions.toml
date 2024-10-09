@@ -13,6 +13,8 @@ retrofit = "2.9.0"
 okhttp = "4.12.0"
 loggingInterceptor = "4.9.1"
 retrofitConverterGson = "2.9.0"
+navigationFragmentKtx = "2.8.0"
+navigationUiKtx = "2.8.0"
 
 
 [libraries]
@@ -29,6 +31,8 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 retrofitConverterGson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofitConverterGson" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "loggingInterceptor" }
+fragmentktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+uiktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
