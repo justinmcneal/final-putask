@@ -46,7 +46,7 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
             // Retrieve the token
             val token = "Bearer ${dataManager.getToken()}"
 
-            Log.d("ContactSupport", "Retrieving user details") // Debug log
+            Log.d("ContactSupport", "Retrieving user details $token") // Debug log
 
             // Fetch user details
             val userResponse = contactApiService.getUserDetails(token)
