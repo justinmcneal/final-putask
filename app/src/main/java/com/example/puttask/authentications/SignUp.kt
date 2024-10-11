@@ -13,8 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.puttask.MainActivity
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
-import com.example.puttask.data.RegistrationRequest
-import com.example.puttask.data.RegistrationResponse
+import com.example.puttask.api.RegistrationRequest
+import com.example.puttask.api.RegistrationResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

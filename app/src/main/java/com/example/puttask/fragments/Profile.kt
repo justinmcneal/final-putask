@@ -11,7 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.puttask.R
 import com.example.puttask.api.DataManager
 import com.example.puttask.api.RetrofitClient
-import com.example.puttask.data.UserInfo
+import com.example.puttask.api.UserInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

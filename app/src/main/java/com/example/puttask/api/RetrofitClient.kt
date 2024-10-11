@@ -15,7 +15,7 @@ object RetrofitClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    //For Easier Debugging
+    // OkHttpClient with logging and timeout settings
     private val client = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -23,37 +23,18 @@ object RetrofitClient {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    //For Flexibility
-    val gson = GsonBuilder()
+    // Gson for parsing JSON
+    private val gson = GsonBuilder()
         .setLenient()
         .create()
 
-    // For Authentication
-    val authService: AuthService by lazy {
+    // Single APIService instance for all API calls
+    val apiService: APIService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
-            .create(AuthService::class.java)
-    }
-
-    // For Contact Form
-    val contactService: ContactService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .build()
-            .create(ContactService::class.java)
-    }
-
-    val taskService: TaskService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .build()
-            .create(TaskService::class.java)
+            .create(APIService::class.java)
     }
 }

@@ -10,15 +10,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.puttask.ForgotPassword
 import com.example.puttask.MainActivity
 import com.example.puttask.R
 import com.example.puttask.api.DataManager
 import com.example.puttask.api.RetrofitClient
-import com.example.puttask.data.LoginRequest
-import com.example.puttask.data.LoginResponse
+import com.example.puttask.api.LoginRequest
+import com.example.puttask.api.LoginResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

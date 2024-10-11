@@ -4,28 +4,33 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class DataManager(context: Context) {
-    private val sharedPreferences: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
-    // Save the token to SharedPreferences
-    fun saveToken(token: String) {
-        sharedPreferences.edit().apply {
-            putString("auth_token", token)
-            putBoolean("isLoggedIn", true)
-            apply()
-        }
+    private val preferences: SharedPreferences =
+        context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+
+    companion object {
+        private const val KEY_AUTH_TOKEN = "auth_token"
+        private const val KEY_IS_LOGGED_IN = "is_logged_in"
     }
 
-    // Retrieve the token from SharedPreferences
-    fun getToken(): String {
-        return sharedPreferences.getString("auth_token", "") ?: ""
+    // Save the authentication token
+    fun saveAuthToken(token: String) {
+        preferences.edit().putString(KEY_AUTH_TOKEN, token).apply()
+        preferences.edit().putBoolean(KEY_IS_LOGGED_IN, true).apply()
     }
 
-    // Clear the token from SharedPreferences
-    fun clearToken() {
-        sharedPreferences.edit().apply {
-            remove("auth_token")
-            putBoolean("isLoggedIn", false)
-            apply()
-        }
+    // Get the authentication token
+    fun getAuthToken(): String? {
+        return preferences.getString(KEY_AUTH_TOKEN, null)
+    }
+
+    // Check if user is logged in
+    fun isLoggedIn(): Boolean {
+        return preferences.getBoolean(KEY_IS_LOGGED_IN, false)
+    }
+
+    // Clear all saved data (e.g., logout)
+    fun clear() {
+        preferences.edit().clear().apply()
     }
 }

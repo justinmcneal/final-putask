@@ -9,9 +9,9 @@ import android.widget.EditText
 import android.widget.Toast
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
-import com.example.puttask.data.ContactRequest
-import com.example.puttask.data.ContactResponse
-import com.example.puttask.data.User
+import com.example.puttask.api.ContactRequest
+import com.example.puttask.api.ContactResponse
+import com.example.puttask.api.User
 import com.google.gson.Gson
 import okhttp3.ResponseBody
 import retrofit2.Call
