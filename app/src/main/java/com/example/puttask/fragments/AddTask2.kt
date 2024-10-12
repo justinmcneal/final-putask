@@ -25,7 +25,6 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var popupCardView: CardView
     private lateinit var llButtonEnd: LinearLayout
     private lateinit var llBtn: LinearLayout
-    private lateinit var llDaily: LinearLayout
     private lateinit var btnRepeat: AppCompatButton
     private lateinit var hsvDaily: HorizontalScrollView
     private val taskList: MutableList<Task> = mutableListOf()
@@ -43,7 +42,6 @@ class AddTask2 : AppCompatActivity() {
         popupCardView = findViewById(R.id.popupCardView)
         llButtonEnd = findViewById(R.id.llButtonEnd)
         llBtn = findViewById(R.id.llBtn)
-        llDaily = findViewById(R.id.llDaily)
         btnRepeat = findViewById(R.id.btnRepeat)
         tvCancel = findViewById(R.id.tvCancel)
         tvDone = findViewById(R.id.tvDone)
@@ -84,7 +82,6 @@ class AddTask2 : AppCompatActivity() {
         switchRepeat.setOnCheckedChangeListener { _, isChecked ->
             hsvDaily.visibility = if (isChecked) View.VISIBLE else View.GONE
             llButtonEnd.visibility = if (isChecked) View.VISIBLE else View.GONE
-            llDaily.visibility = if (isChecked) View.VISIBLE else View.GONE
             llBtn.visibility = if (isChecked) View.GONE else View.VISIBLE
             popupCardView.layoutParams.height = if (isChecked) 900 else 300
             if (isChecked){
