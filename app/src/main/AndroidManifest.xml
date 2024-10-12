@@ -18,7 +18,13 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".TaskViewRecycler"
+            android:exported="false" />
+        <activity
             android:name=".ForgotPassword"
+            android:exported="false" />
+        <activity
+            android:name=".fragments.Lists"
             android:exported="false" />
         <activity
             android:name=".fragments.AddTask2"

@@ -22,7 +22,6 @@ class ListsAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
         holder.tvTitle.text = task.task_name
-        holder.tvTaskDescription.text = task.task_description
         holder.tvTime.text = task.start_datetime // Adjust this if needed
         holder.checkBox.isChecked = task.isChecked // Ensure `isChecked` is a property in your `Task` data class
 
@@ -38,7 +37,6 @@ class ListsAdapter(
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
-        val tvTaskDescription: TextView = itemView.findViewById(R.id.tvTaskDescription)
         val tvTime: TextView = itemView.findViewById(R.id.tvTime)
     }
 }
