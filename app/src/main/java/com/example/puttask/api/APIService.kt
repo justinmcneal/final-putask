@@ -6,6 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 
 interface APIService {
 
@@ -16,6 +17,8 @@ interface APIService {
     // Get User Info
     @GET("api/user")
     suspend fun getUser(@Header("Authorization") token: String): Response<UserInfo>
+    @PUT("api/user/update")
+    suspend fun updateUsername(@Header("Authorization") token: String, @Body username: String): Response<Unit> // Assuming the response is just a success indicator
 
     // User Login
     @POST("api/login")

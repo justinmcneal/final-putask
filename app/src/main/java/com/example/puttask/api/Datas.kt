@@ -4,16 +4,28 @@ data class RegistrationRequest(
     val username: String,
     val email: String,
     val password: String,
-    val password_confirmation: String
-)
-
+    val password_confirmation: String)
 data class RegistrationResponse(
     val message: String,
-    val token: String
-)
+    val token: String)
+
+//login
+data class LoginRequest(
+    val email: String,
+    val password: String)
+data class LoginResponse(
+    val message: String,
+    val token: String)
 
 
+//change username
+data class UpdateUsernameRequest(
+    val username: String)
+data class UpdateUsernameResponse(
+    val message: String,
+    val user: UserInfo)
 
+//all user data
 data class UserInfo (
     val id: Int,
     val username: String,
@@ -22,74 +34,41 @@ data class UserInfo (
     val created_at: String,
     val updated_at: String,
     val password: String,
-    val password_confirmation: String
-)
-
-
-data class LoginRequest(
-    val email: String,
-    val password: String
-)
-
-data class LoginResponse(
-    val message: String,
-    val token: String
-)
+    val password_confirmation: String)
 
 
 // this is for forgot password and shit
 data class EmailRequest(
-    val email: String
-)
-
+    val email: String)
 data class EmailResponse(
     val message: String,
-    val email_exists: Boolean
-)
-
-
-
+    val email_exists: Boolean)
 data class OTPRequest(
-    val email: String,   // The email address associated with the OTP
-    val otp: Int   // The OTP value entered by the user
-)
-
+    val email: String,
+    val otp: Int)
 data class OTPResponse(
-    val otp_valid: Boolean,   // Indicates whether the OTP is valid
-    val message: String       // A message about the OTP verification status (e.g., "OTP Verified", "Invalid OTP")
-)
-
-
-
+    val otp_valid: Boolean,
+    val message: String)
 data class ForgotPasswordRequest(
-    val email: String // The email of the user who forgot the password
-)
-
+    val email: String)
 data class ForgotPasswordResponse(
-    val email_exists: Boolean,  // Indicates if the email exists in the system
-    val message: String         // A message about the status of the forgot password request
-)
-
-
-
+    val email_exists: Boolean,
+    val message: String)
 data class ResetPasswordRequest(
-    val email: String, // Add this line
+    val email: String,
     val password: String,
-    val password_confirmation: String
-)
-
+    val password_confirmation: String)
 data class ResetPasswordResponse(
     val success: Boolean,
-    val message: String
-)
+    val message: String)
 
+
+//contact
 data class ContactRequest(
-    val message: String
-)
-
+    val message: String)
 data class ContactResponse(
     val message: String,
-    val data: UserInfo
-)
+    val data: UserInfo)
+
 
 
