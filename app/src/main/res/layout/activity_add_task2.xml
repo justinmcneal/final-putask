@@ -24,17 +24,29 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvCreateNew"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/opensans"
-                android:padding="12dp"
-                android:text="New Task"
-                android:layout_gravity="center"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_back"
+                    android:layout_gravity="center"
+                    android:background="@android:color/transparent"/>
+
+                <TextView
+                    android:id="@+id/tvCreateNew"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/opensans"
+                    android:layout_weight="1"
+                    android:padding="12dp"
+                    android:text="New Task"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
@@ -221,7 +233,7 @@
                 android:background="@drawable/corners_for_greeting"
                 android:backgroundTint="@color/white"
                 android:layout_weight="1"
-                android:layout_marginStart="26dp"
+                android:layout_marginStart="18dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -329,6 +341,16 @@
                 android:layout_gravity="center"
                 android:layout_marginEnd="10dp" />
         </LinearLayout>
+        <androidx.appcompat.widget.AppCompatButton
+            android:layout_width="140dp"
+            android:layout_height="wrap_content"
+            android:text="Create"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center"
+            android:textSize="16dp"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/skyblue"
+            android:background="@drawable/corners_for_greeting"/>
 
     </LinearLayout>
 
@@ -419,29 +441,6 @@
                     android:textColor="@color/skyblue"
                     android:textSize="20dp"
                     android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/llDaily"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="54dp"
-                android:background="@color/white"
-                android:elevation="0.1dp"
-                android:visibility="gone"
-                android:scrollbars="none"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tvDaily"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:padding="8dp"
-                    android:text="Daily"
-                    android:textColor="@color/gray"
-                    android:textStyle="bold"
-                    android:textSize="18sp" />
             </LinearLayout>
 
             <HorizontalScrollView
