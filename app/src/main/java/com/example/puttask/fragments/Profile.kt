@@ -13,6 +13,7 @@ import com.example.puttask.ForgotPassword
 import com.example.puttask.R
 import com.example.puttask.api.DataManager
 import com.example.puttask.api.RetrofitClient
+import com.example.puttask.api.UpdateUsernameRequest
 import com.example.puttask.api.UserInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,6 +25,7 @@ class Profile : Fragment() {
     private lateinit var emailTextView: TextView
     private lateinit var changePasswordTextView: TextView
     private lateinit var dataManager: DataManager
+    private lateinit var btnSave: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,12 +36,19 @@ class Profile : Fragment() {
         usernameTextView = view.findViewById(R.id.etUsername)
         emailTextView = view.findViewById(R.id.tvEmail)
         changePasswordTextView = view.findViewById(R.id.tvChangePassword)
+        btnSave = view.findViewById(R.id.btnSave)
         dataManager = DataManager(requireContext())
 
         changePasswordTextView.setOnClickListener {
             val intent = Intent(requireContext(), ForgotPassword::class.java)
             startActivity(intent)
         }
+
+        btnSave.setOnClickListener {
+            val newUsername = usernameTextView.text.toString() // Get the new username
+            updateUsername(newUsername)
+        }
+
         return view
     }
 
@@ -56,13 +65,38 @@ class Profile : Fragment() {
                     val userInfo: UserInfo = response.body()!!
                     usernameTextView.text = userInfo.username
                     emailTextView.text = userInfo.email
-                    changePasswordTextView.text = userInfo.password // Display the actual password
                 } else {
-                    showError("Error fetching user info")
+                    showError("Error fetching user info: ${response.message()}")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 showError("Error fetching user info")
+            }
+        }
+    }
+
+    private fun updateUsername(newUsername: String) {
+        lifecycleScope.launch {
+            if (newUsername.isNotBlank()) {
+                try {
+                    val updateUsernameRequest = UpdateUsernameRequest(username = newUsername)
+                    val response = RetrofitClient.apiService.updateUsername(
+                        "Bearer ${dataManager.getAuthToken()}",
+                        updateUsernameRequest
+                    )
+
+                    if (response.isSuccessful) {
+                        showError("Username updated successfully")
+                        fetchUserInfo() // Refresh user info after update
+                    } else {
+                        showError("Error updating username: ${response.message()}")
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    showError("Error updating username")
+                }
+            } else {
+                showError("Username cannot be empty")
             }
         }
     }
