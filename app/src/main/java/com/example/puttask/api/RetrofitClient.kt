@@ -1,6 +1,8 @@
 package com.example.puttask.api
 
+import android.content.Context
 import com.google.gson.GsonBuilder
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -56,4 +58,43 @@ object RetrofitClient {
             .build()
             .create(TaskService::class.java)
     }
+
+
+    fun getClient(context: Context): Retrofit {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val authInterceptor = Interceptor { chain ->
+            val requestBuilder = chain.request().newBuilder()
+            val token = "Bearer " + getTokenFromSharedPreferences(context)
+            requestBuilder.addHeader("Authorization", token)
+            chain.proceed(requestBuilder.build())
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .addInterceptor(authInterceptor)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+        val gson = GsonBuilder()
+            .setLenient()
+            .create()
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+    }
+
+    private fun getTokenFromSharedPreferences(context: Context): String? {
+        val sharedPref = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
+        return sharedPref.getString("token", "")
+    }
+
+
 }

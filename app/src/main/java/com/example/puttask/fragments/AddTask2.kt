@@ -9,7 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
 import com.example.puttask.R
+import com.example.puttask.api.RetrofitClient
+import com.example.puttask.api.TaskService
+import com.example.puttask.data.CreateRequest
+import com.example.puttask.data.CreateResponse
 import com.example.puttask.data.Task
+import retrofit2.Call
 import java.util.*
 
 class AddTask2 : AppCompatActivity() {
@@ -144,15 +149,37 @@ class AddTask2 : AppCompatActivity() {
 
     private fun createTask() {
         val title = tvList.text.toString()
-        val description = "Your task description" // Update this to get a real description from user input
-        val time = tvTimeReminder.text.toString()
-        val repeatDays = getSelectedRepeatDays()
+        val description = "Your task description" // Get real description from user input
+        val startDateTime = tvDueDate.text.toString() // Start datetime
+        val endDateTime = tvTimeReminder.text.toString() // End datetime
+        val repeatDays = getSelectedRepeatDays() // Repeat days logic
 
-        // Create the task and add to the list
-        val newTask = Task(0, title, description, time, "", repeatDays, false) // Set ID as 0 for new task
-        taskList.add(newTask)
-        Toast.makeText(this, "Task created", Toast.LENGTH_SHORT).show()
+        val createRequest = CreateRequest(
+            task_name = title,
+            task_description = description,
+            start_datetime = startDateTime,
+            end_datetime = endDateTime,
+            repeat_days = repeatDays
+        )
+
+        val call = RetrofitClient.getClient(this).create(TaskService::class.java).createTask(createRequest)
+
+        call.enqueue(object : retrofit2.Callback<CreateResponse> {
+            override fun onResponse(call: Call<CreateResponse>, response: retrofit2.Response<CreateResponse>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@AddTask2, "Task created successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@AddTask2, "Failed to create task", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<CreateResponse>, t: Throwable) {
+                Toast.makeText(this@AddTask2, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
+
+
 
     private fun updateTask() {
         currentTaskIndex?.let { index ->
@@ -184,4 +211,8 @@ class AddTask2 : AppCompatActivity() {
         dimBackground.visibility = if (dimBackground.visibility == View.VISIBLE) View.GONE else View.VISIBLE
         popupCardView.visibility = if (popupCardView.visibility == View.VISIBLE) View.GONE else View.VISIBLE
     }
+
+
+
+
 }
