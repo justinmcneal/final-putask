@@ -1,6 +1,5 @@
 package com.example.puttask.api
 
-import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -17,8 +16,9 @@ interface APIService {
     // Get User Info
     @GET("api/user")
     suspend fun getUser(@Header("Authorization") token: String): Response<UserInfo>
-    @PUT("api/user/update")
-    suspend fun updateUsername(@Header("Authorization") token: String, @Body username: String): Response<Unit> // Assuming the response is just a success indicator
+
+    @PUT("api/user/update-username")
+    suspend fun updateUsername(@Header("Authorization") token: String, @Body username: UpdateUsernameRequest): Response<UpdateUsernameResponse> // Assuming the response is just a success indicator
 
     // User Login
     @POST("api/login")
