@@ -41,16 +41,20 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
             try {
                 val token = DataManager(requireContext()).getAuthToken()
                 Log.d("ContactSupport", "Retrieved Token: $token") // Log the token value
+
                 if (token != null) {
                     val userResponse = contactApiService.getUser("Bearer $token")
-                    if (userResponse.isSuccessful) {
+
+                    if (userResponse.isSuccessful && userResponse.body() != null) {
                         val user = userResponse.body()
+
                         if (user != null) {
+                            // Extract username and email from the user object
                             val username = user.username
                             val email = user.email
-                            sendContactForm(message, username, email)
+                            sendContactForm(message, username, email) // Proceed to send the contact form
                         } else {
-                            Toast.makeText(context, "Failed to retrieve user data", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Failed to get user data", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         Toast.makeText(context, "Failed to get user info: ${userResponse.message()}", Toast.LENGTH_SHORT).show()
@@ -65,26 +69,36 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
     }
 
     private fun sendContactForm(message: String, username: String, email: String) {
-        val contactReq = ContactRequest(message, username, email)
+        val contactReq = ContactRequest(message) // Create a ContactRequest with the user's message
         lifecycleScope.launch {
             try {
+                // Make the API call to send the contact form
                 val response = contactApiService.sendContactForm(contactReq)
+
                 if (response.isSuccessful) {
-                    // Assuming response.body() is of type ContactResponse
-                    val jsonResponse = response.body()
-                    if (jsonResponse != null) {
-                        Toast.makeText(context, "Message: ${jsonResponse.message}", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Received empty response", Toast.LENGTH_SHORT).show()
+                    val responseBody = response.body()
+                    if (responseBody != null) {
+                        val jsonString = Gson().toJson(responseBody)
+                        Log.d("ResponseJSON", jsonString)
+
+                        // Parse the JSON string into a ContactResponse object
+                        val contactResponse = Gson().fromJson(jsonString, ContactResponse::class.java)
+
+                        // Now you can access the message and data properties
+                        val successMessage = contactResponse.message
+                        val user = contactResponse.data // This should contain the UserInfo object
+
+                        // Log the entire user object for debugging
+                        Log.d("ContactSupportNigga1", "User")
                     }
-                } else {
-                    Toast.makeText(context, "Failed: ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
-            } catch (e: Exception) {
-                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+
+            }  catch (e: Exception) {
+                // Catch any exceptions and log the error message
+                Toast.makeText(context, "Error:Nigga6 ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("ErrorNigga7", "Error: ${e.message}")
+        }
         }
     }
-
-
 }
+

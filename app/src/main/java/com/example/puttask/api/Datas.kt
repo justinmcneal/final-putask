@@ -83,25 +83,13 @@ data class ResetPasswordResponse(
     val message: String
 )
 
-
-
 data class ContactRequest(
-    val message: String,
-    val username: String,
-    val email: String
+    val message: String
 )
 
 data class ContactResponse(
     val message: String,
-    val username: String,
-    val email: String
-)
-
-
-
-data class User(
-    val username: String,
-    val email: String
+    val data: UserInfo
 )
 
 

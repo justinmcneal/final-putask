@@ -22,7 +22,6 @@ class Profile : Fragment() {
 
     private lateinit var usernameTextView: TextView
     private lateinit var emailTextView: TextView
-    private lateinit var passwordTextView: TextView
     private lateinit var changePasswordTextView: TextView
     private lateinit var dataManager: DataManager
 
@@ -30,52 +29,39 @@ class Profile : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        usernameTextView = view.findViewById(R.id.tvUsername)
+        usernameTextView = view.findViewById(R.id.etUsername)
         emailTextView = view.findViewById(R.id.tvEmail)
-        passwordTextView = view.findViewById(R.id.tvChangePassword)
         changePasswordTextView = view.findViewById(R.id.tvChangePassword)
-
-        // Initialize DataManager
         dataManager = DataManager(requireContext())
 
-        // Set up click listener for the Change Password TextView
         changePasswordTextView.setOnClickListener {
-            // Start the ForgotPassword activity
             val intent = Intent(requireContext(), ForgotPassword::class.java)
             startActivity(intent)
         }
-
         return view
     }
 
     override fun onResume() {
         super.onResume()
-        fetchUserInfo() // Fetch user information whenever the fragment is visible
+        fetchUserInfo()
     }
 
     private fun fetchUserInfo() {
         lifecycleScope.launch {
             try {
-                // Call the suspend function with the token from DataManager
                 val response = RetrofitClient.apiService.getUser("Bearer ${dataManager.getAuthToken()}")
-
-                // Check for a successful response
                 if (response.isSuccessful && response.body() != null) {
                     val userInfo: UserInfo = response.body()!!
-
-                    // Update the UI after fetching the user info
                     usernameTextView.text = userInfo.username
                     emailTextView.text = userInfo.email
-                    passwordTextView.text = "*".repeat(userInfo.password.length) // Hide the password
+                    changePasswordTextView.text = userInfo.password // Display the actual password
                 } else {
                     showError("Error fetching user info")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Handle errors and show the toast message
                 showError("Error fetching user info")
             }
         }
