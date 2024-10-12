@@ -15,6 +15,7 @@ import com.example.puttask.api.ContactResponse
 import com.example.puttask.api.DataManager
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class ContactSupport : Fragment(R.layout.fragment_contact_support) {
 
@@ -31,7 +32,7 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
                 Log.d("ContactSupport", "Submit button clicked")
                 submitContactForm(message)
             } else {
-                Toast.makeText(context, "Please enter a message", Toast.LENGTH_SHORT).show()
+                showToast("Please enter a message")
             }
         }
     }
@@ -40,36 +41,36 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
         lifecycleScope.launch {
             try {
                 val token = DataManager(requireContext()).getAuthToken()
-                Log.d("ContactSupport", "Retrieved Token: $token") // Log the token value
+                Log.d("ContactSupport", "Retrieved Token: $token")
 
                 if (token != null) {
+                    // Make sure the getUser API call is defined correctly in your API service
                     val userResponse = contactApiService.getUser("Bearer $token")
 
                     if (userResponse.isSuccessful && userResponse.body() != null) {
                         val user = userResponse.body()
-
                         if (user != null) {
-                            // Extract username and email from the user object
                             val username = user.username
                             val email = user.email
-                            sendContactForm(message, username, email) // Proceed to send the contact form
+                            sendContactForm(message) // Pass username and email if required
                         } else {
-                            Toast.makeText(context, "Failed to get user data", Toast.LENGTH_SHORT).show()
+                            showToast("Failed to get user data")
                         }
                     } else {
-                        Toast.makeText(context, "Failed to get user info: ${userResponse.message()}", Toast.LENGTH_SHORT).show()
+                        showToast("Failed to get user info: ${userResponse.message()}")
                     }
                 } else {
-                    Toast.makeText(context, "User not authenticated. Please log in.", Toast.LENGTH_SHORT).show()
+                    showToast("User not authenticated. Please log in.")
                 }
             } catch (e: Exception) {
-                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("ContactSupport", "Error in submitContactForm: ${e.message}", e)
+                showToast("Error: ${e.message}")
             }
         }
     }
 
-    private fun sendContactForm(message: String, username: String, email: String) {
-        val contactReq = ContactRequest(message) // Create a ContactRequest with the user's message
+    private fun sendContactForm(message: String) {
+        val contactReq = ContactRequest(message) // Include username and email if required
         lifecycleScope.launch {
             try {
                 // Make the API call to send the contact form
@@ -78,27 +79,30 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
                 if (response.isSuccessful) {
                     val responseBody = response.body()
                     if (responseBody != null) {
-                        val jsonString = Gson().toJson(responseBody)
-                        Log.d("ResponseJSON", jsonString)
-
-                        // Parse the JSON string into a ContactResponse object
-                        val contactResponse = Gson().fromJson(jsonString, ContactResponse::class.java)
-
-                        // Now you can access the message and data properties
-                        val successMessage = contactResponse.message
-                        val user = contactResponse.data // This should contain the UserInfo object
-
-                        // Log the entire user object for debugging
-                        Log.d("ContactSupportNigga1", "User")
+                        Log.d("ResponseJSON", Gson().toJson(responseBody))
+                        val successMessage = responseBody.message // Assuming message is a field in the response
+                        Log.d("ContactSupport", "Contact form submitted successfully: $successMessage")
+                        showToast(successMessage)
+                    } else {
+                        Log.e("ContactSupport", "Empty response body")
                     }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("ContactSupport", "Error submitting contact form: ${response.message()} - $errorBody")
+                    showToast("Error: ${response.message()}")
                 }
-
-            }  catch (e: Exception) {
-                // Catch any exceptions and log the error message
-                Toast.makeText(context, "Error:Nigga6 ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("ErrorNigga7", "Error: ${e.message}")
-        }
+            } catch (e: HttpException) {
+                Log.e("ContactSupport", "HTTP Exception: ${e.message()}")
+                showToast("HTTP Error: ${e.message()}")
+            } catch (e: Exception) {
+                Log.e("ContactSupport", "Error in sendContactForm: ${e.message}", e)
+                showToast("Error: ${e.message}")
+            }
         }
     }
-}
 
+    // Helper method for displaying Toast messages
+    private fun showToast(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+}

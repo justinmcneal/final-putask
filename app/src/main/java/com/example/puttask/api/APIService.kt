@@ -17,6 +17,8 @@ interface APIService {
     // Get User Info
     @GET("api/user")
     suspend fun getUser(@Header("Authorization") token: String): Response<UserInfo>
+
+    // Update User Info
     @PUT("api/user/update")
     suspend fun updateUsername(@Header("Authorization") token: String, @Body username: String): Response<Unit> // Assuming the response is just a success indicator
 
@@ -40,19 +42,22 @@ interface APIService {
     @POST("api/password/reset")
     suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<ResetPasswordResponse>
 
-    // Send Contacts
-    @POST("api/contact/send")
+    // Send Contact Form
+    @POST("/api/contact/send") // Update this path to match your API endpoint
     suspend fun sendContactForm(@Body contactRequest: ContactRequest): Response<ContactResponse>
 
-//    // Create Task
-//    @POST("api/tasks")
-//    suspend fun createTask(@Body createRequest: CreateRequest): Response<CreateResponse>
-//
-//    // Update Task
-//    @PUT("api/tasks/{id}")
-//    suspend fun updateTask(@Path("id") id: Int, @Body updateRequest: UpdateRequest): Response<UpdateResponse>
-//
-//    // Delete Task
-//    @DELETE("api/tasks/{id}")
-//    suspend fun deleteTask(@Path("id") id: Int): Response<DeleteResponse>
+    // If you need to keep another method, make sure to distinguish their purposes
+    // For example, you might want to use `submitContactForm` for a different endpoint or functionality
+
+    // Create Task
+    // @POST("api/tasks")
+    // suspend fun createTask(@Body createRequest: CreateRequest): Response<CreateResponse>
+
+    // Update Task
+    // @PUT("api/tasks/{id}")
+    // suspend fun updateTask(@Path("id") id: Int, @Body updateRequest: UpdateRequest): Response<UpdateResponse>
+
+    // Delete Task
+    // @DELETE("api/tasks/{id}")
+    // suspend fun deleteTask(@Path("id") id: Int): Response<DeleteResponse>
 }
