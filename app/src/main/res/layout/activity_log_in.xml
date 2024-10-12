@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LogIn"
+    tools:context=".authentications.LogIn"
     android:background="@drawable/loginbg">
 
     <TextView
@@ -49,32 +49,63 @@
                 android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
                 android:hint="Email"
+                android:textColorHint="@color/gray"
+                android:textColor="@color/darkgray"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:padding="15dp"
                 android:textSize="15sp" />
 
-            <EditText
-                android:id="@+id/etPassword"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:layout_marginTop="16dp"
-                android:autofillHints="Email"
                 android:background="@drawable/round_edit_text"
-                android:drawablePadding="15dp"
-                android:fontFamily="@font/opensans"
-                android:hint="Password"
-                android:inputType="textPassword"
-                android:maxLines="1"
-                android:padding="15dp"
-                android:textSize="15sp" />
+                android:padding="4dp">
 
+                <!-- Password EditText -->
+                <EditText
+                    android:id="@+id/etPassword"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:background="@null"
+                    android:textSize="15dp"
+                    android:layout_marginStart="10dp"
+                    android:paddingEnd="8dp" />
+
+                <!-- Eye Icon ImageView -->
+                <ImageView
+                    android:id="@+id/ivTogglePasswordVisibility"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:src="@drawable/hide" /> <!-- Add eye closed icon initially -->
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvForgotPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/opensans"
+                android:text="Forgot Password?"
+                android:layout_gravity="end"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:textSize="12sp"
+                android:clickable="true"
+                android:focusable="true"/>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:orientation="vertical">
 
             <Button

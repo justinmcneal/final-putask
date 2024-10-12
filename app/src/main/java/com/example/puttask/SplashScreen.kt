@@ -10,13 +10,20 @@ import android.view.animation.Animation
 import android.widget.ImageView
 import android.widget.TextView
 import android.view.View
+import com.example.puttask.authentications.LoginSignin
+import com.example.puttask.MainActivity
+import com.example.puttask.api.DataManager
 
 class SplashScreen : AppCompatActivity() {
+
+    private lateinit var dataManager: DataManager // Declare DataManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
 
-        // Find the logo and title by ID
+        dataManager = DataManager(this) // Initialize DataManager
+
         val putasklogo: ImageView = findViewById(R.id.putasklogo)
         val title: TextView = findViewById(R.id.tvTitle)  // Title text view
 
@@ -46,8 +53,18 @@ class SplashScreen : AppCompatActivity() {
 
         // Delay before navigating to the next activity
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, LoginSignin::class.java))
-            finish()
-        }, 8000)  // Total delay of 7 seconds before transitioning
+            // Check if the user is already authenticated
+            val token = dataManager.getAuthToken() // Fetch the saved token from DataManager
+
+            // Navigate to MainActivity or LoginSignin after splash screen
+            if (token != null) {
+                // If the token is not null, go to MainActivity
+                startActivity(Intent(this, MainActivity::class.java))
+            } else {
+                // If the token is null, go to LoginSignin
+                startActivity(Intent(this, LoginSignin::class.java))
+            }
+            finish() // Close the splash screen
+        }, 8000)  // Total delay of 8 seconds before transitioning
     }
 }
