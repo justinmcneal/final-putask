@@ -10,14 +10,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.puttask.MainActivity
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.RegistrationRequest
-import com.example.puttask.api.RegistrationResponse
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class SignUp : AppCompatActivity() {
 
@@ -28,14 +27,12 @@ class SignUp : AppCompatActivity() {
     private lateinit var etConfirmPassword: EditText
     private lateinit var ivTogglePasswordVisibility: ImageView
     private lateinit var ivToggleConfirmPasswordVisibility: ImageView
-    private var isPasswordVisible: Boolean = false
-    private var isConfirmPasswordVisible: Boolean = false
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
 
+        // Initialize views
         btnSign = findViewById(R.id.btnSign)
         etUsername = findViewById(R.id.etUsername)
         etEmail = findViewById(R.id.etEmail)
@@ -44,70 +41,47 @@ class SignUp : AppCompatActivity() {
         ivTogglePasswordVisibility = findViewById(R.id.ivTogglePasswordVisibility)
         ivToggleConfirmPasswordVisibility = findViewById(R.id.ivToggleConfirmPasswordVisibility)
 
-
-
-        //alternate if successful, ito ikekeep
+        // Set click listeners
         btnSign.setOnClickListener {
-            val (username, email, password, confirmPassword) = listOf(
-                etUsername.text.toString().trim(),
-                etEmail.text.toString().trim(),
-                etPassword.text.toString().trim(),
-                etConfirmPassword.text.toString().trim()
-            )
+            val username = etUsername.text.toString().trim()
+            val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+            val confirmPassword = etConfirmPassword.text.toString().trim()
 
             if (validateInputs(username, email, password, confirmPassword)) {
                 registerUser(username, email, password, confirmPassword)
             }
         }
 
-        // Set click listener for the login redirect
         findViewById<TextView>(R.id.othersLog).setOnClickListener {
             startActivity(Intent(this, LogIn::class.java))
         }
-        // Set an onClickListener on the eye icon forpassword
+
+        // Toggle password visibility
         ivTogglePasswordVisibility.setOnClickListener {
-            if (isPasswordVisible) {
-                // Hide password
-                etPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-                ivTogglePasswordVisibility.setImageResource(R.drawable.hide)
-            } else {
-                // Show password
-                etPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-                ivTogglePasswordVisibility.setImageResource(R.drawable.view)
-            }
-
-            // Move the cursor to the end of the text
-            etPassword.setSelection(etPassword.text.length)
-
-            // Toggle the boolean value
-            isPasswordVisible = !isPasswordVisible
+            togglePasswordVisibility(etPassword, ivTogglePasswordVisibility)
         }
-        // Set an onClickListener on the eye icon forpassword
+
         ivToggleConfirmPasswordVisibility.setOnClickListener {
-            if (isConfirmPasswordVisible) {
-                // Hide password
-                etConfirmPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-                ivToggleConfirmPasswordVisibility.setImageResource(R.drawable.hide)
-            } else {
-                // Show password
-                etConfirmPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-                ivToggleConfirmPasswordVisibility.setImageResource(R.drawable.view)
-            }
-
-            // Move the cursor to the end of the text
-            etConfirmPassword.setSelection(etPassword.text.length)
-
-            // Toggle the boolean value
-            isConfirmPasswordVisible = !isConfirmPasswordVisible
+            togglePasswordVisibility(etConfirmPassword, ivToggleConfirmPasswordVisibility)
         }
     }
 
-    private fun validateInputs(
-        username: String,
-        email: String,
-        password: String,
-        confirmPassword: String
-    ): Boolean {
+    private fun togglePasswordVisibility(editText: EditText, imageView: ImageView) {
+        if (editText.inputType == InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
+            // Hide password
+            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            imageView.setImageResource(R.drawable.hide)
+        } else {
+            // Show password
+            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            imageView.setImageResource(R.drawable.view)
+        }
+        // Move cursor to the end of the text
+        editText.setSelection(editText.text.length)
+    }
+
+    private fun validateInputs(username: String, email: String, password: String, confirmPassword: String): Boolean {
         return when {
             username.isEmpty() -> showError("Please enter a username")
             email.isEmpty() -> showError("Please enter an email")
@@ -127,16 +101,12 @@ class SignUp : AppCompatActivity() {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    private fun registerUser(
-        username: String,
-        email: String,
-        password: String,
-        confirmPassword: String
-    ) {
+    private fun registerUser(username: String, email: String, password: String, confirmPassword: String) {
         val registrationRequest = RegistrationRequest(username, email, password, confirmPassword)
 
-        RetrofitClient.authService.register(registrationRequest).enqueue(object : Callback<RegistrationResponse> {
-            override fun onResponse(call: Call<RegistrationResponse>, response: Response<RegistrationResponse>) {
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.register(registrationRequest)
                 val message = if (response.isSuccessful) {
                     response.body()?.message ?: "Registration successful"
                 } else {
@@ -144,13 +114,18 @@ class SignUp : AppCompatActivity() {
                 }
 
                 showToast(message)
-                if (response.isSuccessful) startActivity(Intent(this@SignUp, MainActivity::class.java))
+                if (response.isSuccessful) {
+                    startActivity(Intent(this@SignUp, MainActivity::class.java))
+                    finish() // Close the SignUp screen
+                }
+            } catch (e: HttpException) {
+                Log.e("SignUpError", "HTTP Error: ${e.message()}", e)
+                showToast("HTTP Error: ${e.message()}")
+            } catch (e: Throwable) {
+                Log.e("SignUpError", "Network Error: ${e.message}", e)
+                showToast("Network Error: ${e.localizedMessage}")
             }
-            override fun onFailure(call: Call<RegistrationResponse>, t: Throwable) {
-                Log.e("SignUpError", "Network Error: ${t.message}", t)
-                showToast("Network Error: ${t.localizedMessage}")
-            }
-        })
+        }
     }
 
     private fun showToast(message: String) {

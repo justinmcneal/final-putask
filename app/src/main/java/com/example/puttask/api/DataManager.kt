@@ -24,12 +24,11 @@ class DataManager(context: Context) {
         return preferences.getString(KEY_AUTH_TOKEN, null)
     }
 
-    // Check if user is logged in
-    fun isLoggedIn(): Boolean {
-        return preferences.getBoolean(KEY_IS_LOGGED_IN, false)
+    fun clearLoginData() {
+        preferences.edit().remove(KEY_IS_LOGGED_IN).apply()
     }
 
-    // Clear all saved data (e.g., logout)
+    // Clear all saved data (delete account)
     fun clear() {
         preferences.edit().clear().apply()
     }

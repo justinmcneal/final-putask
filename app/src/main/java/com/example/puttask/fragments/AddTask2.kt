@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
 import com.example.puttask.R
-import com.example.puttask.data.Task
+import com.example.puttask.api.Task
 import java.util.*
 
 class AddTask2 : AppCompatActivity() {
@@ -35,7 +35,6 @@ class AddTask2 : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task2)
 
-        // Initialize views
         addIcon = findViewById(R.id.imListAdd)
         tvList = findViewById(R.id.tvList)
         tvDueDate = findViewById(R.id.tvStartDate)
@@ -71,12 +70,10 @@ class AddTask2 : AppCompatActivity() {
             dropdownMenu.show()
         }
 
-        // Date and Time Picker logic
         val calendar = Calendar.getInstance()
         findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener {
             showDatePicker(calendar)
         }
-
         findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener {
             showTimePicker(calendar)
         }

@@ -8,6 +8,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
+import com.example.puttask.api.DataManager
 import com.example.puttask.authentications.LoginSignin
 import com.example.puttask.databinding.ActivityMainBinding
 import com.example.puttask.fragments.*
@@ -18,6 +19,8 @@ import java.util.*
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var dataManager: DataManager
+
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
@@ -31,6 +34,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        dataManager = DataManager(this) // Initialize your DataManager
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -49,6 +54,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             startActivity(Intent(this, AddTask2::class.java))
         }
 
+        // Add the back press callback
         onBackPressedDispatcher.addCallback(this, backPressedCallback)
     }
 
@@ -72,7 +78,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.ic_lists -> Lists() to "Tasks"
             R.id.ic_timeline -> Timeline() to "Timeline"
             R.id.ic_analytics -> Analytics() to "Analytics"
-            R.id.ic_profile -> Profile() to ""
+            R.id.ic_profile -> Profile() to "Profile"
             R.id.ic_contactsupport -> ContactSupport() to "Contact Support"
             R.id.ic_logout -> {
                 logout()
@@ -86,6 +92,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun logout() {
+        dataManager.clearLoginData() // Clear login data
         startActivity(Intent(this, LoginSignin::class.java))
         finish()
     }

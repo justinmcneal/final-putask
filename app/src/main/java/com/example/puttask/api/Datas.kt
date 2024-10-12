@@ -26,7 +26,6 @@ data class UserInfo (
 )
 
 
-
 data class LoginRequest(
     val email: String,
     val password: String
@@ -38,7 +37,7 @@ data class LoginResponse(
 )
 
 
-
+// this is for forgot password and shit
 data class EmailRequest(
     val email: String
 )
@@ -93,7 +92,9 @@ data class ContactRequest(
 )
 
 data class ContactResponse(
-    val message: String
+    val message: String,
+    val username: String,
+    val email: String
 )
 
 

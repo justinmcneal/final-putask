@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.EmailRequest
 import com.example.puttask.api.EmailResponse
@@ -18,6 +19,7 @@ import com.example.puttask.api.OTPResponse
 import com.example.puttask.api.ResetPasswordRequest
 import com.example.puttask.api.ResetPasswordResponse
 import com.google.gson.Gson
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -43,7 +45,6 @@ class ForgotPassword : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgot_password)
 
-        // Initialize views
         etForgotEmail = findViewById(R.id.etForgotEmail)
         etOTP = findViewById(R.id.etOTP)
         etNewPassword = findViewById(R.id.etNewPassword)
@@ -56,7 +57,6 @@ class ForgotPassword : AppCompatActivity() {
         // Send OTP button listener
         btnSendOTP.setOnClickListener {
             val email = etForgotEmail.text.toString().trim()
-
             if (email.isNotEmpty() && isValidEmail(email)) {
                 Log.d("EmailInput", "Email entered: $email")
                 sendPasswordResetRequest(email)
@@ -91,23 +91,20 @@ class ForgotPassword : AppCompatActivity() {
         btnResetPassword.setOnClickListener {
             val newPassword = etNewPassword.text.toString()
             val confirmPassword = etConfirmNewPassword.text.toString()
-            val email = etForgotEmail.text.toString().trim() // Get the email from the EditText
-
-            // Check if passwords are not empty and match
+            val email = etForgotEmail.text.toString().trim()
             if (newPassword.isNotEmpty() && newPassword == confirmPassword) {
-                resetPassword(email, newPassword, confirmPassword) // Pass email, new password, and confirm password
+                resetPassword(email, newPassword, confirmPassword)
             } else {
                 Toast.makeText(this, "Passwords do not match or are empty", Toast.LENGTH_SHORT).show()
             }
         }
-
     }
 
     private fun sendPasswordResetRequest(email: String) {
         val forgotPasswordRequest = ForgotPasswordRequest(email)
-
-        RetrofitClient.authService.checkEmail(forgotPasswordRequest).enqueue(object : Callback<ForgotPasswordResponse> {
-            override fun onResponse(call: Call<ForgotPasswordResponse>, response: Response<ForgotPasswordResponse>) {
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.checkEmail(forgotPasswordRequest)
                 if (response.isSuccessful) {
                     val emailResponse = response.body()
                     val jsonResponse = Gson().toJson(emailResponse)
@@ -120,9 +117,8 @@ class ForgotPassword : AppCompatActivity() {
                         btnVerifyOTP.visibility = View.VISIBLE
                         tvResendOTP.visibility = View.VISIBLE
 
-                        // Create EmailRequest from the email
-                        val emailRequest = EmailRequest(email) // Create EmailRequest from the email
-                        sendOTP(emailRequest) // Send OTP after verifying email exists
+                        val emailRequest = EmailRequest(email)
+                        sendOTP(emailRequest)
                     } else {
                         Toast.makeText(this@ForgotPassword, "Email not found in the system", Toast.LENGTH_SHORT).show()
                     }
@@ -131,13 +127,11 @@ class ForgotPassword : AppCompatActivity() {
                     Toast.makeText(this@ForgotPassword, "Error: ${response.message()}\n$errorBody", Toast.LENGTH_SHORT).show()
                     Log.d("Error", "Error: ${response.message()}\n$errorBody")
                 }
+            } catch (e: Exception) {
+                Toast.makeText(this@ForgotPassword, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("EmailCheckFailure", "Error: ${e.message}", e)
             }
-
-            override fun onFailure(call: Call<ForgotPasswordResponse>, t: Throwable) {
-                Toast.makeText(this@ForgotPassword, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                Log.e("EmailCheckFailure", "Error: ${t.message}", t)
-            }
-        })
+        }
     }
 
     private fun sendOTP(emailRequest: EmailRequest) {
@@ -145,9 +139,9 @@ class ForgotPassword : AppCompatActivity() {
             Toast.makeText(this, "Too many attempts. Please try again later.", Toast.LENGTH_SHORT).show()
             return
         }
-
-        RetrofitClient.authService.sendOTP(emailRequest).enqueue(object : Callback<EmailResponse> {
-            override fun onResponse(call: Call<EmailResponse>, response: Response<EmailResponse>) {
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.sendOTP(emailRequest)
                 if (response.isSuccessful) {
                     val jsonResponse = Gson().toJson(response.body())
                     Log.d("SendOTPResponse", "JSON Response: $jsonResponse")
@@ -161,29 +155,25 @@ class ForgotPassword : AppCompatActivity() {
 
                     retryCount++
                     lastFailedAttemptTime = System.currentTimeMillis()
-
                     if (retryCount < 3) {
                         startCooldown(emailRequest)
                     } else {
                         Toast.makeText(this@ForgotPassword, "Maximum attempts reached. Please wait 30 minutes.", Toast.LENGTH_SHORT).show()
                     }
                 }
-            }
-
-            override fun onFailure(call: Call<EmailResponse>, t: Throwable) {
-                val errorMessage = t.message ?: "Network error"
+            } catch (e: Exception) {
+                val errorMessage = e.message ?: "Network error"
                 Toast.makeText(this@ForgotPassword, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
 
                 retryCount++
                 lastFailedAttemptTime = System.currentTimeMillis()
-
                 if (retryCount < 3) {
                     startCooldown(emailRequest)
                 } else {
                     Toast.makeText(this@ForgotPassword, "Maximum attempts reached. Please wait 30 minutes.", Toast.LENGTH_SHORT).show()
                 }
             }
-        })
+        }
     }
 
     private fun startCooldown(emailRequest: EmailRequest) {
@@ -196,9 +186,9 @@ class ForgotPassword : AppCompatActivity() {
 
     private fun verifyOTP(email: String, otp: Int) {
         val otpRequest = OTPRequest(email, otp)
-
-        RetrofitClient.authService.verifyOTP(otpRequest).enqueue(object : Callback<OTPResponse> {
-            override fun onResponse(call: Call<OTPResponse>, response: Response<OTPResponse>) {
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.verifyOTP(otpRequest)
                 if (response.isSuccessful) {
                     Toast.makeText(this@ForgotPassword, "OTP verified successfully", Toast.LENGTH_SHORT).show()
                     etNewPassword.visibility = View.VISIBLE
@@ -207,22 +197,19 @@ class ForgotPassword : AppCompatActivity() {
                 } else {
                     Toast.makeText(this@ForgotPassword, "Invalid OTP. Please try again.", Toast.LENGTH_SHORT).show()
                 }
+            } catch (e: Exception) {
+                Toast.makeText(this@ForgotPassword, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("OTPVerificationFailure", "Error: ${e.message}", e)
             }
-
-            override fun onFailure(call: Call<OTPResponse>, t: Throwable) {
-                Toast.makeText(this@ForgotPassword, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                Log.e("OTPVerificationFailure", "Error: ${t.message}", t)
-            }
-        })
+        }
     }
 
     private fun resetPassword(email: String, newPassword: String, confirmPassword: String) {
         val resetPasswordRequest = ResetPasswordRequest(email, newPassword, confirmPassword)
-
         Log.d("ResetPasswordInput", "Email: $email, New Password: $newPassword, Confirm Password: $confirmPassword")
-
-        RetrofitClient.authService.resetPassword(resetPasswordRequest).enqueue(object : Callback<ResetPasswordResponse> {
-            override fun onResponse(call: Call<ResetPasswordResponse>, response: Response<ResetPasswordResponse>) {
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.resetPassword(resetPasswordRequest)
                 if (response.isSuccessful) {
                     Toast.makeText(this@ForgotPassword, "Password reset successfully", Toast.LENGTH_SHORT).show()
                     finish() // Close activity after successful reset
@@ -230,15 +217,12 @@ class ForgotPassword : AppCompatActivity() {
                     Log.e("ResetPasswordError", "Error Code: ${response.code()}, Error Message: ${response.message()}")
                     Toast.makeText(this@ForgotPassword, "Failed to reset password: ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
+            } catch (e: Exception) {
+                Toast.makeText(this@ForgotPassword, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("PasswordResetFailure", "Error: ${e.message}", e)
             }
-
-            override fun onFailure(call: Call<ResetPasswordResponse>, t: Throwable) {
-                Toast.makeText(this@ForgotPassword, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                Log.e("PasswordResetFailure", "Error: ${t.message}", t)
-            }
-        })
+        }
     }
-
 
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()

@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.puttask.data.Task
+import com.example.puttask.api.Task
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,

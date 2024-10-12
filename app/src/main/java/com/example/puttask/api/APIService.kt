@@ -1,24 +1,16 @@
 package com.example.puttask.api
 
-import com.example.puttask.api.CreateRequest
-import com.example.puttask.api.CreateResponse
-import com.example.puttask.api.DeleteResponse
-import com.example.puttask.api.UpdateRequest
-import com.example.puttask.api.UpdateResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
 
 interface APIService {
 
     // User Registration
-    @POST("api/registrationPost")
+    @POST("api/registration")
     suspend fun register(@Body registrationRequest: RegistrationRequest): Response<RegistrationResponse>
 
     // Get User Info
@@ -26,7 +18,7 @@ interface APIService {
     suspend fun getUser(@Header("Authorization") token: String): Response<UserInfo>
 
     // User Login
-    @POST("api/loginPost")
+    @POST("api/login")
     suspend fun login(@Body loginRequest: LoginRequest): Response<LoginResponse>
 
     // Forgot Password - Validate Email
@@ -47,17 +39,17 @@ interface APIService {
 
     // Send Contacts
     @POST("api/contact/send")
-    suspend fun sendContactForm(@Body contactRequest: ContactRequest): Response<ResponseBody>
+    suspend fun sendContactForm(@Body contactRequest: ContactRequest): Response<ContactResponse>
 
-    // Create Task
-    @POST("api/tasks")
-    suspend fun createTask(@Body createRequest: CreateRequest): Response<CreateResponse>
-
-    // Update Task
-    @PUT("api/tasks/{id}")
-    suspend fun updateTask(@Path("id") id: Int, @Body updateRequest: UpdateRequest): Response<UpdateResponse>
-
-    // Delete Task
-    @DELETE("api/tasks/{id}")
-    suspend fun deleteTask(@Path("id") id: Int): Response<DeleteResponse>
+//    // Create Task
+//    @POST("api/tasks")
+//    suspend fun createTask(@Body createRequest: CreateRequest): Response<CreateResponse>
+//
+//    // Update Task
+//    @PUT("api/tasks/{id}")
+//    suspend fun updateTask(@Path("id") id: Int, @Body updateRequest: UpdateRequest): Response<UpdateResponse>
+//
+//    // Delete Task
+//    @DELETE("api/tasks/{id}")
+//    suspend fun deleteTask(@Path("id") id: Int): Response<DeleteResponse>
 }

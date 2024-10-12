@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
-import com.example.puttask.data.Task
+import com.example.puttask.api.Task
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
