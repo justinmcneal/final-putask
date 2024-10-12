@@ -31,7 +31,7 @@ data class UpdateRequest(
     val task_description: String?,
     val start_datetime: String?,
     val end_datetime: String?,
-    val repeat_days: List<String>?
+    val repeat_days: List<Int>
 )
 
 data class UpdateResponse(

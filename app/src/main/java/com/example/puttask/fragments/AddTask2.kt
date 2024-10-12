@@ -1,5 +1,6 @@
 package com.example.puttask.fragments
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
@@ -10,11 +11,15 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
-import com.example.puttask.api.TaskService
 import com.example.puttask.data.CreateRequest
 import com.example.puttask.data.CreateResponse
+import com.example.puttask.data.DeleteResponse
 import com.example.puttask.data.Task
+import com.example.puttask.data.UpdateRequest
+import com.example.puttask.data.UpdateResponse
 import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.util.*
 
 class AddTask2 : AppCompatActivity() {
@@ -33,8 +38,8 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var llDaily: LinearLayout
     private lateinit var btnRepeat: AppCompatButton
     private lateinit var hsvDaily: HorizontalScrollView
-    private val taskList: MutableList<Task> = mutableListOf()
     private var currentTaskIndex: Int? = null // Track current task index for update
+    private var taskId: Int? = null // Store the ID of the task being updated
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,12 +100,7 @@ class AddTask2 : AppCompatActivity() {
             llDaily.visibility = if (isChecked) View.VISIBLE else View.GONE
             llBtn.visibility = if (isChecked) View.GONE else View.VISIBLE
             popupCardView.layoutParams.height = if (isChecked) 900 else 300
-            if (isChecked){
-                btnRepeat.text = "Yes"
-            }
-            else{
-                btnRepeat.text = "No"
-            }
+            btnRepeat.text = if (isChecked) "Yes" else "No"
         }
 
         // Popup visibility handling
@@ -108,11 +108,40 @@ class AddTask2 : AppCompatActivity() {
         tvCancel.setOnClickListener { clearFields(); visibilityChecker(); switchRepeat.isChecked = false }
         tvDone.setOnClickListener { handleTaskAction() }
 
-        btnRepeat.setOnClickListener{
+        btnRepeat.setOnClickListener {
             visibilityChecker()
             popupCardView.visibility = View.VISIBLE
-
         }
+
+        // Check for task update scenario
+        taskId = intent.getIntExtra("TASK_ID", -1).takeIf { it != -1 }
+        if (taskId != null) {
+            loadTaskData(taskId!!)
+        }
+    }
+
+    private fun loadTaskData(taskId: Int) {
+        // Fetch the task details from the server using the taskId
+        RetrofitClient.taskService.getTaskById(taskId).enqueue(object : Callback<Task> {
+            override fun onResponse(call: Call<Task>, response: Response<Task>) {
+                if (response.isSuccessful) {
+                    response.body()?.let { task ->
+                        tvList.text = task.task_name
+                        tvDueDate.text = task.start_datetime
+                        tvTimeReminder.text = task.end_datetime
+                        // Load other task details as needed
+                    }
+                } else {
+                    // Handle the case where the response is not successful
+                    Toast.makeText(this@AddTask2, "Error loading task", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Task>, t: Throwable) {
+                // Handle the failure case
+                Toast.makeText(this@AddTask2, "Error loading task: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun showDatePicker(calendar: Calendar) {
@@ -127,6 +156,7 @@ class AddTask2 : AppCompatActivity() {
         datePickerDialog.show()
     }
 
+    @SuppressLint("DefaultLocale")
     private fun showTimePicker(calendar: Calendar) {
         val timePickerDialog = TimePickerDialog(this, { _, hourOfDay, minute ->
             val amPm = if (hourOfDay >= 12) "PM" else "AM"
@@ -138,8 +168,8 @@ class AddTask2 : AppCompatActivity() {
     }
 
     private fun handleTaskAction() {
-        if (currentTaskIndex != null) {
-            updateTask()
+        if (taskId != null) {
+            updateTask(taskId!!)
         } else {
             createTask()
         }
@@ -162,10 +192,11 @@ class AddTask2 : AppCompatActivity() {
             repeat_days = repeatDays
         )
 
-        val call = RetrofitClient.getClient(this).create(TaskService::class.java).createTask(createRequest)
 
-        call.enqueue(object : retrofit2.Callback<CreateResponse> {
-            override fun onResponse(call: Call<CreateResponse>, response: retrofit2.Response<CreateResponse>) {
+        val call = RetrofitClient.taskService.createTask(createRequest)
+
+        call.enqueue(object : Callback<CreateResponse> {
+            override fun onResponse(call: Call<CreateResponse>, response: Response<CreateResponse>) {
                 if (response.isSuccessful) {
                     Toast.makeText(this@AddTask2, "Task created successfully", Toast.LENGTH_SHORT).show()
                 } else {
@@ -179,32 +210,62 @@ class AddTask2 : AppCompatActivity() {
         })
     }
 
+    private fun updateTask(taskId: Int) {
+        val title = tvList.text.toString()
+        val description = "Your task description" // Get real description from user input
+        val startDateTime = tvDueDate.text.toString() // Start datetime
+        val endDateTime = tvTimeReminder.text.toString() // End datetime
+        val repeatDays = getSelectedRepeatDays() // Repeat days logic
 
+        val updateRequest = UpdateRequest(
+            id = taskId,
+            task_name = title,
+            task_description = description,
+            start_datetime = startDateTime,
+            end_datetime = endDateTime,
+            repeat_days = repeatDays
+        )
 
-    private fun updateTask() {
-        currentTaskIndex?.let { index ->
-            val title = tvList.text.toString()
-            val description = "Your task description" // Update this to get a real description from user input
-            val time = tvTimeReminder.text.toString()
-            val repeatDays = getSelectedRepeatDays()
+        val call = RetrofitClient.taskService.updateTask(taskId, updateRequest)
 
-            // Update the task
-            taskList[index] = Task(taskList[index].id, title, description, time, "", repeatDays, false) // Keep the same ID
-            Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show()
-            currentTaskIndex = null // Reset index after updating
-        }
+        call.enqueue(object : Callback<UpdateResponse> {
+            override fun onResponse(call: Call<UpdateResponse>, response: Response<UpdateResponse>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@AddTask2, "Task updated successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@AddTask2, "Failed to update task", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<UpdateResponse>, t: Throwable) {
+                Toast.makeText(this@AddTask2, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
-    private fun getSelectedRepeatDays(): List<String> {
-        // Implement logic to get selected repeat days based on your UI (e.g., checkboxes)
-        return listOf() // Replace with actual selected days
+    private fun deleteTask(taskId: Int) {
+        val call = RetrofitClient.taskService.deleteTask(taskId)
+
+        call.enqueue(object : Callback<DeleteResponse> {
+            override fun onResponse(call: Call<DeleteResponse>, response: Response<DeleteResponse>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@AddTask2, "Task deleted successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@AddTask2, "Failed to delete task", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<DeleteResponse>, t: Throwable) {
+                Toast.makeText(this@AddTask2, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun clearFields() {
         tvList.text = ""
         tvTimeReminder.text = ""
         tvDueDate.text = ""
-        }
+    }
 
     // Function to handle popup visibility
     private fun visibilityChecker() {
@@ -212,7 +273,8 @@ class AddTask2 : AppCompatActivity() {
         popupCardView.visibility = if (popupCardView.visibility == View.VISIBLE) View.GONE else View.VISIBLE
     }
 
-
-
-
+    private fun getSelectedRepeatDays(): List<Int> {
+        // Implement the logic to get selected repeat days from your UI.
+        return emptyList()
+    }
 }

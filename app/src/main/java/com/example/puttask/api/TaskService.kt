@@ -4,11 +4,15 @@ import com.example.puttask.data.*
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface TaskService {
+
+    @GET("api/tasks/{id}")
+    fun getTaskById(@Path("id") taskId: Int): Call<Task>
 
     //CREATE
     @POST("api/tasks")
@@ -21,4 +25,5 @@ interface TaskService {
     //DELETE
     @DELETE("api/tasks/{id}") // Assuming you use the task ID in the URL to delete a specific task
     fun deleteTask(@Path("id") id: Int): Call<DeleteResponse>
+
 }
