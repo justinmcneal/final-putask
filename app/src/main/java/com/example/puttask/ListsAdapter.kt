@@ -10,7 +10,8 @@ import com.example.puttask.api.Task
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,
-    private val onTaskCheckedChange: (Task, Boolean) -> Unit
+    private val onTaskCheckedChange: (Task, Boolean) -> Unit,
+    private val onItemClick: (Task) -> Unit // Add click listener for the entire item
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -29,6 +30,10 @@ class ListsAdapter(
         holder.checkBox.setOnCheckedChangeListener(null) // Clear previous listener
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
             onTaskCheckedChange(task, isChecked) // Notify the listener of the change
+        }
+        // Handle item click for navigation
+        holder.itemView.setOnClickListener {
+            onItemClick(task) // Trigger the onItemClick function when the item is clicked
         }
     }
 

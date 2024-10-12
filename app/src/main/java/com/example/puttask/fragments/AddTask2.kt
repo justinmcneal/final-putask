@@ -2,12 +2,14 @@ package com.example.puttask.fragments
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
+import com.example.puttask.MainActivity
 import com.example.puttask.R
 import com.example.puttask.api.Task
 import java.util.*
@@ -27,6 +29,7 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var llBtn: LinearLayout
     private lateinit var btnRepeat: AppCompatButton
     private lateinit var hsvDaily: HorizontalScrollView
+    private lateinit var btnBack: ImageButton
     private val taskList: MutableList<Task> = mutableListOf()
     private var currentTaskIndex: Int? = null // Track current task index for update
 
@@ -47,6 +50,12 @@ class AddTask2 : AppCompatActivity() {
         tvDone = findViewById(R.id.tvDone)
         switchRepeat = findViewById(R.id.switchRepeat)
         hsvDaily = findViewById(R.id.hsvDaily)
+        btnBack = findViewById(R.id.btnBack)
+
+        btnBack.setOnClickListener{
+            val intent = Intent (this, MainActivity::class.java)
+            startActivity(intent)
+        }
 
         // Set up the PopupMenu for category selection
         addIcon.setOnClickListener {

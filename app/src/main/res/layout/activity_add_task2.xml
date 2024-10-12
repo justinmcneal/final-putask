@@ -29,6 +29,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <ImageButton
+                    android:id="@+id/btnBack"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_back"
@@ -159,7 +160,7 @@
                 android:fontFamily="@font/opensans"
                 android:hint="List:"
                 android:textColorHint="@color/black"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <ImageView
                 android:id="@+id/imListAdd"
@@ -196,7 +197,7 @@
             android:layout_marginEnd="10dp"
             android:orientation="horizontal">
             <LinearLayout
-                android:layout_width="170dp"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/corners_for_greeting"
                 android:backgroundTint="@color/white"
@@ -213,7 +214,7 @@
                     android:fontFamily="@font/opensans"
                     android:hint="Due Date"
                     android:textColorHint="@color/black"
-                    android:textSize="16sp" />
+                    android:textSize="14sp" />
 
                 <ImageButton
                     android:id="@+id/addDueIcon"
@@ -246,7 +247,7 @@
                     android:layout_weight="1"
                     android:hint="Time Reminder"
                     android:textColorHint="@color/black"
-                    android:textSize="16sp" />
+                    android:textSize="14sp" />
 
                 <ImageButton
                     android:id="@+id/addTimeIcon"
@@ -293,7 +294,7 @@
                 android:fontFamily="@font/opensans"
                 android:text="Repeat"
                 android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnRepeat"
@@ -332,7 +333,7 @@
                 android:fontFamily="@font/opensans"
                 android:text="Send Notification"
                 android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <Switch
                 android:id="@+id/switchNotif"

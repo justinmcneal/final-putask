@@ -1,5 +1,6 @@
 package com.example.puttask.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
+import com.example.puttask.TaskViewRecycler
 import com.example.puttask.api.Task
 
 class Lists : Fragment(R.layout.fragment_lists) {
@@ -22,6 +24,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var tvDropdownLists: TextView
     private lateinit var ic_sort: ImageView
     private lateinit var popupcardviewLists: CardView
+
 
 
     private val taskList = mutableListOf(
@@ -68,21 +71,25 @@ class Lists : Fragment(R.layout.fragment_lists) {
         ic_sort.setOnClickListener {
             visibilityChecker()
         }
-
-        // Set up the RecyclerView
+        // need to initialize RecyclerView here to avoid UninitializedPropertyAccessException
         listsrecyclerView = view.findViewById(R.id.listsrecyclerView)
         listsrecyclerView.layoutManager = LinearLayoutManager(context)
 
-        // Initialize the adapter and set it to RecyclerView
-        listsAdapter = ListsAdapter(taskList) { task, isChecked ->
+        // Initialize the adapter with a click listener
+        listsAdapter = ListsAdapter(taskList, { task, isChecked ->
             // Update the task state here if needed
             val index = taskList.indexOf(task)
             if (index != -1) {
                 taskList[index] = task.copy(isChecked = isChecked)
             }
-        }
-        listsrecyclerView.adapter = listsAdapter
+        }, { task ->
+            // Handle navigation when an item is clicked
+            val intent = Intent(requireContext(), TaskViewRecycler::class.java)//bagong function for clickable recycler view
+            intent.putExtra("TASK_ID", task.id) // Pass the task ID or any necessary data
+            startActivity(intent)
+        })
 
+        listsrecyclerView.adapter = listsAdapter
     }
 
     // cardview pop up for sort options
