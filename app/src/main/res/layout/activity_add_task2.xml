@@ -81,6 +81,7 @@
                     android:textStyle="bold" />
 
                 <EditText
+                    android:id="@+id/taskname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints="Add a task name"
@@ -106,6 +107,7 @@
                     android:textStyle="bold" />
 
                 <EditText
+                    android:id="@+id/taskdescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints="Add a Task Description"
@@ -640,9 +642,6 @@
                 android:layout_height="wrap_content"
                 android:background="@color/white">
             </LinearLayout>
-
         </androidx.cardview.widget.CardView>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

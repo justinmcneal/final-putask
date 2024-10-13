@@ -25,194 +25,117 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var addIcon: ImageView
     private lateinit var tvList: TextView
     private lateinit var switchRepeat: Switch
-    private lateinit var tvCancel: TextView
-    private lateinit var tvDone: TextView
     private lateinit var tvDueDate: TextView
     private lateinit var tvTimeReminder: TextView
     private lateinit var dimBackground: View
     private lateinit var popupCardView: CardView
-    private lateinit var llButtonEnd: LinearLayout
-    private lateinit var llBtn: LinearLayout
-    private lateinit var btnRepeat: AppCompatButton
-    private lateinit var hsvDaily: HorizontalScrollView
-    private lateinit var btnBack: ImageButton
-    private lateinit var createButton: AppCompatButton // Declare CreateButton
-    private val taskList: MutableList<Task> = mutableListOf()
-    private var currentTaskIndex: Int? = null // Track current task index for update
+    private lateinit var createButton: AppCompatButton
+    private lateinit var etTaskName: EditText
+    private lateinit var etTaskDescription: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task2)
+        initViews()
+        setupListeners()
+    }
 
-        // Initialize views
+    private fun initViews() {
         addIcon = findViewById(R.id.imListAdd)
         tvList = findViewById(R.id.tvList)
+        etTaskName = findViewById(R.id.taskname)
+        etTaskDescription = findViewById(R.id.taskdescription)
         tvDueDate = findViewById(R.id.tvStartDate)
         tvTimeReminder = findViewById(R.id.tvEndDate)
         dimBackground = findViewById(R.id.dimBackground)
         popupCardView = findViewById(R.id.popupCardView)
-        llButtonEnd = findViewById(R.id.llButtonEnd)
-        llBtn = findViewById(R.id.llBtn)
-        btnRepeat = findViewById(R.id.btnRepeat)
-        tvCancel = findViewById(R.id.tvCancel)
-        tvDone = findViewById(R.id.tvDone)
-        switchRepeat = findViewById(R.id.switchRepeat)
-        hsvDaily = findViewById(R.id.hsvDaily)
-        btnBack = findViewById(R.id.btnBack)
-        createButton = findViewById(R.id.CreateButton) // Initialize CreateButton
+        createButton = findViewById(R.id.CreateButton)
+        switchRepeat = findViewById(R.id.switchRepeat) // Make sure you have the correct ID here
 
-        // Set up back button click listener
-        btnBack.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-        }
+    }
 
-        // Set up the PopupMenu for category selection
-        addIcon.setOnClickListener {
-            val dropdownMenu = PopupMenu(this, addIcon)
-            dropdownMenu.menuInflater.inflate(R.menu.popup_categories, dropdownMenu.menu)
-            dropdownMenu.setOnMenuItemClickListener { menuItem ->
-                val category = when (menuItem.itemId) {
+    private fun setupListeners() {
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
+        addIcon.setOnClickListener { showCategoryPopup() }
+        findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener { showDatePicker() }
+        findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener { showTimePicker() }
+        switchRepeat.setOnCheckedChangeListener { _, isChecked -> updateRepeatUI(isChecked) }
+        findViewById<TextView>(R.id.tvCancel).setOnClickListener { clearFields(); togglePopupVisibility(false) }
+        findViewById<TextView>(R.id.tvDone).setOnClickListener { createTask() }
+        createButton.setOnClickListener { createTask() }
+    }
+
+    private fun showCategoryPopup() {
+        PopupMenu(this, addIcon).apply {
+            menuInflater.inflate(R.menu.popup_categories, menu)
+            setOnMenuItemClickListener { menuItem ->
+                tvList.text = when (menuItem.itemId) {
                     R.id.personal -> "Personal"
                     R.id.work -> "Work"
                     R.id.school -> "School"
                     R.id.social -> "Social"
-                    else -> null
-                }
-                category?.let {
-                    tvList.text = it
-                    true
-                } ?: false
+                    else -> ""
+                }.takeIf { it.isNotEmpty() }
+                true
             }
-            dropdownMenu.show()
-        }
-
-        // Set up date and time pickers
-        val calendar = Calendar.getInstance()
-        findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener {
-            showDatePicker(calendar)
-        }
-        findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener {
-            showTimePicker(calendar)
-        }
-
-        // Repeat switch logic
-        popupCardView.visibility = View.GONE
-        hsvDaily.visibility = View.GONE
-        switchRepeat.setOnCheckedChangeListener { _, isChecked ->
-            hsvDaily.visibility = if (isChecked) View.VISIBLE else View.GONE
-            llButtonEnd.visibility = if (isChecked) View.VISIBLE else View.GONE
-            llBtn.visibility = if (isChecked) View.GONE else View.VISIBLE
-            popupCardView.layoutParams.height = if (isChecked) 900 else 300
-            btnRepeat.text = if (isChecked) "Yes" else "No"
-        }
-
-        // Popup visibility handling
-        findViewById<TextView>(R.id.tvBack).setOnClickListener { visibilityChecker() }
-        tvCancel.setOnClickListener { clearFields(); visibilityChecker(); switchRepeat.isChecked = false }
-        tvDone.setOnClickListener { handleTaskAction() }
-
-        // Set up CreateButton click listener
-        createButton.setOnClickListener {
-            createTask() // Call createTask when CreateButton is clicked
-        }
-
-        btnRepeat.setOnClickListener {
-            visibilityChecker()
-            popupCardView.visibility = View.VISIBLE
+            show()
         }
     }
 
-    private fun showDatePicker(calendar: Calendar) {
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-        val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
-            tvDueDate.text = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-        }, year, month, day)
-
-        datePickerDialog.show()
+    private fun showDatePicker() {
+        Calendar.getInstance().let { calendar ->
+            DatePickerDialog(this, { _, year, month, day ->
+                tvDueDate.text = String.format("%02d/%02d/%04d", day, month + 1, year)
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
     }
 
-    private fun showTimePicker(calendar: Calendar) {
-        val timePickerDialog = TimePickerDialog(this, { _, hourOfDay, minute ->
-            val amPm = if (hourOfDay >= 12) "PM" else "AM"
-            val hour = if (hourOfDay > 12) hourOfDay - 12 else if (hourOfDay == 0) 12 else hourOfDay
-            tvTimeReminder.text = String.format("%02d:%02d %s", hour, minute, amPm)
-        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false)
+    private fun showTimePicker() {
+        Calendar.getInstance().let { calendar ->
+            TimePickerDialog(this, { _, hourOfDay, minute ->
+                tvTimeReminder.text = String.format("%02d:%02d %s", if (hourOfDay > 12) hourOfDay - 12 else if (hourOfDay == 0) 12 else hourOfDay, minute, if (hourOfDay >= 12) "PM" else "AM")
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
+        }
+    }
 
-        timePickerDialog.show()
+    private fun updateRepeatUI(isChecked: Boolean) {
+        findViewById<HorizontalScrollView>(R.id.hsvDaily).visibility = if (isChecked) View.VISIBLE else View.GONE
+        findViewById<LinearLayout>(R.id.llButtonEnd).visibility = if (isChecked) View.VISIBLE else View.GONE
+        findViewById<LinearLayout>(R.id.llBtn).visibility = if (isChecked) View.GONE else View.VISIBLE
+        popupCardView.layoutParams.height = if (isChecked) 900 else 300
+        findViewById<AppCompatButton>(R.id.btnRepeat).text = if (isChecked) "Yes" else "No"
     }
 
     private fun createTask() {
-        val title = tvList.text.toString()
-        val description = "Your task description" // Update this to get a real description from user input
-        val startDateTime = tvDueDate.text.toString() // Get start date and time from your UI
-        val endDateTime = tvTimeReminder.text.toString() // Get end date and time from your UI
-        val category = addIcon.text.toString
-
-        // Create the task request object using CreateRequest
+        val repeatDays = if (switchRepeat.isChecked) listOf("Monday", "Wednesday") else null // Replace with actual selected repeat days
         val createRequest = CreateRequest(
-            task_name = title,
-            task_description = description,
-            start_datetime = startDateTime, // Use appropriate formatting if necessary
-            end_datetime = endDateTime, // Use appropriate formatting if necessary
-            repeat_days = if (switchRepeat.isChecked) {
-                // Add your logic to get repeat days if the switch is checked
-                listOf("Monday", "Wednesday") // Replace with actual logic to get selected repeat days
-            } else {
-                null
-            },
-            category = category,
-            )
+            task_name = etTaskName.text.toString(),
+            task_description = etTaskDescription.text.toString(),
+            start_datetime = tvDueDate.text.toString(),
+            end_datetime = tvTimeReminder.text.toString(),
+            repeat_days = repeatDays,
+            category = tvList.text.toString()
+        )
 
-        // Make the API call to create the task
         CoroutineScope(Dispatchers.IO).launch {
             val response: Response<Task> = RetrofitClient.apiService.createTask(createRequest)
             runOnUiThread {
-                if (response.isSuccessful) {
-                    Toast.makeText(this@AddTask2, "Task created successfully!", Toast.LENGTH_SHORT).show()
-                    clearFields() // Optionally clear the fields after creating the task
-                } else {
-                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
-                }
+                Toast.makeText(this@AddTask2, if (response.isSuccessful) "Task created successfully!" else "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                if (response.isSuccessful) clearFields()
             }
         }
     }
 
     private fun clearFields() {
+        etTaskName.text.clear()
+        etTaskDescription.text.clear()
         tvList.text = ""
         tvTimeReminder.text = ""
         tvDueDate.text = ""
     }
 
-    // Function to handle popup visibility
-    private fun visibilityChecker() {
-        dimBackground.visibility = if (dimBackground.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-        popupCardView.visibility = if (popupCardView.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-    }
-
-    private fun handleTaskAction() {
-        if (currentTaskIndex != null) {
-            updateTask()
-        } else {
-            createTask()
-        }
-        clearFields()
-        visibilityChecker()
-    }
-
-    private fun updateTask() {
-        currentTaskIndex?.let { index ->
-            val title = tvList.text.toString()
-            val description = "Your task description" // Update this to get a real description from user input
-            val time = tvTimeReminder.text.toString()
-            val category =
-
-            // Update the task
-            taskList[index] = Task(taskList[index].id, title, description, time, "", listOf(), false, category) // Keep the same ID
-            Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show()
-            currentTaskIndex = null // Reset index after updating
-        }
+    private fun togglePopupVisibility(isVisible: Boolean) {
+        dimBackground.visibility = if (isVisible) View.VISIBLE else View.GONE
+        popupCardView.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 }
