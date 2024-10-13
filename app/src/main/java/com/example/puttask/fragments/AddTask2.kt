@@ -120,11 +120,20 @@ class AddTask2 : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val response: Response<Task> = RetrofitClient.apiService.createTask(createRequest)
             runOnUiThread {
-                Toast.makeText(this@AddTask2, if (response.isSuccessful) "Task created successfully!" else "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
-                if (response.isSuccessful) clearFields()
+                if (response.isSuccessful) {
+                    val task = response.body() // Get the created task
+                    val intent = Intent()
+                    intent.putExtra("NEW_TASK", task) // Pass the new task back to the previous activity
+                    setResult(RESULT_OK, intent)
+                    finish() // Close AddTask2 and return to Lists
+                    clearFields() // Clear fields only after successfully creating the task
+                } else {
+                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
+
 
     private fun clearFields() {
         etTaskName.text.clear()

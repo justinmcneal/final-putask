@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +26,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     // This should now be an empty list that will be populated with tasks created in AddTask2
     private val taskList = mutableListOf<Task>()
+
+    private val ADD_TASK_REQUEST_CODE = 100
+
+    private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -46,6 +54,17 @@ class Lists : Fragment(R.layout.fragment_lists) {
             startActivity(intent)
         })
 
+        addTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                val newTask = result.data?.getSerializableExtra("NEW_TASK") as? Task
+                newTask?.let {
+                    taskList.add(it) // Add the new task to the list
+                    listsAdapter.notifyDataSetChanged() // Notify adapter about the new task
+                    updateNoTasksMessage() // Update UI accordingly
+                }
+            }
+        }
+
         // Set up the delete click listener
         listsAdapter.setOnDeleteClickListener { task ->
             showDeleteConfirmationDialog(task)
@@ -54,6 +73,12 @@ class Lists : Fragment(R.layout.fragment_lists) {
         listsRecyclerView.adapter = listsAdapter
 
         updateNoTasksMessage() // Update visibility based on task list size
+
+    }
+
+    private fun startAddTaskActivity() {
+        val intent = Intent(requireContext(), AddTask2::class.java)
+        addTaskLauncher.launch(intent) // Use the new launcher
     }
 
     private fun showDeleteConfirmationDialog(task: Task) {

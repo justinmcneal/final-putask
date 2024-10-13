@@ -1,5 +1,7 @@
 package com.example.puttask.api
 
+import java.io.Serializable
+
 data class CreateRequest(
     val task_name: String,        // Ensure this matches the API's expected JSON format
     val task_description: String,
@@ -19,7 +21,7 @@ data class Task(
     val repeat_days: List<String>?, // Nullable, as it might not always be set
     val category: String,
     val isChecked: Boolean
-)
+): Serializable
 
 // Request to update an existing task
 data class UpdateRequest(
