@@ -1,50 +1,37 @@
 package com.example.puttask.api
 
 data class CreateRequest(
-    val task_name: String,        //note the value should be the same in the api json format
+    val task_name: String,        // Ensure this matches the API's expected JSON format
     val task_description: String,
     val start_datetime: String,
     val end_datetime: String,
-    val repeat_days: List<String>?
+    val repeat_days: List<String>?, // Nullable in case it's optional
+    val category: String
 )
 
-data class CreateResponse(
-    val success: Boolean,
-    val message: String?,
-    val task_id: Int?,
-    val created_task: Task?
-)
-
-//kinukuha din ni recyclerview
+// Recycler View Shit
 data class Task(
     val id: Int,
     val task_name: String,
     val task_description: String,
     val start_datetime: String,
     val end_datetime: String,
-    val repeat_days: List<String>?,  // Nullable in case it's not required
+    val repeat_days: List<String>?, // Nullable, as it might not always be set
+    val category: String,
     val isChecked: Boolean
 )
 
+// Request to update an existing task
 data class UpdateRequest(
-    val id: Int,
-    val task_name: String?,
+    val task_name: String?,       // Nullable in case only some fields are being updated
     val task_description: String?,
     val start_datetime: String?,
     val end_datetime: String?,
-    val repeat_days: List<String>?
+    val repeat_days: List<String>?,
+    val category: String
 )
 
-data class UpdateResponse(
-    val success: Boolean,
-    val message: String?,
-    val updated_task: Task?
-)
-
-data class DeleteRequest(
-    val id: Int
-)
-
+// Response after deleting a task
 data class DeleteResponse(
     val success: Boolean,
     val message: String?

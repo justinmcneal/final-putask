@@ -11,7 +11,13 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
 import com.example.puttask.MainActivity
 import com.example.puttask.R
+import com.example.puttask.api.CreateRequest
+import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.Response
 import java.util.*
 
 class AddTask2 : AppCompatActivity() {
@@ -30,6 +36,7 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var btnRepeat: AppCompatButton
     private lateinit var hsvDaily: HorizontalScrollView
     private lateinit var btnBack: ImageButton
+    private lateinit var createButton: AppCompatButton // Declare CreateButton
     private val taskList: MutableList<Task> = mutableListOf()
     private var currentTaskIndex: Int? = null // Track current task index for update
 
@@ -37,6 +44,7 @@ class AddTask2 : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task2)
 
+        // Initialize views
         addIcon = findViewById(R.id.imListAdd)
         tvList = findViewById(R.id.tvList)
         tvDueDate = findViewById(R.id.tvStartDate)
@@ -51,10 +59,11 @@ class AddTask2 : AppCompatActivity() {
         switchRepeat = findViewById(R.id.switchRepeat)
         hsvDaily = findViewById(R.id.hsvDaily)
         btnBack = findViewById(R.id.btnBack)
+        createButton = findViewById(R.id.CreateButton) // Initialize CreateButton
 
-        btnBack.setOnClickListener{
-            val intent = Intent (this, MainActivity::class.java)
-            startActivity(intent)
+        // Set up back button click listener
+        btnBack.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
         }
 
         // Set up the PopupMenu for category selection
@@ -77,6 +86,7 @@ class AddTask2 : AppCompatActivity() {
             dropdownMenu.show()
         }
 
+        // Set up date and time pickers
         val calendar = Calendar.getInstance()
         findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener {
             showDatePicker(calendar)
@@ -93,12 +103,7 @@ class AddTask2 : AppCompatActivity() {
             llButtonEnd.visibility = if (isChecked) View.VISIBLE else View.GONE
             llBtn.visibility = if (isChecked) View.GONE else View.VISIBLE
             popupCardView.layoutParams.height = if (isChecked) 900 else 300
-            if (isChecked){
-                btnRepeat.text = "Yes"
-            }
-            else{
-                btnRepeat.text = "No"
-            }
+            btnRepeat.text = if (isChecked) "Yes" else "No"
         }
 
         // Popup visibility handling
@@ -106,10 +111,14 @@ class AddTask2 : AppCompatActivity() {
         tvCancel.setOnClickListener { clearFields(); visibilityChecker(); switchRepeat.isChecked = false }
         tvDone.setOnClickListener { handleTaskAction() }
 
-        btnRepeat.setOnClickListener{
+        // Set up CreateButton click listener
+        createButton.setOnClickListener {
+            createTask() // Call createTask when CreateButton is clicked
+        }
+
+        btnRepeat.setOnClickListener {
             visibilityChecker()
             popupCardView.visibility = View.VISIBLE
-
         }
     }
 
@@ -135,6 +144,54 @@ class AddTask2 : AppCompatActivity() {
         timePickerDialog.show()
     }
 
+    private fun createTask() {
+        val title = tvList.text.toString()
+        val description = "Your task description" // Update this to get a real description from user input
+        val startDateTime = tvDueDate.text.toString() // Get start date and time from your UI
+        val endDateTime = tvTimeReminder.text.toString() // Get end date and time from your UI
+        val category = addIcon.text.toString
+
+        // Create the task request object using CreateRequest
+        val createRequest = CreateRequest(
+            task_name = title,
+            task_description = description,
+            start_datetime = startDateTime, // Use appropriate formatting if necessary
+            end_datetime = endDateTime, // Use appropriate formatting if necessary
+            repeat_days = if (switchRepeat.isChecked) {
+                // Add your logic to get repeat days if the switch is checked
+                listOf("Monday", "Wednesday") // Replace with actual logic to get selected repeat days
+            } else {
+                null
+            },
+            category = category,
+            )
+
+        // Make the API call to create the task
+        CoroutineScope(Dispatchers.IO).launch {
+            val response: Response<Task> = RetrofitClient.apiService.createTask(createRequest)
+            runOnUiThread {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@AddTask2, "Task created successfully!", Toast.LENGTH_SHORT).show()
+                    clearFields() // Optionally clear the fields after creating the task
+                } else {
+                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun clearFields() {
+        tvList.text = ""
+        tvTimeReminder.text = ""
+        tvDueDate.text = ""
+    }
+
+    // Function to handle popup visibility
+    private fun visibilityChecker() {
+        dimBackground.visibility = if (dimBackground.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        popupCardView.visibility = if (popupCardView.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+    }
+
     private fun handleTaskAction() {
         if (currentTaskIndex != null) {
             updateTask()
@@ -145,46 +202,17 @@ class AddTask2 : AppCompatActivity() {
         visibilityChecker()
     }
 
-    private fun createTask() {
-        val title = tvList.text.toString()
-        val description = "Your task description" // Update this to get a real description from user input
-        val time = tvTimeReminder.text.toString()
-        val repeatDays = getSelectedRepeatDays()
-
-        // Create the task and add to the list
-        val newTask = Task(0, title, description, time, "", repeatDays, false) // Set ID as 0 for new task
-        taskList.add(newTask)
-        Toast.makeText(this, "Task created", Toast.LENGTH_SHORT).show()
-    }
-
     private fun updateTask() {
         currentTaskIndex?.let { index ->
             val title = tvList.text.toString()
             val description = "Your task description" // Update this to get a real description from user input
             val time = tvTimeReminder.text.toString()
-            val repeatDays = getSelectedRepeatDays()
+            val category =
 
             // Update the task
-            taskList[index] = Task(taskList[index].id, title, description, time, "", repeatDays, false) // Keep the same ID
+            taskList[index] = Task(taskList[index].id, title, description, time, "", listOf(), false, category) // Keep the same ID
             Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show()
             currentTaskIndex = null // Reset index after updating
         }
-    }
-
-    private fun getSelectedRepeatDays(): List<String> {
-        // Implement logic to get selected repeat days based on your UI (e.g., checkboxes)
-        return listOf() // Replace with actual selected days
-    }
-
-    private fun clearFields() {
-        tvList.text = ""
-        tvTimeReminder.text = ""
-        tvDueDate.text = ""
-        }
-
-    // Function to handle popup visibility
-    private fun visibilityChecker() {
-        dimBackground.visibility = if (dimBackground.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-        popupCardView.visibility = if (popupCardView.visibility == View.VISIBLE) View.GONE else View.VISIBLE
     }
 }

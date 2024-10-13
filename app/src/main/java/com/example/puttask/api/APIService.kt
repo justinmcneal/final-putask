@@ -46,13 +46,25 @@ interface APIService {
     @POST("api/contact/send")
     suspend fun sendContactForm(@Body contactRequest: ContactRequest): Response<ContactResponse>
 
+
+
+    // CRUD
+
+    // Get all tasks
+    @GET("api/tasks")
+    suspend fun getAllTasks(): Response<List<Task>>
+
+    // Get a specific task by ID
+    @GET("api/tasks/{id}")
+    suspend fun getTaskById(@Path("id") id: Int): Response<Task>
+
     // Create Task
     @POST("api/tasks")
-    suspend fun createTask(@Body createRequest: CreateRequest): Response<CreateResponse>
+    suspend fun createTask(@Body createRequest: CreateRequest): Response<Task>
 
     // Update Task
     @PUT("api/tasks/{id}")
-    suspend fun updateTask(@Path("id") id: Int, @Body updateRequest: UpdateRequest): Response<UpdateResponse>
+    suspend fun updateTask(@Path("id") id: Int, @Body updateRequest: UpdateRequest): Response<Task>
 
     // Delete Task
     @DELETE("api/tasks/{id}")
