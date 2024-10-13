@@ -64,7 +64,6 @@
                 <ImageView
                     android:layout_width="150dp"
                     android:layout_height="150dp"
-                    android:layout_marginStart="48dp"
                     android:src="@drawable/todo_vector" />
             </LinearLayout>
 
@@ -118,15 +117,6 @@
                 android:layout_weight="11"
                 android:nestedScrollingEnabled="false" />
 
-            <TextView
-                android:id="@+id/tvNotask"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="No task created."
-                android:textColor="@color/gray"
-                android:textSize="15sp"
-                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/textView"
@@ -208,6 +198,26 @@
 
 
         </androidx.cardview.widget.CardView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/tvNotask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="No task created."
+                android:textColor="@color/gray"
+                android:textSize="15sp"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
