@@ -11,9 +11,9 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.puttask.ListsAdapter
 import com.example.puttask.MainActivity
 import com.example.puttask.R
-import com.example.puttask.TaskAdapter
 import com.example.puttask.api.CreateRequest
 import com.example.puttask.api.DeleteResponse
 import com.example.puttask.api.RetrofitClient
@@ -56,17 +56,23 @@ class AddTask2 : AppCompatActivity() {
         popupCardView = findViewById(R.id.popupCardView)
         createButton = findViewById(R.id.CreateButton)
         switchRepeat = findViewById(R.id.switchRepeat) // Make sure you have the correct ID here
-
     }
 
     private fun setupListeners() {
-        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
+        // Reduce findViewById() calls by storing in variables for better performance
+        val backButton = findViewById<ImageButton>(R.id.btnBack)
+        val dueIcon = findViewById<ImageButton>(R.id.addDueIcon)
+        val timeIcon = findViewById<ImageButton>(R.id.addTimeIcon)
+        val cancelButton = findViewById<TextView>(R.id.tvCancel)
+        val doneButton = findViewById<TextView>(R.id.tvDone)
+
+        backButton.setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
         addIcon.setOnClickListener { showCategoryPopup() }
-        findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener { showDatePicker() }
-        findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener { showTimePicker() }
+        dueIcon.setOnClickListener { showDatePicker() }
+        timeIcon.setOnClickListener { showTimePicker() }
         switchRepeat.setOnCheckedChangeListener { _, isChecked -> updateRepeatUI(isChecked) }
-        findViewById<TextView>(R.id.tvCancel).setOnClickListener { clearFields(); togglePopupVisibility(false) }
-        findViewById<TextView>(R.id.tvDone).setOnClickListener { createTask() }
+        cancelButton.setOnClickListener { clearFields(); togglePopupVisibility(false) }
+        doneButton.setOnClickListener { createTask() }
         createButton.setOnClickListener { createTask() }
     }
 
@@ -125,13 +131,19 @@ class AddTask2 : AppCompatActivity() {
 
         // Launch the coroutine to make the API call
         CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<Task> = RetrofitClient.apiService.createTask(createRequest)
-            runOnUiThread {
-                if (response.isSuccessful) {
-                    Toast.makeText(this@AddTask2, "Task created successfully!", Toast.LENGTH_SHORT).show()
-                    clearFields() // Reset form after successful task creation
-                } else {
-                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+            try {
+                val response: Response<Task> = RetrofitClient.apiService.createTask(createRequest)
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@AddTask2, "Task created successfully!", Toast.LENGTH_SHORT).show()
+                        clearFields() // Reset form after successful task creation
+                    } else {
+                        Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this@AddTask2, "Network error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -139,21 +151,24 @@ class AddTask2 : AppCompatActivity() {
 
     private fun getTasks() {
         CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<List<Task>> = RetrofitClient.apiService.getAllTasks()
-            runOnUiThread {
-                if (response.isSuccessful) {
-                    val taskList: List<Task> = response.body() ?: emptyList()
-                    // Pass the taskList to RecyclerView adapter
-                    setupRecyclerView(taskList)
-                } else {
-                    Toast.makeText(this@AddTask2, "Failed to fetch tasks", Toast.LENGTH_SHORT).show()
+            try {
+                val response: Response<List<Task>> = RetrofitClient.apiService.getAllTasks()
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        val taskList: List<Task> = response.body() ?: emptyList()
+                        // Pass the taskList to RecyclerView adapter
+                        setupRecyclerView(taskList)
+                    } else {
+                        Toast.makeText(this@AddTask2, "Failed to fetch tasks", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this@AddTask2, "Network error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
-
-
-
 
     private fun updateTask(taskId: Int) {
         val updateRequest = UpdateRequest(
@@ -166,12 +181,18 @@ class AddTask2 : AppCompatActivity() {
         )
 
         CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<Task> = RetrofitClient.apiService.updateTask(taskId, updateRequest)
-            runOnUiThread {
-                if (response.isSuccessful) {
-                    Toast.makeText(this@AddTask2, "Task updated successfully!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this@AddTask2, "Failed to update task: ${response.message()}", Toast.LENGTH_SHORT).show()
+            try {
+                val response: Response<Task> = RetrofitClient.apiService.updateTask(taskId, updateRequest)
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@AddTask2, "Task updated successfully!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@AddTask2, "Failed to update task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this@AddTask2, "Network error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -179,42 +200,57 @@ class AddTask2 : AppCompatActivity() {
 
     private fun deleteTask(taskId: Int) {
         CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<DeleteResponse> = RetrofitClient.apiService.deleteTask(taskId)
-            runOnUiThread {
-                if (response.isSuccessful) {
-                    Toast.makeText(this@AddTask2, "Task deleted successfully!", Toast.LENGTH_SHORT).show()
-                    // Optionally refresh the task list
-                    getTasks()
-                } else {
-                    Toast.makeText(this@AddTask2, "Failed to delete task: ${response.message()}", Toast.LENGTH_SHORT).show()
+            try {
+                val response: Response<DeleteResponse> = RetrofitClient.apiService.deleteTask(taskId)
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@AddTask2, "Task deleted successfully!", Toast.LENGTH_SHORT).show()
+                        // Optionally refresh the task list
+                        getTasks()
+                    } else {
+                        Toast.makeText(this@AddTask2, "Failed to delete task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this@AddTask2, "Network error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
+    private fun clearFields() {
+        etTaskName.setText("")
+        etTaskDescription.setText("")
+        tvDueDate.text = ""
+        tvTimeReminder.text = ""
+        tvList.text = "Select a category"
+    }
+
+    private fun togglePopupVisibility(show: Boolean) {
+        dimBackground.visibility = if (show) View.VISIBLE else View.GONE
+        popupCardView.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
     private fun setupRecyclerView(taskList: List<Task>) {
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+        val adapter = ListsAdapter(
+            taskList.toMutableList(), // Convert to mutable list for adapter
+            { task, isChecked -> // onTaskCheckedChange callback
+                // Handle the task check change, if needed
+                // Update task isChecked status in your data model
+                task.isChecked = isChecked
+            },
+            { task -> // onItemClick callback
+                // Handle item click for task (e.g., open task details or edit)
+                Toast.makeText(this, "Clicked: ${task.task_name}", Toast.LENGTH_SHORT).show()
+            },
+            { taskId -> // onDeleteTask callback
+                deleteTask(taskId) // Call the deleteTask method you already have
+            }
+        )
         recyclerView.layoutManager = LinearLayoutManager(this)
-        val adapter = TaskAdapter(taskList) { taskId ->
-            // Handle deleteTask when delete button is clicked
-            deleteTask(taskId)
-        }
         recyclerView.adapter = adapter
     }
-
-
-    private fun clearFields() {
-        etTaskName.text.clear()
-        etTaskDescription.text.clear()
-        tvList.text = ""
-        tvTimeReminder.text = ""
-        tvDueDate.text = ""
-    }
-
-    private fun togglePopupVisibility(isVisible: Boolean) {
-        dimBackground.visibility = if (isVisible) View.VISIBLE else View.GONE
-        popupCardView.visibility = if (isVisible) View.VISIBLE else View.GONE
-    }
-
 
 }

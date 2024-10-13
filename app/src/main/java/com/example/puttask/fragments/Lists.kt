@@ -4,9 +4,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +19,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var listsAdapter: ListsAdapter
     private lateinit var tvNoTasks: TextView // Declare the TextView for "No tasks created"
 
-    // This should now be an empty list that will be populated with tasks created in AddTask2
+    // Task list that will be populated dynamically
     private val taskList = mutableListOf<Task>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -33,26 +31,29 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
         // Set up RecyclerView
         listsRecyclerView.layoutManager = LinearLayoutManager(context)
-        listsAdapter = ListsAdapter(taskList, { task, isChecked ->
-            // Update the task state here if needed
-            val index = taskList.indexOf(task)
-            if (index != -1) {
-                taskList[index] = task.copy(isChecked = isChecked)
+        listsAdapter = ListsAdapter(
+            taskList = taskList,
+            onTaskCheckedChange = { task, isChecked ->
+                // Update the task's checked state
+                val index = taskList.indexOf(task)
+                if (index != -1) {
+                    taskList[index] = task.copy(isChecked = isChecked)
+                }
+            },
+            onItemClick = { task ->
+                // Handle item click and navigate to TaskViewRecycler
+                val intent = Intent(requireContext(), TaskViewRecycler::class.java)
+                intent.putExtra("TASK_ID", task.id)
+                startActivity(intent)
+            },
+            onDeleteTask = { taskId ->
+                // Handle task deletion by task ID
+                val taskToDelete = taskList.find { it.id == taskId }
+                taskToDelete?.let { showDeleteConfirmationDialog(it) }
             }
-        }, { task ->
-            // Handle navigation when an item is clicked
-            val intent = Intent(requireContext(), TaskViewRecycler::class.java)
-            intent.putExtra("TASK_ID", task.id) // Pass the task ID or any necessary data
-            startActivity(intent)
-        })
-
-        // Set up the delete click listener
-        listsAdapter.setOnDeleteClickListener { task ->
-            showDeleteConfirmationDialog(task)
-        }
+        )
 
         listsRecyclerView.adapter = listsAdapter
-
         updateNoTasksMessage() // Update visibility based on task list size
     }
 
@@ -88,7 +89,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
-    // Method to update the task list (should be called from AddTask2)
+    // Method to update the task list (should be called from AddTask2 or other sources)
     fun updateTaskList(newTasks: List<Task>) {
         taskList.clear()
         taskList.addAll(newTasks)
