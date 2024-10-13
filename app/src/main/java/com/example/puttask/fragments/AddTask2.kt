@@ -9,11 +9,16 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.MainActivity
 import com.example.puttask.R
+import com.example.puttask.TaskAdapter
 import com.example.puttask.api.CreateRequest
+import com.example.puttask.api.DeleteResponse
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
+import com.example.puttask.api.UpdateRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -107,7 +112,8 @@ class AddTask2 : AppCompatActivity() {
     }
 
     private fun createTask() {
-        val repeatDays = if (switchRepeat.isChecked) listOf("Monday", "Wednesday") else null // Replace with actual selected repeat days
+        // Collect user input for task creation
+        val repeatDays = if (switchRepeat.isChecked) listOf("Monday", "Wednesday") else null // Sample days
         val createRequest = CreateRequest(
             task_name = etTaskName.text.toString(),
             task_description = etTaskDescription.text.toString(),
@@ -117,14 +123,85 @@ class AddTask2 : AppCompatActivity() {
             category = tvList.text.toString()
         )
 
+        // Launch the coroutine to make the API call
         CoroutineScope(Dispatchers.IO).launch {
             val response: Response<Task> = RetrofitClient.apiService.createTask(createRequest)
             runOnUiThread {
-                Toast.makeText(this@AddTask2, if (response.isSuccessful) "Task created successfully!" else "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
-                if (response.isSuccessful) clearFields()
+                if (response.isSuccessful) {
+                    Toast.makeText(this@AddTask2, "Task created successfully!", Toast.LENGTH_SHORT).show()
+                    clearFields() // Reset form after successful task creation
+                } else {
+                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
+
+    private fun getTasks() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val response: Response<List<Task>> = RetrofitClient.apiService.getAllTasks()
+            runOnUiThread {
+                if (response.isSuccessful) {
+                    val taskList: List<Task> = response.body() ?: emptyList()
+                    // Pass the taskList to RecyclerView adapter
+                    setupRecyclerView(taskList)
+                } else {
+                    Toast.makeText(this@AddTask2, "Failed to fetch tasks", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+
+
+
+    private fun updateTask(taskId: Int) {
+        val updateRequest = UpdateRequest(
+            task_name = etTaskName.text.toString(),
+            task_description = etTaskDescription.text.toString(),
+            start_datetime = tvDueDate.text.toString(),
+            end_datetime = tvTimeReminder.text.toString(),
+            repeat_days = listOf("Monday", "Wednesday"),  // example repeat days
+            category = tvList.text.toString()
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val response: Response<Task> = RetrofitClient.apiService.updateTask(taskId, updateRequest)
+            runOnUiThread {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@AddTask2, "Task updated successfully!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@AddTask2, "Failed to update task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun deleteTask(taskId: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val response: Response<DeleteResponse> = RetrofitClient.apiService.deleteTask(taskId)
+            runOnUiThread {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@AddTask2, "Task deleted successfully!", Toast.LENGTH_SHORT).show()
+                    // Optionally refresh the task list
+                    getTasks()
+                } else {
+                    Toast.makeText(this@AddTask2, "Failed to delete task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun setupRecyclerView(taskList: List<Task>) {
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        val adapter = TaskAdapter(taskList) { taskId ->
+            // Handle deleteTask when delete button is clicked
+            deleteTask(taskId)
+        }
+        recyclerView.adapter = adapter
+    }
+
 
     private fun clearFields() {
         etTaskName.text.clear()
@@ -138,4 +215,6 @@ class AddTask2 : AppCompatActivity() {
         dimBackground.visibility = if (isVisible) View.VISIBLE else View.GONE
         popupCardView.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
+
+
 }
