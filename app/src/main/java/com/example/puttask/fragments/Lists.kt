@@ -1,5 +1,6 @@
 package com.example.puttask.fragments
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -24,6 +25,8 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var tvDropdownLists: TextView
     private lateinit var ic_sort: ImageView
     private lateinit var popupcardviewLists: CardView
+    private lateinit var tvNoTasks: TextView // Declare the TextView for "No tasks created"
+
 
 
 
@@ -43,6 +46,8 @@ class Lists : Fragment(R.layout.fragment_lists) {
         ic_sort = view.findViewById(R.id.ic_sort)
         tvDropdownLists = view.findViewById(R.id.tvDropdownLists)
         popupcardviewLists = view.findViewById(R.id.popupcardviewLists) // Initialize here
+        tvNoTasks = view.findViewById(R.id.tvNotask) // Initialize the TextView
+
 
 
 
@@ -88,8 +93,44 @@ class Lists : Fragment(R.layout.fragment_lists) {
             intent.putExtra("TASK_ID", task.id) // Pass the task ID or any necessary data
             startActivity(intent)
         })
+            // Set up the delete click listener
+        listsAdapter.setOnDeleteClickListener { task ->
+            showDeleteConfirmationDialog(task)
+        }
 
         listsrecyclerView.adapter = listsAdapter
+    }
+
+    private fun showDeleteConfirmationDialog(task: Task) {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Delete Task")
+        builder.setMessage("Are you sure you want to delete this task?")
+
+        builder.setPositiveButton("Delete") { _, _ ->
+            deleteTask(task)
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        builder.create().show()
+    }
+
+    private fun deleteTask(task: Task) {
+        taskList.remove(task)
+        listsAdapter.notifyDataSetChanged()
+        updateNoTasksMessage() // Update the message after deletion
+
+    }
+    private fun updateNoTasksMessage() {
+        if (taskList.isEmpty()) {
+            tvNoTasks.visibility = View.VISIBLE // Show the "No tasks created" message
+            listsrecyclerView.visibility = View.GONE // Hide the RecyclerView
+        } else {
+            tvNoTasks.visibility = View.GONE // Hide the message
+            listsrecyclerView.visibility = View.VISIBLE // Show the RecyclerView
+        }
     }
 
     // cardview pop up for sort options
