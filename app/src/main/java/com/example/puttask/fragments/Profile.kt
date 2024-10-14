@@ -25,7 +25,6 @@ class Profile : Fragment() {
     private lateinit var changePasswordTextView: TextView
     private lateinit var dataManager: DataManager
     private lateinit var btnSave: TextView
-
     private lateinit var apiService: APIService
     private lateinit var usernameTextView: TextView
     private lateinit var emailTextView: TextView
@@ -35,6 +34,9 @@ class Profile : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
+
+        // Initialize DataManager
+        dataManager = DataManager(requireContext())
 
         usernameTextView = view.findViewById(R.id.etUsername)
         emailTextView = view.findViewById(R.id.tvEmail)
@@ -129,4 +131,3 @@ class Profile : Fragment() {
         }
     }
 }
-
