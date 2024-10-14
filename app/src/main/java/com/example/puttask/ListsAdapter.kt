@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import android.widget.ImageButton // Import ImageButton
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.api.Task
@@ -15,7 +15,6 @@ class ListsAdapter(
     private val onItemClick: (Task) -> Unit // Add click listener for the entire item
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
-    // Add a listener for delete clicks
     private var onDeleteClick: ((Task) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -28,7 +27,6 @@ class ListsAdapter(
         val task = taskList[position]
         holder.tvTitle.text = task.task_name
         holder.tvTime.text = task.start_datetime // Adjust this if needed
-        holder.checkBox.isChecked = task.isChecked // Ensure `isChecked` is a property in your `Task` data class
 
         // Handle checkbox state change
         holder.checkBox.setOnCheckedChangeListener(null) // Clear previous listener
@@ -49,7 +47,13 @@ class ListsAdapter(
 
     override fun getItemCount(): Int = taskList.size
 
-    // Add a method to set the delete click listener
+    // Method to add a new task to the list and notify the adapter
+    fun addTask(task: Task) {
+        taskList.add(task)
+        notifyItemInserted(taskList.size - 1) // Notify adapter of the new item
+    }
+
+    // Method to set the delete click listener
     fun setOnDeleteClickListener(listener: (Task) -> Unit) {
         onDeleteClick = listener
     }

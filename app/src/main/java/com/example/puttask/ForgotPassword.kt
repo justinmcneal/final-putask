@@ -11,18 +11,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.EmailRequest
-import com.example.puttask.api.EmailResponse
 import com.example.puttask.api.ForgotPasswordRequest
-import com.example.puttask.api.ForgotPasswordResponse
 import com.example.puttask.api.OTPRequest
-import com.example.puttask.api.OTPResponse
 import com.example.puttask.api.ResetPasswordRequest
-import com.example.puttask.api.ResetPasswordResponse
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+
 
 class ForgotPassword : AppCompatActivity() {
 
@@ -104,7 +98,7 @@ class ForgotPassword : AppCompatActivity() {
         val forgotPasswordRequest = ForgotPasswordRequest(email)
         lifecycleScope.launch {
             try {
-                val response = RetrofitClient.apiService.checkEmail(forgotPasswordRequest)
+                val response = RetrofitClient.getApiService(this@ForgotPassword).checkEmail(forgotPasswordRequest)
                 if (response.isSuccessful) {
                     val emailResponse = response.body()
                     val jsonResponse = Gson().toJson(emailResponse)
@@ -141,7 +135,7 @@ class ForgotPassword : AppCompatActivity() {
         }
         lifecycleScope.launch {
             try {
-                val response = RetrofitClient.apiService.sendOTP(emailRequest)
+                val response = RetrofitClient.getApiService(this@ForgotPassword).sendOTP(emailRequest)
                 if (response.isSuccessful) {
                     val jsonResponse = Gson().toJson(response.body())
                     Log.d("SendOTPResponse", "JSON Response: $jsonResponse")
@@ -188,7 +182,7 @@ class ForgotPassword : AppCompatActivity() {
         val otpRequest = OTPRequest(email, otp)
         lifecycleScope.launch {
             try {
-                val response = RetrofitClient.apiService.verifyOTP(otpRequest)
+                val response = RetrofitClient.getApiService(this@ForgotPassword).verifyOTP(otpRequest)
                 if (response.isSuccessful) {
                     Toast.makeText(this@ForgotPassword, "OTP verified successfully", Toast.LENGTH_SHORT).show()
                     etNewPassword.visibility = View.VISIBLE
@@ -209,7 +203,7 @@ class ForgotPassword : AppCompatActivity() {
         Log.d("ResetPasswordInput", "Email: $email, New Password: $newPassword, Confirm Password: $confirmPassword")
         lifecycleScope.launch {
             try {
-                val response = RetrofitClient.apiService.resetPassword(resetPasswordRequest)
+                val response = RetrofitClient.getApiService(this@ForgotPassword).resetPassword(resetPasswordRequest)
                 if (response.isSuccessful) {
                     Toast.makeText(this@ForgotPassword, "Password reset successfully", Toast.LENGTH_SHORT).show()
                     finish() // Close activity after successful reset

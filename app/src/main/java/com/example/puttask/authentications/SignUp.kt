@@ -15,6 +15,7 @@ import com.example.puttask.MainActivity
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.RegistrationRequest
+import com.example.puttask.api.DataManager
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -106,17 +107,22 @@ class SignUp : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val response = RetrofitClient.apiService.register(registrationRequest)
-                val message = if (response.isSuccessful) {
-                    response.body()?.message ?: "Registration successful"
-                } else {
-                    response.errorBody()?.string() ?: "Unknown error"
-                }
-
-                showToast(message)
+                val response = RetrofitClient.getApiService(this@SignUp).register(registrationRequest)
                 if (response.isSuccessful) {
+                    val registrationResponse = response.body()
+                    val message = registrationResponse?.message ?: "Registration successful"
+
+                    // Save the authentication token using DataManager
+                    registrationResponse?.token?.let {
+                        DataManager(this@SignUp).saveAuthToken(it)
+                    }
+
+                    showToast(message)
                     startActivity(Intent(this@SignUp, MainActivity::class.java))
                     finish() // Close the SignUp screen
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    showToast(errorBody ?: "Registration failed")
                 }
             } catch (e: HttpException) {
                 Log.e("SignUpError", "HTTP Error: ${e.message()}", e)

@@ -18,7 +18,6 @@ data class Task(
     val end_datetime: String,
     val repeat_days: List<String>?, // Nullable, as it might not always be set
     val category: String,
-    val isChecked: Boolean
 )
 
 // Request to update an existing task

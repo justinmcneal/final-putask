@@ -65,7 +65,9 @@ data class ResetPasswordResponse(
 
 //contact
 data class ContactRequest(
-    val message: String)
+    val message: String,
+    val username: String,
+    val email: String)
 data class ContactResponse(
     val message: String,
     val data: UserInfo)

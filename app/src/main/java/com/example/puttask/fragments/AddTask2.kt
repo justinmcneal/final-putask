@@ -33,9 +33,19 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var etTaskName: EditText
     private lateinit var etTaskDescription: EditText
 
+    // Newly added variable for repeat days
+    private var repeatDays: MutableList<String> = mutableListOf()
+
+    private var taskCallback: TaskCallback? = null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task2)
+
+        // Set the callback from the Intent
+        taskCallback = intent.getParcelableExtra("task_callback") // Ensure to send this from the Lists fragment
+
         initViews()
         setupListeners()
     }
@@ -50,12 +60,11 @@ class AddTask2 : AppCompatActivity() {
         dimBackground = findViewById(R.id.dimBackground)
         popupCardView = findViewById(R.id.popupCardView)
         createButton = findViewById(R.id.CreateButton)
-        switchRepeat = findViewById(R.id.switchRepeat) // Make sure you have the correct ID here
-
+        switchRepeat = findViewById(R.id.switchRepeat)
     }
 
     private fun setupListeners() {
-        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { onBackPressedDispatcher.onBackPressed() }
         addIcon.setOnClickListener { showCategoryPopup() }
         findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener { showDatePicker() }
         findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener { showTimePicker() }
@@ -93,7 +102,9 @@ class AddTask2 : AppCompatActivity() {
     private fun showTimePicker() {
         Calendar.getInstance().let { calendar ->
             TimePickerDialog(this, { _, hourOfDay, minute ->
-                tvTimeReminder.text = String.format("%02d:%02d %s", if (hourOfDay > 12) hourOfDay - 12 else if (hourOfDay == 0) 12 else hourOfDay, minute, if (hourOfDay >= 12) "PM" else "AM")
+                tvTimeReminder.text = String.format("%02d:%02d %s",
+                    if (hourOfDay > 12) hourOfDay - 12 else if (hourOfDay == 0) 12 else hourOfDay,
+                    minute, if (hourOfDay >= 12) "PM" else "AM")
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
     }
@@ -104,27 +115,38 @@ class AddTask2 : AppCompatActivity() {
         findViewById<LinearLayout>(R.id.llBtn).visibility = if (isChecked) View.GONE else View.VISIBLE
         popupCardView.layoutParams.height = if (isChecked) 900 else 300
         findViewById<AppCompatButton>(R.id.btnRepeat).text = if (isChecked) "Yes" else "No"
+
+        // Clear previous selections for repeat days if unchecked
+        if (!isChecked) {
+            repeatDays.clear()
+        }
     }
 
     private fun createTask() {
-        val repeatDays = if (switchRepeat.isChecked) listOf("Monday", "Wednesday") else null // Replace with actual selected repeat days
         val createRequest = CreateRequest(
             task_name = etTaskName.text.toString(),
             task_description = etTaskDescription.text.toString(),
             start_datetime = tvDueDate.text.toString(),
             end_datetime = tvTimeReminder.text.toString(),
-            repeat_days = repeatDays,
+            repeat_days = if (switchRepeat.isChecked) repeatDays else null,
             category = tvList.text.toString()
         )
 
         CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<Task> = RetrofitClient.apiService.createTask(createRequest)
+            val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
             runOnUiThread {
-                Toast.makeText(this@AddTask2, if (response.isSuccessful) "Task created successfully!" else "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
-                if (response.isSuccessful) clearFields()
+                if (response.isSuccessful) {
+                    // Directly call the callback method in the Lists fragment
+                    (taskCallback)?.onTaskCreated(response.body()!!) // Cast and call the method
+                    clearFields()
+                    navigateToMainActivity() // Navigate back to MainActivity
+                } else {
+                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
+
 
     private fun clearFields() {
         etTaskName.text.clear()
@@ -132,10 +154,18 @@ class AddTask2 : AppCompatActivity() {
         tvList.text = ""
         tvTimeReminder.text = ""
         tvDueDate.text = ""
+        repeatDays.clear() // Clear repeat days selection
     }
 
     private fun togglePopupVisibility(isVisible: Boolean) {
         dimBackground.visibility = if (isVisible) View.VISIBLE else View.GONE
         popupCardView.visibility = if (isVisible) View.VISIBLE else View.GONE
+    }
+
+    private fun navigateToMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK) // Clear the activity stack
+        startActivity(intent) // Navigate to MainActivity
+        finish() // Optional: Finish the current activity
     }
 }

@@ -16,34 +16,38 @@ import com.example.puttask.api.DataManager
 
 class SplashScreen : AppCompatActivity() {
 
-    private lateinit var dataManager: DataManager // Declare DataManager
+    private lateinit var dataManager: DataManager
+    private lateinit var putasklogo: ImageView
+    private lateinit var title: TextView
+
+    private val delayDuration: Long = 8000 // 8 seconds delay
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
 
-        dataManager = DataManager(this) // Initialize DataManager
+        dataManager = DataManager(this)
 
-        val putasklogo: ImageView = findViewById(R.id.putasklogo)
-        val title: TextView = findViewById(R.id.tvTitle)  // Title text view
+        putasklogo = findViewById(R.id.putasklogo)
+        title = findViewById(R.id.tvTitle)
 
-        // Load the animations
+        // Load animations
         val spinToRightAnimation = AnimationUtils.loadAnimation(this, R.anim.spin_to_right)
         val spinToLeftAnimation = AnimationUtils.loadAnimation(this, R.anim.spin_to_left)
         val fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in)
 
-        // Start the right spin animation on the logo
+        // Start the left spin animation on the logo
         putasklogo.startAnimation(spinToLeftAnimation)
 
-        // Set a listener for the spin to right animation
+        // Set animation listener for the spin-to-left animation
         spinToLeftAnimation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation?) {}
 
             override fun onAnimationEnd(animation: Animation?) {
-                // Start the left spin animation after the right spin ends
+                // Start the right spin animation after the left spin ends
                 putasklogo.startAnimation(spinToRightAnimation)
 
-                // Start fading in the title as the left spin starts
+                // Start fading in the title
                 title.visibility = View.VISIBLE
                 title.startAnimation(fadeInAnimation)
             }
@@ -51,20 +55,26 @@ class SplashScreen : AppCompatActivity() {
             override fun onAnimationRepeat(animation: Animation?) {}
         })
 
+        // Check for authentication token
+        val token = dataManager.getAuthToken()
+
         // Delay before navigating to the next activity
         Handler(Looper.getMainLooper()).postDelayed({
-            // Check if the user is already authenticated
-            val token = dataManager.getAuthToken() // Fetch the saved token from DataManager
-
-            // Navigate to MainActivity or LoginSignin after splash screen
             if (token != null) {
-                // If the token is not null, go to MainActivity
+                // Token exists, navigate to MainActivity
                 startActivity(Intent(this, MainActivity::class.java))
             } else {
-                // If the token is null, go to LoginSignin
+                // No token, navigate to LoginSignin
                 startActivity(Intent(this, LoginSignin::class.java))
             }
             finish() // Close the splash screen
-        }, 8000)  // Total delay of 8 seconds before transitioning
+        }, delayDuration)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clear animations to prevent memory leaks
+        putasklogo.clearAnimation()
+        title.clearAnimation()
     }
 }
