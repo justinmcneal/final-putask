@@ -2,12 +2,15 @@ package com.example.puttask.fragments
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
@@ -27,11 +30,10 @@ class Lists : Fragment(R.layout.fragment_lists) {
     // This should now be an empty list that will be populated with tasks created in AddTask2
     private val taskList = mutableListOf<Task>()
 
-    private val ADD_TASK_REQUEST_CODE = 100
-
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
 
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -41,29 +43,30 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
         // Set up RecyclerView
         listsRecyclerView.layoutManager = LinearLayoutManager(context)
+
         listsAdapter = ListsAdapter(taskList, { task, isChecked ->
-            // Update the task state here if needed
             val index = taskList.indexOf(task)
             if (index != -1) {
-                taskList[index] = task.copy(isChecked = isChecked)
+                taskList[index] = task.copy(isChecked = isChecked) // This will work now
             }
         }, { task ->
-            // Handle navigation when an item is clicked
             val intent = Intent(requireContext(), TaskViewRecycler::class.java)
-            intent.putExtra("TASK_ID", task.id) // Pass the task ID or any necessary data
+            intent.putExtra("TASK_ID", task.id)
             startActivity(intent)
         })
 
         addTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == AppCompatActivity.RESULT_OK) {
-                val newTask = result.data?.getSerializableExtra("NEW_TASK") as? Task
+                val newTask = result.data?.getParcelableExtra("NEW_TASK", Task::class.java) // Updated method
                 newTask?.let {
+                    Log.d("Lists", "Received Task: $it")
                     taskList.add(it) // Add the new task to the list
                     listsAdapter.notifyDataSetChanged() // Notify adapter about the new task
                     updateNoTasksMessage() // Update UI accordingly
                 }
             }
         }
+
 
         // Set up the delete click listener
         listsAdapter.setOnDeleteClickListener { task ->

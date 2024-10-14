@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -108,6 +109,11 @@ class AddTask2 : AppCompatActivity() {
 
     private fun createTask() {
         val repeatDays = if (switchRepeat.isChecked) listOf("Monday", "Wednesday") else null // Replace with actual selected repeat days
+        val task = Task(1, "Task Name", "Description", "2024-10-14", "2024-10-15", listOf("Monday"), "Work", false)
+        Log.d("AddTask2", "Creating Task: $task")
+
+
+
         val createRequest = CreateRequest(
             task_name = etTaskName.text.toString(),
             task_description = etTaskDescription.text.toString(),
@@ -118,20 +124,40 @@ class AddTask2 : AppCompatActivity() {
         )
 
         CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<Task> = RetrofitClient.apiService.createTask(createRequest)
-            runOnUiThread {
-                if (response.isSuccessful) {
-                    val task = response.body() // Get the created task
-                    val intent = Intent()
-                    intent.putExtra("NEW_TASK", task) // Pass the new task back to the previous activity
-                    setResult(RESULT_OK, intent)
-                    finish() // Close AddTask2 and return to Lists
-                    clearFields() // Clear fields only after successfully creating the task
-                } else {
-                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+            try {
+                val response: Response<Task> = RetrofitClient.apiService.createTask(createRequest)
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        val task = response.body()
+                        Log.d("AddTask2", "API Task Response: $task")
+
+                        // Check if the task is not null before proceeding
+                        task?.let {
+                            val intent = Intent()
+                            intent.putExtra("NEW_TASK", it)
+                            setResult(RESULT_OK, intent)
+                            finish() // Finish and pass the task back to the calling activity
+                        } ?: run {
+                            Log.e("AddTask2", "API response returned null task")
+                            Toast.makeText(this@AddTask2, "Failed to create task: Task is null", Toast.LENGTH_SHORT).show()
+                        }
+
+                    } else {
+                        // Log API failure message
+                        Log.e("AddTask2", "API Failure: ${response.errorBody()?.string()}")
+                        Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                // Catch any exceptions that occur during the coroutine execution
+                Log.e("AddTask2", "Exception in API call: ${e.localizedMessage}", e)
+                runOnUiThread {
+                    Toast.makeText(this@AddTask2, "Failed to create task: Exception occurred", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+
+
     }
 
 
