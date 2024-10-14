@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
@@ -34,6 +35,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var tvNoTasks: TextView // Declare the TextView for "No tasks created"
     private lateinit var dataManager : DataManager
     private lateinit var tvUsername : TextView
+    private lateinit var tvDropdownLists: TextView
+    private lateinit var ic_sort: ImageView
+    private lateinit var popupcardviewLists: CardView
     // This should now be an empty list that will be populated with tasks created in AddTask2
     private val taskList = mutableListOf<Task>()
 
@@ -45,7 +49,35 @@ class Lists : Fragment(R.layout.fragment_lists) {
         tvNoTasks = view.findViewById(R.id.tvNotask) // Initialize the TextView
         tvUsername = view.findViewById(R.id.tvUsername)
         dataManager = DataManager(requireContext()) // Example of initializing DataManager
+        ic_sort = view.findViewById(R.id.ic_sort)
+        tvDropdownLists = view.findViewById(R.id.tvDropdownLists)
+        popupcardviewLists = view.findViewById(R.id.popupcardviewLists) // Initialize here
 
+        // Updated this lists dropdown as a customized so that icon would be inside
+        val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
+        val menuMap = mapOf(
+            R.id.allItems to "All Items",
+            R.id.personal to "Personal",
+            R.id.work to "Work",
+            R.id.school to "School",
+            R.id.social to "Social"
+        )
+
+        dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)
+
+        tvDropdownLists.setOnClickListener {
+            dropdownLists.setOnMenuItemClickListener { menuItem ->
+                menuMap[menuItem.itemId]?.let {
+                    tvDropdownLists.text = it
+                    true
+                } ?: false
+            }
+            dropdownLists.show()
+        }
+        //sort options
+        ic_sort.setOnClickListener {
+            visibilityChecker()
+        }
 
         // Set up RecyclerView
         listsRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -186,5 +218,10 @@ class Lists : Fragment(R.layout.fragment_lists) {
         taskList.addAll(newTasks)
         listsAdapter.notifyDataSetChanged()
         updateNoTasksMessage() // Update visibility based on the new task list
+    }
+    // cardview pop up for sort options
+    private fun visibilityChecker() {
+        popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+
     }
 }

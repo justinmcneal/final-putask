@@ -29,9 +29,15 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var tvTimeReminder: TextView
     private lateinit var dimBackground: View
     private lateinit var popupCardView: CardView
+    private lateinit var llButtonEnd: LinearLayout
+    private lateinit var btnRepeat: AppCompatButton
+    private lateinit var llBtn: LinearLayout
+    private lateinit var tvCancel: TextView
+    private lateinit var tvDone: TextView
     private lateinit var createButton: AppCompatButton
     private lateinit var etTaskName: EditText
     private lateinit var etTaskDescription: EditText
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,12 +53,31 @@ class AddTask2 : AppCompatActivity() {
         etTaskDescription = findViewById(R.id.taskdescription)
         tvDueDate = findViewById(R.id.tvStartDate)
         tvTimeReminder = findViewById(R.id.tvEndDate)
+        btnRepeat = findViewById(R.id.btnRepeat)
         dimBackground = findViewById(R.id.dimBackground)
         popupCardView = findViewById(R.id.popupCardView)
+        llButtonEnd = findViewById(R.id.llButtonEnd)
+        llBtn = findViewById(R.id.llBtn)
+        tvCancel = findViewById(R.id.tvCancel)
+        tvDone = findViewById(R.id.tvDone)
         createButton = findViewById(R.id.CreateButton)
         switchRepeat = findViewById(R.id.switchRepeat) // Make sure you have the correct ID here
 
+        // Repeat switch logic
+        popupCardView.visibility = View.GONE
+        switchRepeat.setOnCheckedChangeListener { _, isChecked ->
+            updateRepeatUI(isChecked)
+        }
+
+        // Popup visibility handling
+        findViewById<TextView>(R.id.tvBack).setOnClickListener { togglePopupVisibility(false) }
+        btnRepeat.setOnClickListener{
+            togglePopupVisibility(true)
+        }
+
     }
+
+
 
     private fun setupListeners() {
         findViewById<ImageButton>(R.id.btnBack).setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
@@ -63,6 +88,18 @@ class AddTask2 : AppCompatActivity() {
         findViewById<TextView>(R.id.tvCancel).setOnClickListener { clearFields(); togglePopupVisibility(false) }
         findViewById<TextView>(R.id.tvDone).setOnClickListener { createTask() }
         createButton.setOnClickListener { createTask() }
+
+        // Now these listeners are only set here, avoiding conflicts
+        tvCancel.setOnClickListener {
+            clearFields()
+            togglePopupVisibility(false)
+            switchRepeat.isChecked = false
+        }
+
+        tvDone.setOnClickListener {
+            createTask()
+            togglePopupVisibility(false)
+        }
     }
 
     private fun showCategoryPopup() {
@@ -82,6 +119,7 @@ class AddTask2 : AppCompatActivity() {
         }
     }
 
+
     private fun showDatePicker() {
         Calendar.getInstance().let { calendar ->
             DatePickerDialog(this, { _, year, month, day ->
@@ -99,7 +137,6 @@ class AddTask2 : AppCompatActivity() {
     }
 
     private fun updateRepeatUI(isChecked: Boolean) {
-        findViewById<HorizontalScrollView>(R.id.hsvDaily).visibility = if (isChecked) View.VISIBLE else View.GONE
         findViewById<LinearLayout>(R.id.llButtonEnd).visibility = if (isChecked) View.VISIBLE else View.GONE
         findViewById<LinearLayout>(R.id.llBtn).visibility = if (isChecked) View.GONE else View.VISIBLE
         popupCardView.layoutParams.height = if (isChecked) 900 else 300
