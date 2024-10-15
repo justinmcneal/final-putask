@@ -43,7 +43,6 @@ class AddTask2 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task2)
-
         // Set the callback from the Intent
         taskCallback = intent.getParcelableExtra("task_callback") // Ensure to send this from the Lists fragment
 

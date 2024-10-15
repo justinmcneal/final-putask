@@ -1,13 +1,16 @@
 package com.example.puttask
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.api.Task
+import com.example.puttask.fragments.AddTask2
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,
@@ -36,7 +39,24 @@ class ListsAdapter(
 
         // Handle item click for navigation
         holder.itemView.setOnClickListener {
-            onItemClick(task) // Trigger the onItemClick function when the item is clicked
+            try {
+                // Create the intent for AddTask2 activity
+                val intent = Intent(holder.itemView.context, AddTask2::class.java).apply {
+                    putExtra("task_name", task.task_name)
+                    putExtra("start_datetime", task.start_datetime)
+                    putExtra("end_datetime", task.end_datetime)
+                    putExtra("task_id", task.id)
+                }
+
+                // Start the AddTask2 activity
+                holder.itemView.context.startActivity(intent)
+
+                // Trigger the onItemClick function when the item is clicked
+                onItemClick(task)
+            } catch (e: Exception) {
+                Toast.makeText(holder.itemView.context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                e.printStackTrace() // Log the exception for debugging
+            }
         }
 
         // Handle delete button click
