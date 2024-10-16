@@ -100,41 +100,38 @@ class AddTask2 : AppCompatActivity() {
     private fun showDatePicker() {
         Calendar.getInstance().let { calendar ->
             DatePickerDialog(this, { _, year, month, day ->
-                tvDueDate.text = String.format("%04d/%02d/%02d", year, month + 1, day)
+                // Create a calendar instance for the selected date
+                val selectedDateCalendar = Calendar.getInstance().apply {
+                    set(year, month, day)
+                }
+
+                // Get the current date for comparison
+                val currentDate = Calendar.getInstance()
+
+                // Check if the selected date is in the past
+                if (selectedDateCalendar.before(currentDate)) {
+                    Toast.makeText(this, "Selected date cannot be in the past", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Format and display the selected date
+                    tvDueDate.text = String.format("%04d/%02d/%02d", year, month + 1, day)
+                }
             }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
         }
     }
 
+
     private fun showTimePicker() {
         Calendar.getInstance().let { calendar ->
             TimePickerDialog(this, { _, hourOfDay, minute ->
-                val selectedTime = String.format("%02d:%02d:00", hourOfDay, minute)
-                val dateText = tvDueDate.text.toString()
+                // Format the selected time as HH:mm (only time)
+                val selectedTime = String.format("%02d:%02d", hourOfDay, minute)
 
-                if (dateText.isNotEmpty()) {
-                    tvTimeReminder.text = selectedTime
-
-                    // Set end datetime (e.g., 1 hour after the start time)
-                    val endCalendar = Calendar.getInstance()
-                    endCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay + 1) // 1 hour later
-                    endCalendar.set(Calendar.MINUTE, minute)
-
-                    val endDateString = String.format("%04d-%02d-%02d %02d:%02d:00",
-                        endCalendar.get(Calendar.YEAR),
-                        endCalendar.get(Calendar.MONTH) + 1,
-                        endCalendar.get(Calendar.DAY_OF_MONTH),
-                        endCalendar.get(Calendar.HOUR_OF_DAY),
-                        endCalendar.get(Calendar.MINUTE)
-                    )
-
-                    // Store the end datetime in a variable for later use
-                    tvTimeReminder.text = endDateString
-                } else {
-                    Toast.makeText(this, "Please select a date first", Toast.LENGTH_SHORT).show()
-                }
+                // Display the selected time in the TextView
+                tvTimeReminder.text = selectedTime
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
     }
+
 
 
     private fun updateRepeatUI(isChecked: Boolean) {
@@ -162,7 +159,7 @@ class AddTask2 : AppCompatActivity() {
         val endDateTimeString = "${tvDueDate.text} ${tvTimeReminder.text}" // Assume you set end time properly elsewhere
 
         // Parse the combined strings into Date objects
-        val dateFormat = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()) // Adjust format to match your inputs
+        val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
         val startDateTime = dateFormat.parse(startDateTimeString)
         val endDateTime = dateFormat.parse(endDateTimeString) // You should set a different end time for a valid comparison
 
@@ -173,8 +170,8 @@ class AddTask2 : AppCompatActivity() {
                 val createRequest = CreateRequest(
                     task_name = etTaskName.text.toString(),
                     task_description = etTaskDescription.text.toString(),
-                    start_datetime = startDateTimeString,
-                    end_datetime = endDateTimeString,
+                    end_date = startDateTimeString,
+                    end_time = endDateTimeString,
                     repeat_days = if (switchRepeat.isChecked) repeatDays else null,
                     category = tvList.text.toString()
                 )
@@ -184,11 +181,13 @@ class AddTask2 : AppCompatActivity() {
                     val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
                     runOnUiThread {
                         if (response.isSuccessful) {
-                            // Call the callback method in the Lists fragment
-                            (taskCallback)?.onTaskCreated(response.body()!!) // Cast and call the method
+                            runOnUiThread {
+                                taskCallback?.onTaskCreated(response.body()!!) // Check for null or handle it
+                            }
                             clearFields()
-                            navigateToMainActivity() // Navigate back to MainActivity
-                        } else {
+                            navigateToMainActivity()
+                        }
+                        else {
                             Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                         }
                     }

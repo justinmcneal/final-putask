@@ -29,7 +29,7 @@ class ListsAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
         holder.tvTitle.text = task.task_name
-        holder.tvTime.text = task.start_datetime // Adjust this if needed
+        holder.tvTime.text = task.end_date // Adjust this if needed
 
         // Handle checkbox state change
         holder.checkBox.setOnCheckedChangeListener(null) // Clear previous listener
@@ -43,8 +43,8 @@ class ListsAdapter(
                 // Create the intent for AddTask2 activity
                 val intent = Intent(holder.itemView.context, AddTask2::class.java).apply {
                     putExtra("task_name", task.task_name)
-                    putExtra("start_datetime", task.start_datetime)
-                    putExtra("end_datetime", task.end_datetime)
+                    putExtra("end_date", task.end_date)
+                    putExtra("end_time", task.end_time)
                     putExtra("task_id", task.id)
                 }
 
