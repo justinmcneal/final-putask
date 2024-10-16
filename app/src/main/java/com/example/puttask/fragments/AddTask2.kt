@@ -184,11 +184,13 @@ class AddTask2 : AppCompatActivity() {
                     val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
                     runOnUiThread {
                         if (response.isSuccessful) {
-                            // Call the callback method in the Lists fragment
-                            (taskCallback)?.onTaskCreated(response.body()!!) // Cast and call the method
+                            runOnUiThread {
+                                taskCallback?.onTaskCreated(response.body()!!) // Check for null or handle it
+                            }
                             clearFields()
-                            navigateToMainActivity() // Navigate back to MainActivity
-                        } else {
+                            navigateToMainActivity()
+                        }
+                        else {
                             Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                         }
                     }

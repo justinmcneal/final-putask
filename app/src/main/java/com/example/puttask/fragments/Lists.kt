@@ -14,13 +14,14 @@ import com.example.puttask.R
 import com.example.puttask.TaskViewRecycler
 import com.example.puttask.api.Task
 
-class Lists : Fragment(R.layout.fragment_lists) {
+class Lists : Fragment(R.layout.fragment_lists), TaskCallback { // Implement TaskCallback here
 
     private lateinit var listsRecyclerView: RecyclerView
     private lateinit var listsAdapter: ListsAdapter
     private lateinit var tvNoTasks: TextView
     private val taskList = mutableListOf<Task>()
     private val completedTasks = mutableSetOf<Int>() // Set to keep track of completed task IDs
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -52,6 +53,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
         listsRecyclerView.adapter = listsAdapter
         updateNoTasksMessage()
+    }
+
+    // Implement onTaskCreated method
+    override fun onTaskCreated(task: Task) {
+        taskList.add(task)  // Add the new task to your list
+        listsAdapter.notifyItemInserted(taskList.size - 1) // Notify adapter
+        updateNoTasksMessage() // Update UI if needed
     }
 
     private fun showDeleteConfirmationDialog(task: Task) {
@@ -87,12 +95,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         updateNoTasksMessage()
     }
 
-    fun onTaskCreated(task: Task) {
-        taskList.add(task)
-        listsAdapter.notifyItemInserted(taskList.size - 1)
-        updateNoTasksMessage()
-    }
-
     private fun deleteTask(task: Task) {
         val index = taskList.indexOf(task)
         if (index != -1) {
@@ -104,10 +106,5 @@ class Lists : Fragment(R.layout.fragment_lists) {
         } else {
             Toast.makeText(context, "Task not found.", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    // Method to check if a task is completed
-    fun isTaskCompleted(task: Task): Boolean {
-        return completedTasks.contains(task.id)
     }
 }
