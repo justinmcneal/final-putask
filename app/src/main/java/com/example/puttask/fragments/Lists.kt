@@ -13,6 +13,7 @@ import com.example.puttask.ListsAdapter
 import com.example.puttask.R
 import com.example.puttask.TaskViewRecycler
 import com.example.puttask.api.Task
+import com.example.puttask.fragments.AddTask2.Companion.taskCallback
 
 class Lists : Fragment(R.layout.fragment_lists), TaskCallback { // Implement TaskCallback here
 
@@ -42,8 +43,8 @@ class Lists : Fragment(R.layout.fragment_lists), TaskCallback { // Implement Tas
                 listsAdapter.notifyItemChanged(index) // Notify adapter about item change
             }
         }, { task ->
-            val intent = Intent(requireContext(), TaskViewRecycler::class.java)
-            intent.putExtra("TASK_ID", task.id)
+            AddTask2.taskCallback = this // Assign Lists fragment as callback
+            val intent = Intent(requireContext(), AddTask2::class.java)
             startActivity(intent)
         })
 

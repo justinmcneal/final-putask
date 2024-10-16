@@ -22,6 +22,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class AddTask2 : AppCompatActivity() {
+    companion object {
+        var taskCallback: TaskCallback? = null
+    }
 
     private lateinit var addIcon: ImageView
     private lateinit var tvList: TextView
@@ -151,25 +154,19 @@ class AddTask2 : AppCompatActivity() {
     }
 
     private fun createTask() {
-        // Ensure that both due date and time are set
         if (tvDueDate.text.isEmpty() || tvTimeReminder.text.isEmpty()) {
             Toast.makeText(this, "Please select both due date and time", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Combine date and time into a single datetime string
         val endDateString = "${tvDueDate.text} ${tvTimeReminder.text}"
-        val endTimeString = "${tvDueDate.text} ${tvTimeReminder.text}" // Assume you set end time properly elsewhere
-
-        // Parse the combined strings into Date objects
-        val dateFormat = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()) // Adjust format to match your inputs
+        val endTimeString = "${tvDueDate.text} ${tvTimeReminder.text}"
+        val dateFormat = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault())
         val startDateTime = dateFormat.parse(endDateString)
-        val endDateTime = dateFormat.parse(endTimeString) // You should set a different end time for a valid comparison
+        val endDateTime = dateFormat.parse(endTimeString)
 
-        // Validate the parsed date objects
         if (startDateTime != null && endDateTime != null) {
             if (startDateTime.before(endDateTime)) {
-                // Create request if date validations pass
                 val createRequest = CreateRequest(
                     task_name = etTaskName.text.toString(),
                     task_description = etTaskDescription.text.toString(),
@@ -179,18 +176,16 @@ class AddTask2 : AppCompatActivity() {
                     category = tvList.text.toString()
                 )
 
-                // Launch coroutine to make API call
                 CoroutineScope(Dispatchers.IO).launch {
                     val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
                     runOnUiThread {
                         if (response.isSuccessful) {
-                            runOnUiThread {
-                                taskCallback?.onTaskCreated(response.body()!!) // Check for null or handle it
-                            }
+                            val newTask = response.body() ?: return@runOnUiThread // Check for null here
+                            taskCallback?.onTaskCreated(newTask) // Call the callback with the new task
+
                             clearFields()
                             navigateToMainActivity()
-                        }
-                        else {
+                        } else {
                             Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -202,6 +197,7 @@ class AddTask2 : AppCompatActivity() {
             Toast.makeText(this, "Invalid date/time selected", Toast.LENGTH_SHORT).show()
         }
     }
+
 
 
     private fun clearFields() {
