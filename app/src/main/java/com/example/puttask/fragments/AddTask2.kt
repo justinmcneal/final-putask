@@ -158,13 +158,13 @@ class AddTask2 : AppCompatActivity() {
         }
 
         // Combine date and time into a single datetime string
-        val startDateTimeString = "${tvDueDate.text} ${tvTimeReminder.text}"
-        val endDateTimeString = "${tvDueDate.text} ${tvTimeReminder.text}" // Assume you set end time properly elsewhere
+        val endDateString = "${tvDueDate.text} ${tvTimeReminder.text}"
+        val endTimeString = "${tvDueDate.text} ${tvTimeReminder.text}" // Assume you set end time properly elsewhere
 
         // Parse the combined strings into Date objects
         val dateFormat = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()) // Adjust format to match your inputs
-        val startDateTime = dateFormat.parse(startDateTimeString)
-        val endDateTime = dateFormat.parse(endDateTimeString) // You should set a different end time for a valid comparison
+        val startDateTime = dateFormat.parse(endDateString)
+        val endDateTime = dateFormat.parse(endTimeString) // You should set a different end time for a valid comparison
 
         // Validate the parsed date objects
         if (startDateTime != null && endDateTime != null) {
@@ -173,8 +173,8 @@ class AddTask2 : AppCompatActivity() {
                 val createRequest = CreateRequest(
                     task_name = etTaskName.text.toString(),
                     task_description = etTaskDescription.text.toString(),
-                    end_date = startDateTimeString,
-                    end_time = endDateTimeString,
+                    end_date = endDateString,
+                    end_time = endTimeString,
                     repeat_days = if (switchRepeat.isChecked) repeatDays else null,
                     category = tvList.text.toString()
                 )

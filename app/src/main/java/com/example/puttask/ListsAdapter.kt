@@ -43,8 +43,8 @@ class ListsAdapter(
                 // Create the intent for AddTask2 activity
                 val intent = Intent(holder.itemView.context, AddTask2::class.java).apply {
                     putExtra("task_name", task.task_name)
-                    putExtra("start_datetime", task.end_date)
-                    putExtra("end_datetime", task.end_time)
+                    putExtra("end_date", task.end_date)
+                    putExtra("end_time", task.end_time)
                     putExtra("task_id", task.id)
                 }
 
