@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import com.example.puttask.api.DataManager
+import com.example.puttask.api.Task
 import com.example.puttask.authentications.LoginSignin
 import com.example.puttask.databinding.ActivityMainBinding
 import com.example.puttask.fragments.*
@@ -20,6 +21,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var dataManager: DataManager
+    private lateinit var adapter: ListsAdapter
+    private val tasks = mutableListOf<Task>()
+
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -90,6 +94,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.drawerLayout.closeDrawer(GravityCompat.END)
         return true
     }
+
+
 
     private fun logout() {
         dataManager.clearLoginData() // Clear login data

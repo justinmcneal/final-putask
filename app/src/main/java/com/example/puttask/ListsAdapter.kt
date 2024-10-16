@@ -15,7 +15,7 @@ import com.example.puttask.fragments.AddTask2
 class ListsAdapter(
     private val taskList: MutableList<Task>,
     private val onTaskCheckedChange: (Task, Boolean) -> Unit,
-    private val onItemClick: (Task) -> Unit // Add click listener for the entire item
+    private val onItemClick: (Task) -> Unit // Click listener for the entire item
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
     private var onDeleteClick: ((Task) -> Unit)? = null
@@ -29,11 +29,11 @@ class ListsAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
         holder.tvTitle.text = task.task_name
-        holder.tvTime.text = task.end_date // Ensure this matches your desired format
+        holder.tvTime.text = task.end_date // Adjust this if needed
 
         // Handle checkbox state change
         holder.checkBox.setOnCheckedChangeListener(null) // Clear previous listener
-        holder.checkBox.isChecked = task.isChecked // Example property for checked state
+        holder.checkBox.isChecked = task.isChecked // Maintain the checked state
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
             onTaskCheckedChange(task, isChecked) // Notify the listener of the change
         }
@@ -47,7 +47,7 @@ class ListsAdapter(
                     putExtra("end_date", task.end_date)
                     putExtra("end_time", task.end_time)
                     putExtra("task_id", task.id)
-                    // Include any additional task properties as needed
+                    putExtra("task_description", task.task_description) // Include task description if needed
                 }
 
                 // Start the AddTask2 activity
