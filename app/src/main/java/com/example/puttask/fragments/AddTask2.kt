@@ -173,8 +173,8 @@ class AddTask2 : AppCompatActivity() {
                 val createRequest = CreateRequest(
                     task_name = etTaskName.text.toString(),
                     task_description = etTaskDescription.text.toString(),
-                    start_datetime = startDateTimeString,
-                    end_datetime = endDateTimeString,
+                    end_date = startDateTimeString,
+                    end_time = endDateTimeString,
                     repeat_days = if (switchRepeat.isChecked) repeatDays else null,
                     category = tvList.text.toString()
                 )
