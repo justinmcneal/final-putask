@@ -29,10 +29,11 @@ class ListsAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
         holder.tvTitle.text = task.task_name
-        holder.tvTime.text = task.end_date // Adjust this if needed
+        holder.tvTime.text = task.end_date // Ensure this matches your desired format
 
         // Handle checkbox state change
         holder.checkBox.setOnCheckedChangeListener(null) // Clear previous listener
+        holder.checkBox.isChecked = task.isChecked // Example property for checked state
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
             onTaskCheckedChange(task, isChecked) // Notify the listener of the change
         }
@@ -46,6 +47,7 @@ class ListsAdapter(
                     putExtra("end_date", task.end_date)
                     putExtra("end_time", task.end_time)
                     putExtra("task_id", task.id)
+                    // Include any additional task properties as needed
                 }
 
                 // Start the AddTask2 activity
@@ -71,6 +73,13 @@ class ListsAdapter(
     fun addTask(task: Task) {
         taskList.add(task)
         notifyItemInserted(taskList.size - 1) // Notify adapter of the new item
+    }
+
+    // Method to update the list of tasks, useful for refreshing after creation
+    fun updateTasks(newTasks: List<Task>) {
+        taskList.clear()
+        taskList.addAll(newTasks)
+        notifyDataSetChanged() // Notify adapter to refresh
     }
 
     // Method to set the delete click listener

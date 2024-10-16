@@ -164,14 +164,23 @@ class AddTask2 : AppCompatActivity() {
         val endDateTime = dateFormat.parse(endDateTimeString) // You should set a different end time for a valid comparison
 
         // Validate the parsed date objects
-        if (startDateTime != null && endDateTime != null) {
-            if (startDateTime.before(endDateTime)) {
-                // Create request if date validations pass
+        // Validate that both end date and time are set
+        if (tvDueDate.text.isNotEmpty() && tvTimeReminder.text.isNotEmpty()) {
+            // Combine end date and time into a single datetime string
+            val endDateTimeString = "${tvDueDate.text} ${tvTimeReminder.text}"
+
+            // Parse the combined strings into Date objects
+            val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()) // Adjust format to match your inputs
+            val endDateTime = dateFormat.parse(endDateTimeString)
+
+            // Validate the parsed endDateTime object
+            if (endDateTime != null) {
+                // Create request if validations pass
                 val createRequest = CreateRequest(
                     task_name = etTaskName.text.toString(),
                     task_description = etTaskDescription.text.toString(),
-                    end_date = startDateTimeString,
-                    end_time = endDateTimeString,
+                    end_date = tvDueDate.text.toString(), // Send end date directly
+                    end_time = tvTimeReminder.text.toString(), // Send end time directly
                     repeat_days = if (switchRepeat.isChecked) repeatDays else null,
                     category = tvList.text.toString()
                 )
@@ -181,23 +190,21 @@ class AddTask2 : AppCompatActivity() {
                     val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
                     runOnUiThread {
                         if (response.isSuccessful) {
-                            runOnUiThread {
-                                taskCallback?.onTaskCreated(response.body()!!) // Check for null or handle it
-                            }
+                            taskCallback?.onTaskCreated(response.body()!!) // Check for null or handle it
                             clearFields()
                             navigateToMainActivity()
-                        }
-                        else {
+                        } else {
                             Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
             } else {
-                Toast.makeText(this, "Start date/time must be before end date/time", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Invalid date/time selected", Toast.LENGTH_SHORT).show()
             }
         } else {
-            Toast.makeText(this, "Invalid date/time selected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please select both end date and time", Toast.LENGTH_SHORT).show()
         }
+
     }
 
 
