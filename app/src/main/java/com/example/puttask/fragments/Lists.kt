@@ -3,6 +3,7 @@ package com.example.puttask.fragments
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,8 +12,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
 import com.example.puttask.TaskViewRecycler
+import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.example.puttask.databinding.FragmentListsBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.Response
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
@@ -22,7 +29,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private lateinit var listsAdapter: ListsAdapter
     private val taskList = mutableListOf<Task>()
-    private val completedTasks = mutableSetOf<String>() // Assuming task ID is an Integer
+    private val completedTasks = mutableSetOf<String>() // Assuming task ID is a String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,6 +44,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView() // Initialize RecyclerView
+        fetchTasks() // Fetch tasks from API
         updateNoTasksMessage() // Update UI message if no tasks are available
     }
 
@@ -53,6 +61,24 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
 
         binding.listsrecyclerView.adapter = listsAdapter // Set adapter to RecyclerView
+    }
+
+    private fun fetchTasks() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
+            if (response.isSuccessful) {
+                response.body()?.let { tasks ->
+                    taskList.clear()
+                    taskList.addAll(tasks)
+                    withContext(Dispatchers.Main) {
+                        listsAdapter.notifyDataSetChanged() // Notify adapter about data change
+                        updateNoTasksMessage() // Update visibility message
+                    }
+                }
+            } else {
+                Log.e("ListsFragment", "Error fetching tasks: ${response.message()}")
+            }
+        }
     }
 
     private fun handleCheckboxToggle(task: Task, isChecked: Boolean) {
