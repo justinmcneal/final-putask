@@ -65,18 +65,22 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private fun fetchTasks() {
         CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
-            if (response.isSuccessful) {
-                response.body()?.let { tasks ->
-                    taskList.clear()
-                    taskList.addAll(tasks)
-                    withContext(Dispatchers.Main) {
-                        listsAdapter.notifyDataSetChanged() // Notify adapter about data change
-                        updateNoTasksMessage() // Update visibility message
+            try {
+                val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
+                if (response.isSuccessful) {
+                    response.body()?.let { tasks ->
+                        taskList.clear()
+                        taskList.addAll(tasks)
+                        withContext(Dispatchers.Main) {
+                            listsAdapter.notifyDataSetChanged() // Notify adapter about data change
+                            updateNoTasksMessage() // Update visibility message
+                        }
                     }
+                } else {
+                    Log.e("ListsFragment", "Error fetching tasks: ${response.message()}")
                 }
-            } else {
-                Log.e("ListsFragment", "Error fetching tasks: ${response.message()}")
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception fetching tasks", e)
             }
         }
     }
@@ -139,12 +143,12 @@ class Lists : Fragment(R.layout.fragment_lists) {
             taskList.removeAt(index) // Remove the task from the list
             listsAdapter.notifyItemRemoved(index) // Notify adapter about the removal
             completedTasks.remove(task.id) // Remove from completed tasks if it was marked as completed
-            updateNoTasksMessage() // Check if the "No tasks" message should be shown
+            updateNoTasksMessage() // Update the visibility message
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null // Clean up binding reference to prevent memory leaks
+        _binding = null // Clean up the view binding to prevent memory leaks
     }
 }
