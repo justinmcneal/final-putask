@@ -117,7 +117,6 @@ class AddTask2 : AppCompatActivity() {
     }
 
     private fun createTask() {
-        // Ensure all required fields are not empty
         if (etTaskName.text.isEmpty() || etTaskDescription.text.isEmpty() || tvDueDate.text.isEmpty() || tvTimeReminder.text.isEmpty() || tvList.text.isEmpty()) {
             Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show()
             return

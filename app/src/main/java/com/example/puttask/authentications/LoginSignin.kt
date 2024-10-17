@@ -30,13 +30,11 @@ class LoginSignin : AppCompatActivity() {
         btnLogIn = findViewById(R.id.btnLogIn)
 
         btnSignUp.setOnClickListener {
-            // Start SignUpActivity
             val intent = Intent(this, SignUp::class.java)
             startActivity(intent)
         }
 
         btnLogIn.setOnClickListener {
-            // Start LogInActivity
             val intent = Intent(this, LogIn::class.java)
             startActivity(intent)
         }

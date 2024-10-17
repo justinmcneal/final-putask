@@ -30,13 +30,11 @@ class LogIn : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log_in)
 
-        // Initialize views
         btnLogin = findViewById(R.id.btnLog)
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
         ivTogglePasswordVisibility = findViewById(R.id.ivTogglePasswordVisibility)
 
-        // Set click listener for the login button
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
@@ -46,12 +44,10 @@ class LogIn : AppCompatActivity() {
             }
         }
 
-        // Set click listener for signup link
         findViewById<TextView>(R.id.othersSign).setOnClickListener {
             startActivity(Intent(this, SignUp::class.java))
         }
 
-        // Toggle password visibility
         ivTogglePasswordVisibility.setOnClickListener {
             togglePasswordVisibility(etPassword, ivTogglePasswordVisibility)
         }

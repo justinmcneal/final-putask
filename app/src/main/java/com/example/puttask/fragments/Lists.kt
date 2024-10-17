@@ -113,11 +113,24 @@ class Lists : Fragment(R.layout.fragment_lists) {
     }
 
     private fun deleteTask(task: Task) {
-        val index = taskList.indexOf(task)
-        if (index != -1) {
-            taskList.removeAt(index)
-            listsAdapter.notifyItemRemoved(index)
-            updateNoTasksMessage()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.getApiService(requireContext()).deleteTask(task.id)
+                if (response.isSuccessful) {
+                    withContext(Dispatchers.Main) {
+                        val index = taskList.indexOf(task)
+                        if (index != -1) {
+                            taskList.removeAt(index)
+                            listsAdapter.notifyItemRemoved(index)
+                            updateNoTasksMessage()
+                        }
+                    }
+                } else {
+                    Log.e("ListsFragment", "Error deleting task: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception deleting task", e)
+            }
         }
     }
 

@@ -26,8 +26,6 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
 
         etMessage = view.findViewById(R.id.etMessage)
         btnSubmit = view.findViewById(R.id.btnSubmit)
-
-        // Initialize the API service
         contactApiService = RetrofitClient.getApiService(requireContext())
 
         btnSubmit.setOnClickListener {

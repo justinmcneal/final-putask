@@ -33,7 +33,6 @@ class SignUp : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
 
-        // Initialize views
         btnSign = findViewById(R.id.btnSign)
         etUsername = findViewById(R.id.etUsername)
         etEmail = findViewById(R.id.etEmail)
@@ -42,7 +41,6 @@ class SignUp : AppCompatActivity() {
         ivTogglePasswordVisibility = findViewById(R.id.ivTogglePasswordVisibility)
         ivToggleConfirmPasswordVisibility = findViewById(R.id.ivToggleConfirmPasswordVisibility)
 
-        // Set click listeners
         btnSign.setOnClickListener {
             val username = etUsername.text.toString().trim()
             val email = etEmail.text.toString().trim()
@@ -58,7 +56,6 @@ class SignUp : AppCompatActivity() {
             startActivity(Intent(this, LogIn::class.java))
         }
 
-        // Toggle password visibility
         ivTogglePasswordVisibility.setOnClickListener {
             togglePasswordVisibility(etPassword, ivTogglePasswordVisibility)
         }
@@ -119,7 +116,7 @@ class SignUp : AppCompatActivity() {
 
                     showToast(message)
                     startActivity(Intent(this@SignUp, MainActivity::class.java))
-                    finish() // Close the SignUp screen
+                    finish()
                 } else {
                     val errorBody = response.errorBody()?.string()
                     showToast(errorBody ?: "Registration failed")

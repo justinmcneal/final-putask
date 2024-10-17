@@ -31,20 +31,15 @@ class Profile : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+        savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        // Initialize DataManager
         dataManager = DataManager(requireContext())
-
         usernameTextView = view.findViewById(R.id.etUsername)
         emailTextView = view.findViewById(R.id.tvEmail)
         changePasswordTextView = view.findViewById(R.id.tvChangePassword)
         btnSave = view.findViewById(R.id.btnSave)
-
         apiService = RetrofitClient.getApiService(requireContext())
-
         loadUserProfile()
 
         changePasswordTextView.setOnClickListener {
@@ -56,7 +51,6 @@ class Profile : Fragment() {
             val newUsername = usernameTextView.text.toString() // Get the new username
             updateUsername(newUsername)
         }
-
         return view
     }
 

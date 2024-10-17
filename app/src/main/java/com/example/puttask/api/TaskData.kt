@@ -73,6 +73,5 @@ data class UpdateRequest(
 
 // Response after deleting a task
 data class DeleteResponse(
-    val success: Boolean,
-    val message: String?
+        val message: String?
 )
