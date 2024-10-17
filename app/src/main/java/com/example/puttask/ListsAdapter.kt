@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.api.Task
 import com.example.puttask.fragments.AddTask2
+import com.example.puttask.fragments.Lists
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,
@@ -50,6 +51,10 @@ class ListsAdapter(
                 putExtra("end_date", task.end_date)
                 putExtra("end_time", task.end_time)
             }
+            // Use the task's ID to fetch its details from the server
+            (holder.itemView.context as? Lists)?.fetchTaskById(task.id)
+            onItemClick(task)
+
             (holder.itemView.context as Activity).startActivityForResult(intent, REQUEST_CODE_EDIT_TASK)
             onItemClick(task)
         }

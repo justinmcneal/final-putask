@@ -84,6 +84,36 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
+    fun fetchTaskById(taskId: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val response: Response<Task> = RetrofitClient.getApiService(requireContext()).getTaskById(taskId)
+            if (response.isSuccessful && response.body() != null) {
+                val task = response.body()!!
+
+                // Use the task object as needed, e.g., navigate to a details page
+                requireActivity().runOnUiThread {
+                    showTaskDetails(task)
+                }
+            } else {
+                requireActivity().runOnUiThread {
+                    Toast.makeText(requireContext(), "Failed to load task details", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun showTaskDetails(task: Task) {
+        val intent = Intent(requireContext(), TaskViewRecycler::class.java).apply {
+            putExtra("TASK_ID", task.id)
+            putExtra("TASK_NAME", task.task_name)
+            putExtra("TASK_DESCRIPTION", task.task_description)
+            putExtra("END_DATE", task.end_date)
+            putExtra("END_TIME", task.end_time)
+            // Pass other relevant task details if needed
+        }
+        startActivity(intent)
+    }
+
     private fun showDeleteConfirmationDialog(task: Task) {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Delete Task")
