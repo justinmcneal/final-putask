@@ -37,14 +37,14 @@ class AddTask2 : AppCompatActivity() {
     // Newly added variable for repeat days
     private var repeatDays: MutableList<String> = mutableListOf()
 
-    private var taskCallback: TaskCallback? = null
+    //private var taskCallback: TaskCallback? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task2)
         // Set the callback from the Intent
-        taskCallback = intent.getParcelableExtra("task_callback") // Ensure to send this from the Lists fragment
+        //taskCallback = intent.getParcelableExtra("task_callback") // Esure to send this from the Listsn fragment
 
         initViews()
         setupListeners()
@@ -192,7 +192,7 @@ class AddTask2 : AppCompatActivity() {
                     val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
                     runOnUiThread {
                         if (response.isSuccessful) {
-                            taskCallback?.onTaskCreated(response.body()!!) // Check for null or handle it
+                            //taskCallback?.onTaskCreated(response.body()!!) // Check for null or handle it
                             clearFields()
                             navigateToMainActivity()
                         } else {
@@ -225,7 +225,7 @@ class AddTask2 : AppCompatActivity() {
     }
 
     private fun navigateToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, Lists::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK) // Clear the activity stack
         startActivity(intent) // Navigate to MainActivity
         finish() // Optional: Finish the current activity
