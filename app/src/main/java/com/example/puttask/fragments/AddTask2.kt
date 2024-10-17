@@ -185,6 +185,8 @@ class AddTask2 : AppCompatActivity() {
                     category = tvList.text.toString()
                 )
 
+                //fuck this shit
+
                 // Launch coroutine to make API call
                 CoroutineScope(Dispatchers.IO).launch {
                     val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
