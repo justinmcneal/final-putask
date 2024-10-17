@@ -30,17 +30,21 @@ class ListsAdapter(
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
+
+        // Debugging: Log the task being bound
+        println("Binding task: ${task.task_name}")
+
         holder.tvTitle.text = task.task_name
         holder.tvTime.text = task.end_date
 
         // Removed the checkbox handling
         holder.itemView.setOnClickListener {
             val intent = Intent(holder.itemView.context, AddTask2::class.java).apply {
-                putExtra("task_id", task.id) // Ensure task.id is Int
-                putExtra("task_name", task.task_name) // Now required, non-nullable String
-                putExtra("task_description", task.task_description) // Now required, non-nullable String
-                putExtra("end_date", task.end_date) // Now required, non-nullable String
-                putExtra("end_time", task.end_time) // Now required, non-nullable String
+                putExtra("task_id", task.id)
+                putExtra("task_name", task.task_name)
+                putExtra("task_description", task.task_description)
+                putExtra("end_date", task.end_date)
+                putExtra("end_time", task.end_time)
             }
             (holder.itemView.context as Activity).startActivityForResult(intent, REQUEST_CODE_EDIT_TASK)
             onItemClick(task)
@@ -79,7 +83,6 @@ class ListsAdapter(
     }
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // Removed the CheckBox reference
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         val deleteOption: ImageButton = itemView.findViewById(R.id.ic_delete)

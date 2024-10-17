@@ -23,7 +23,6 @@ import retrofit2.Response
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
-    // View Binding
     private var _binding: FragmentListsBinding? = null
     private val binding get() = _binding!!
 
@@ -42,24 +41,24 @@ class Lists : Fragment(R.layout.fragment_lists) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupRecyclerView() // Initialize RecyclerView
-        fetchTasks() // Fetch tasks from API
-        updateNoTasksMessage() // Update UI message if no tasks are available
+        setupRecyclerView()
+        fetchTasks()
+        updateNoTasksMessage()
     }
 
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
 
-        // Initialize ListsAdapter without checkbox handling
+        // Initialize adapter
         listsAdapter = ListsAdapter(taskList) { task ->
-            handleTaskClick(task) // Pass the task click handler
+            handleTaskClick(task)
         }
 
         listsAdapter.setOnDeleteClickListener { task ->
-            showDeleteConfirmationDialog(task) // Show a confirmation dialog when deleting
+            showDeleteConfirmationDialog(task)
         }
 
-        binding.listsrecyclerView.adapter = listsAdapter // Set adapter to RecyclerView
+        binding.listsrecyclerView.adapter = listsAdapter
     }
 
     private fun fetchTasks() {
@@ -68,13 +67,14 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
                 if (response.isSuccessful) {
                     response.body()?.let { tasks ->
-                        Log.d("ListsFragment", "Fetched tasks: ${tasks.size}") // Log the number of tasks fetched
-                        taskList.clear()
-                        taskList.addAll(tasks)
-                        Log.d("ListsFragment", "Tasks in list after adding: ${taskList.size}") // Log the size after adding
+                        Log.d("ListsFragment", "Fetched tasks: ${tasks.size}")
+
+                        // Clear and update task list on the main thread
                         withContext(Dispatchers.Main) {
-                            listsAdapter.notifyDataSetChanged() // Notify adapter about data change
-                            updateNoTasksMessage() // Update visibility message
+                            taskList.clear()
+                            taskList.addAll(tasks)
+                            listsAdapter.notifyDataSetChanged()
+                            updateNoTasksMessage()
                         }
                     }
                 } else {
@@ -86,10 +86,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
-
     private fun handleTaskClick(task: Task) {
         val intent = Intent(requireContext(), TaskViewRecycler::class.java)
-        intent.putExtra("TASK_ID", task.id) // Pass the task ID to the next activity
+        intent.putExtra("TASK_ID", task.id)
         startActivity(intent)
     }
 
@@ -100,7 +99,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
             .setPositiveButton("Delete") { _, _ -> deleteTask(task) }
             .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
             .create()
-            .show() // Show the dialog
+            .show()
     }
 
     private fun updateNoTasksMessage() {
@@ -113,31 +112,17 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
-    fun onTaskCreated(task: Task) {
-        taskList.add(task)
-        listsAdapter.notifyItemInserted(taskList.size - 1) // Notify adapter about the new task
-        updateNoTasksMessage() // Update the visibility message
-    }
-
-    fun updateTask(updatedTask: Task) {
-        val index = taskList.indexOfFirst { it.id == updatedTask.id }
-        if (index != -1) {
-            taskList[index] = updatedTask // Update the task in the list
-            listsAdapter.notifyItemChanged(index) // Notify adapter to refresh this specific item
-        }
-    }
-
     private fun deleteTask(task: Task) {
         val index = taskList.indexOf(task)
         if (index != -1) {
-            taskList.removeAt(index) // Remove the task from the list
-            listsAdapter.notifyItemRemoved(index) // Notify adapter about the removal
-            updateNoTasksMessage() // Update the visibility message
+            taskList.removeAt(index)
+            listsAdapter.notifyItemRemoved(index)
+            updateNoTasksMessage()
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null // Clean up the view binding to prevent memory leaks
+        _binding = null
     }
 }
