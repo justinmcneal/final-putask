@@ -27,11 +27,17 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private val taskList = mutableListOf<Task>()
     private val completedTasks = mutableSetOf<Int>()
 
+    companion object {
+        private const val REQUEST_CODE_ADD_TASK = 1001
+
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         listsRecyclerView = view.findViewById(R.id.listsrecyclerView)
         tvNoTasks = view.findViewById(R.id.tvNotask)
+
 
         listsRecyclerView.layoutManager = LinearLayoutManager(context)
         listsAdapter = ListsAdapter(taskList, { task, isChecked ->
@@ -47,9 +53,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }, { task ->
             // Handle item click to view task details
-            val intent = Intent(requireContext(), TaskViewRecycler::class.java)
+            val intent = Intent(requireContext(), AddTask2::class.java)
             intent.putExtra("TASK_ID", task.id) // Pass the task ID
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_CODE_ADD_TASK)
         })
 
         listsAdapter.setOnDeleteClickListener { task ->
