@@ -5,7 +5,6 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -14,7 +13,6 @@ import com.example.puttask.fragments.AddTask2
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,
-    private val onTaskCheckedChange: (Task, Boolean) -> Unit,
     private val onItemClick: (Task) -> Unit
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
@@ -35,12 +33,7 @@ class ListsAdapter(
         holder.tvTitle.text = task.task_name
         holder.tvTime.text = task.end_date
 
-        holder.checkBox.setOnCheckedChangeListener(null)
-        holder.checkBox.isChecked = task.isChecked
-        holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-            onTaskCheckedChange(task, isChecked)
-        }
-
+        // Removed the checkbox handling
         holder.itemView.setOnClickListener {
             val intent = Intent(holder.itemView.context, AddTask2::class.java).apply {
                 putExtra("task_id", task.id) // Ensure task.id is Int
@@ -86,7 +79,7 @@ class ListsAdapter(
     }
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
+        // Removed the CheckBox reference
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         val deleteOption: ImageButton = itemView.findViewById(R.id.ic_delete)

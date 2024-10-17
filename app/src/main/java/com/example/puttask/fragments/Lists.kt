@@ -29,7 +29,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private lateinit var listsAdapter: ListsAdapter
     private val taskList = mutableListOf<Task>()
-    private val completedTasks = mutableSetOf<String>() // Assuming task ID is a String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,11 +49,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
-        listsAdapter = ListsAdapter(taskList, { task, isChecked ->
-            handleCheckboxToggle(task, isChecked)
-        }, { task ->
-            handleTaskClick(task)
-        })
+
+        // Initialize ListsAdapter without checkbox handling
+        listsAdapter = ListsAdapter(taskList) { task ->
+            handleTaskClick(task) // Pass the task click handler
+        }
 
         listsAdapter.setOnDeleteClickListener { task ->
             showDeleteConfirmationDialog(task) // Show a confirmation dialog when deleting
@@ -69,8 +68,10 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
                 if (response.isSuccessful) {
                     response.body()?.let { tasks ->
+                        Log.d("ListsFragment", "Fetched tasks: ${tasks.size}") // Log the number of tasks fetched
                         taskList.clear()
                         taskList.addAll(tasks)
+                        Log.d("ListsFragment", "Tasks in list after adding: ${taskList.size}") // Log the size after adding
                         withContext(Dispatchers.Main) {
                             listsAdapter.notifyDataSetChanged() // Notify adapter about data change
                             updateNoTasksMessage() // Update visibility message
@@ -85,17 +86,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
-    private fun handleCheckboxToggle(task: Task, isChecked: Boolean) {
-        val index = taskList.indexOf(task)
-        if (index != -1) {
-            if (isChecked) {
-                completedTasks.add(task.id) // Mark task as completed
-            } else {
-                completedTasks.remove(task.id) // Unmark task
-            }
-            listsAdapter.notifyItemChanged(index) // Notify the adapter to refresh this item
-        }
-    }
 
     private fun handleTaskClick(task: Task) {
         val intent = Intent(requireContext(), TaskViewRecycler::class.java)
@@ -142,7 +132,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         if (index != -1) {
             taskList.removeAt(index) // Remove the task from the list
             listsAdapter.notifyItemRemoved(index) // Notify adapter about the removal
-            completedTasks.remove(task.id) // Remove from completed tasks if it was marked as completed
             updateNoTasksMessage() // Update the visibility message
         }
     }
