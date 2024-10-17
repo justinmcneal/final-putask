@@ -5,13 +5,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
 import com.example.puttask.TaskViewRecycler
+import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.Response
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
@@ -48,10 +54,34 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
         listsAdapter.setOnDeleteClickListener { task ->
             showDeleteConfirmationDialog(task) // Show a confirmation dialog when deleting
+
+        listsRecyclerView.adapter = listsAdapter
+        fetchTasks()  // Call the function to fetch tasks
+        updateNoTasksMessage()
+
         }
 
-        listsRecyclerView.adapter = listsAdapter // Set adapter to RecyclerView
-        updateNoTasksMessage() // Update UI message if no tasks are available
+
+    }
+
+    private fun fetchTasks() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
+            if (response.isSuccessful && response.body() != null) {
+                taskList.clear()
+                taskList.addAll(response.body()!!)
+
+                // Update the RecyclerView on the main thread
+                requireActivity().runOnUiThread {
+                    listsAdapter.notifyDataSetChanged()
+                    updateNoTasksMessage()
+                }
+            } else {
+                requireActivity().runOnUiThread {
+                    Toast.makeText(requireContext(), "Failed to load tasks", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     private fun showDeleteConfirmationDialog(task: Task) {
