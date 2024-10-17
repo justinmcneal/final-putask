@@ -1,4 +1,6 @@
 package com.example.puttask.api
+import android.os.Parcel
+import android.os.Parcelable
 
 data class CreateRequest(
     val task_name: String,        // Ensure this matches the API's expected JSON format
@@ -11,15 +13,52 @@ data class CreateRequest(
 
 // Recycler View Shit
 data class Task(
-    val id: Int,
+    val id: String,
     val task_name: String,
     val task_description: String,
-    val end_date: String?,
-    val end_time: String?,
-    val repeat_days: List<String>?, // Nullable, as it might not always be set
+    val end_date: String,
+    val end_time: String,
+    val repeat_days: List<String>? = null,
     val category: String,
     val isChecked: Boolean
-)
+) : Parcelable {
+
+    constructor(parcel: Parcel) : this(
+        parcel.readString()!!,
+        parcel.readString()!!,
+        parcel.readString()!!,
+        parcel.readString()!!,
+        parcel.readString()!!,
+        parcel.createStringArrayList(),
+        parcel.readString()!!,
+        parcel.readByte() != 0.toByte() // Read isChecked as a Boolean from the Parcel
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(id)
+        parcel.writeString(task_name)
+        parcel.writeString(task_description)
+        parcel.writeString(end_date)
+        parcel.writeString(end_time)
+        parcel.writeStringList(repeat_days)
+        parcel.writeString(category)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<Task> {
+        override fun createFromParcel(parcel: Parcel): Task {
+            return Task(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Task?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+
 
 
 // Request to update an existing task

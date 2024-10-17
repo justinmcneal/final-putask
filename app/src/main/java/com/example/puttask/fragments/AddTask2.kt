@@ -18,7 +18,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Response
-import java.text.SimpleDateFormat
 import java.util.*
 
 class AddTask2 : AppCompatActivity() {
@@ -118,8 +117,9 @@ class AddTask2 : AppCompatActivity() {
     }
 
     private fun createTask() {
-        if (tvDueDate.text.isEmpty() || tvTimeReminder.text.isEmpty()) {
-            Toast.makeText(this, "Please select both due date and time", Toast.LENGTH_SHORT).show()
+        // Ensure all required fields are not empty
+        if (etTaskName.text.isEmpty() || etTaskDescription.text.isEmpty() || tvDueDate.text.isEmpty() || tvTimeReminder.text.isEmpty() || tvList.text.isEmpty()) {
+            Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -136,8 +136,12 @@ class AddTask2 : AppCompatActivity() {
             val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
             runOnUiThread {
                 if (response.isSuccessful) {
+                    val createdTask = response.body()!!
+                    val intent = Intent()
+                    intent.putExtra("new_task", createdTask)
+                    setResult(RESULT_OK, intent)
                     clearFields()
-                    navigateToMainActivity()
+                    finish()
                 } else {
                     Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
@@ -157,12 +161,5 @@ class AddTask2 : AppCompatActivity() {
     private fun togglePopupVisibility(isVisible: Boolean) {
         dimBackground.visibility = if (isVisible) View.VISIBLE else View.GONE
         popupCardView.visibility = if (isVisible) View.VISIBLE else View.GONE
-    }
-
-    private fun navigateToMainActivity() {
-        val intent = Intent(this, Lists::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(intent)
-        finish()
     }
 }

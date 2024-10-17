@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.api.Task
 import com.example.puttask.fragments.AddTask2
@@ -44,11 +43,11 @@ class ListsAdapter(
 
         holder.itemView.setOnClickListener {
             val intent = Intent(holder.itemView.context, AddTask2::class.java).apply {
-                putExtra("task_id", task.id)
-                putExtra("task_name", task.task_name)
-                putExtra("task_description", task.task_description)
-                putExtra("end_date", task.end_date)
-                putExtra("end_time", task.end_time)
+                putExtra("task_id", task.id) // Ensure task.id is Int
+                putExtra("task_name", task.task_name) // Now required, non-nullable String
+                putExtra("task_description", task.task_description) // Now required, non-nullable String
+                putExtra("end_date", task.end_date) // Now required, non-nullable String
+                putExtra("end_time", task.end_time) // Now required, non-nullable String
             }
             (holder.itemView.context as Activity).startActivityForResult(intent, REQUEST_CODE_EDIT_TASK)
             onItemClick(task)
@@ -92,7 +91,4 @@ class ListsAdapter(
         val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         val deleteOption: ImageButton = itemView.findViewById(R.id.ic_delete)
     }
-
-
-
 }
