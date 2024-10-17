@@ -1,5 +1,6 @@
 package com.example.puttask
 
+import android.app.Activity
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -15,8 +16,12 @@ import com.example.puttask.fragments.AddTask2
 class ListsAdapter(
     private val taskList: MutableList<Task>,
     private val onTaskCheckedChange: (Task, Boolean) -> Unit,
-    private val onItemClick: (Task) -> Unit // Click listener for the entire item
+    private val onItemClick: (Task) -> Unit
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
+
+    companion object {
+        const val REQUEST_CODE_EDIT_TASK = 1001
+    }
 
     private var onDeleteClick: ((Task) -> Unit)? = null
 
@@ -29,60 +34,54 @@ class ListsAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
         holder.tvTitle.text = task.task_name
-        holder.tvTime.text = task.end_date // Adjust this if needed
+        holder.tvTime.text = task.end_date
 
-        // Handle checkbox state change
-        holder.checkBox.setOnCheckedChangeListener(null) // Clear previous listener
-        holder.checkBox.isChecked = task.isChecked // Maintain the checked state
+        holder.checkBox.setOnCheckedChangeListener(null)
+        holder.checkBox.isChecked = task.isChecked
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-            onTaskCheckedChange(task, isChecked) // Notify the listener of the change
+            onTaskCheckedChange(task, isChecked)
         }
 
-        // Handle item click for navigation
         holder.itemView.setOnClickListener {
-            try {
-                // Create the intent for AddTask2 activity
-                val intent = Intent(holder.itemView.context, AddTask2::class.java).apply {
-                    putExtra("task_name", task.task_name)
-                    putExtra("end_date", task.end_date)
-                    putExtra("end_time", task.end_time)
-                    putExtra("task_id", task.id)
-                    putExtra("task_description", task.task_description) // Include task description if needed
-                }
-
-                // Start the AddTask2 activity
-                holder.itemView.context.startActivity(intent)
-
-                // Trigger the onItemClick function when the item is clicked
-                onItemClick(task)
-            } catch (e: Exception) {
-                Toast.makeText(holder.itemView.context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                e.printStackTrace() // Log the exception for debugging
+            val intent = Intent(holder.itemView.context, AddTask2::class.java).apply {
+                putExtra("task_id", task.id)
+                putExtra("task_name", task.task_name)
+                putExtra("task_description", task.task_description)
+                putExtra("end_date", task.end_date)
+                putExtra("end_time", task.end_time)
             }
+            (holder.itemView.context as Activity).startActivityForResult(intent, REQUEST_CODE_EDIT_TASK)
+            onItemClick(task)
         }
 
-        // Handle delete button click
         holder.deleteOption.setOnClickListener {
-            onDeleteClick?.invoke(task) // Invoke the delete click listener
+            onDeleteClick?.invoke(task)
         }
     }
 
     override fun getItemCount(): Int = taskList.size
 
-    // Method to add a new task to the list and notify the adapter
     fun addTask(task: Task) {
         taskList.add(task)
-        notifyItemInserted(taskList.size - 1) // Notify adapter of the new item
+        notifyItemInserted(taskList.size - 1)
     }
 
-    // Method to update the list of tasks, useful for refreshing after creation
-    fun updateTasks(newTasks: List<Task>) {
-        taskList.clear()
-        taskList.addAll(newTasks)
-        notifyDataSetChanged() // Notify adapter to refresh
+    fun updateTask(updatedTask: Task) {
+        val index = taskList.indexOfFirst { it.id == updatedTask.id }
+        if (index != -1) {
+            taskList[index] = updatedTask
+            notifyItemChanged(index)
+        }
     }
 
-    // Method to set the delete click listener
+    fun deleteTask(task: Task) {
+        val index = taskList.indexOf(task)
+        if (index != -1) {
+            taskList.removeAt(index)
+            notifyItemRemoved(index)
+        }
+    }
+
     fun setOnDeleteClickListener(listener: (Task) -> Unit) {
         onDeleteClick = listener
     }
@@ -91,6 +90,9 @@ class ListsAdapter(
         val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         val tvTime: TextView = itemView.findViewById(R.id.tvTime)
-        val deleteOption: ImageButton = itemView.findViewById(R.id.ic_delete) // Initialize delete button
+        val deleteOption: ImageButton = itemView.findViewById(R.id.ic_delete)
     }
+
+
+
 }

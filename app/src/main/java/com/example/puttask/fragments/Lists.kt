@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +19,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var listsAdapter: ListsAdapter
     private lateinit var tvNoTasks: TextView
     private val taskList = mutableListOf<Task>()
-    private val completedTasks = mutableSetOf<Int>() // Set to keep track of completed task IDs
+    private val completedTasks = mutableSetOf<Int>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -30,44 +29,38 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
         listsRecyclerView.layoutManager = LinearLayoutManager(context)
         listsAdapter = ListsAdapter(taskList, { task, isChecked ->
+            // Handle checkbox toggle
             val index = taskList.indexOf(task)
             if (index != -1) {
-                // Update the completion status
                 if (isChecked) {
-                    completedTasks.add(task.id) // Mark as completed
+                    completedTasks.add(task.id)
                 } else {
-                    completedTasks.remove(task.id) // Unmark as completed
+                    completedTasks.remove(task.id)
                 }
-                listsAdapter.notifyItemChanged(index) // Notify adapter about item change
+                listsAdapter.notifyItemChanged(index)
             }
         }, { task ->
+            // Handle item click to view task details
             val intent = Intent(requireContext(), TaskViewRecycler::class.java)
-            intent.putExtra("TASK_ID", task.id)
+            intent.putExtra("TASK_ID", task.id) // Pass the task ID
             startActivity(intent)
         })
 
         listsAdapter.setOnDeleteClickListener { task ->
-            showDeleteConfirmationDialog(task)
+            showDeleteConfirmationDialog(task) // Show a confirmation dialog when deleting
         }
 
-        listsRecyclerView.adapter = listsAdapter
-        updateNoTasksMessage()
+        listsRecyclerView.adapter = listsAdapter // Set adapter to RecyclerView
+        updateNoTasksMessage() // Update UI message if no tasks are available
     }
 
     private fun showDeleteConfirmationDialog(task: Task) {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Delete Task")
         builder.setMessage("Are you sure you want to delete this task?")
-
-        builder.setPositiveButton("Delete") { _, _ ->
-            deleteTask(task)
-        }
-
-        builder.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss()
-        }
-
-        builder.create().show()
+        builder.setPositiveButton("Delete") { _, _ -> deleteTask(task) }
+        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+        builder.create().show() // Show the dialog
     }
 
     private fun updateNoTasksMessage() {
@@ -80,34 +73,24 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
-    fun updateTaskList(newTasks: List<Task>) {
-        taskList.clear()
-        taskList.addAll(newTasks)
-        listsAdapter.notifyDataSetChanged()
-        updateNoTasksMessage()
-    }
-
     fun onTaskCreated(task: Task) {
         taskList.add(task)
-        listsAdapter.notifyItemInserted(taskList.size - 1)
-        updateNoTasksMessage()
+        listsAdapter.notifyItemInserted(taskList.size - 1) // Notify adapter about the new task
+        updateNoTasksMessage() // Update the visibility message
     }
 
-    private fun deleteTask(task: Task) {
-        val index = taskList.indexOf(task)
+
+    fun updateTask(updatedTask: Task) {
+        val index = taskList.indexOfFirst { it.id == updatedTask.id }
         if (index != -1) {
-            taskList.removeAt(index)
-            completedTasks.remove(task.id) // Remove from completed tasks if deleted
-            listsAdapter.notifyItemRemoved(index)
-            updateNoTasksMessage()
-            Toast.makeText(context, "Task deleted successfully.", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, "Task not found.", Toast.LENGTH_SHORT).show()
+            taskList[index] = updatedTask // Update the task in the list
+            listsAdapter.notifyItemChanged(index) // Notify adapter to refresh this specific item
         }
     }
 
-    // Method to check if a task is completed
-    fun isTaskCompleted(task: Task): Boolean {
-        return completedTasks.contains(task.id)
+    private fun deleteTask(task: Task) {
+        listsAdapter.deleteTask(task) // Delete the task using the adapter
+        completedTasks.remove(task.id) // Remove from completed tasks if it was marked as completed
+        updateNoTasksMessage() // Check if the "No tasks" message should be shown
     }
 }
