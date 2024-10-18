@@ -115,6 +115,18 @@ class SignUp : AppCompatActivity() {
                     // Save the authentication token using DataManager
                     registrationResponse?.token?.let {
                         DataManager(this@SignUp).saveAuthToken(it)
+
+                        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                        val editor = sharedPreferences.edit()
+
+                        // Clear old data
+                        editor.clear()
+
+                        // Assuming `registrationResponse` contains a `user` object with the new username
+                        val username = registrationResponse?.user?.username
+                        editor.putString("username", username)  // Save new username
+                        editor.putString("token", it)  // Save new token
+                        editor.apply()  // Apply changes
                     }
 
                     showToast(message)

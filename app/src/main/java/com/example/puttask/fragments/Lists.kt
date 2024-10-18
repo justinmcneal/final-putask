@@ -60,6 +60,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
         setupSwipeRefresh()
         fetchTasks()
         updateNoTasksMessage()
+
+        // Fetch and display the username from SharedPreferences
+        val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+        val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
+        binding.tvUsername.text = "Hi $username!"
     }
 
     private fun setupRecyclerView() {
