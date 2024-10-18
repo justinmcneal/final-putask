@@ -54,7 +54,7 @@
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:padding="15dp"
-                android:textSize="15sp" />
+                android:textSize="14sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -74,7 +74,7 @@
                     android:hint="Password"
                     android:inputType="textPassword"
                     android:background="@null"
-                    android:textSize="15dp"
+                    android:textSize="14dp"
                     android:layout_marginStart="10dp"
                     android:paddingEnd="8dp" />
 
@@ -116,7 +116,9 @@
                 android:fontFamily="@font/opensans"
                 android:backgroundTint="@color/skyblue"
                 android:text="Log In"
+                app:cornerRadius="10dp"
                 android:textSize="16sp"
+                android:padding="10dp"
                 android:textStyle="bold"/>
 
             <LinearLayout

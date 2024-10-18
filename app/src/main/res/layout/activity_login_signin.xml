@@ -54,7 +54,7 @@
             android:id="@+id/btnSignIn"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:text="Sign In"
+            android:text="SIGN UP"
             android:fontFamily="@font/opensans"
             android:backgroundTint="@color/skyblue"
             android:textStyle="bold"
@@ -63,15 +63,15 @@
             android:layout_marginEnd="13dp"
             app:cornerRadius="50dp"/>
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnLogIn"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:text="Log In"
             android:fontFamily="@font/opensans"
-            android:backgroundTint="@color/skyblue"
             android:padding="14dp"
             android:textStyle="bold"
+            android:background="@drawable/custom_bg_loginsignup"
             android:textSize="16sp"
             android:layout_marginStart="13dp"
             app:cornerRadius="50dp"/>

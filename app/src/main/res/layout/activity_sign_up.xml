@@ -48,12 +48,12 @@
                 android:drawablePadding="15dp"
                 android:fontFamily="@font/opensans"
                 android:hint="Username"
-                android:textColorHint="@color/gray"
-                android:textColor="@color/darkgray"
                 android:inputType="text"
                 android:maxLines="1"
                 android:padding="15dp"
-                android:textSize="15sp" />
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray"
+                android:textSize="14sp" />
 
             <EditText
                 android:id="@+id/etEmail"
@@ -67,9 +67,9 @@
                 android:hint="Email"
                 android:inputType="textEmailAddress"
                 android:textColorHint="@color/gray"
-                android:textColor="@color/darkgray"                android:maxLines="1"
+                android:textColor="@color/black"                android:maxLines="1"
                 android:padding="15dp"
-                android:textSize="15sp" />
+                android:textSize="14sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -87,9 +87,11 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Enter Password"
+                    android:textColorHint="@color/gray"
                     android:inputType="textPassword"
                     android:background="@null"
-                    android:textSize="15dp"
+                    android:textColor="@color/black"
+                    android:textSize="14dp"
                     android:layout_marginStart="10dp"
                     android:paddingEnd="8dp" />
 
@@ -121,7 +123,9 @@
                     android:hint="Confirm Password"
                     android:inputType="textPassword"
                     android:background="@null"
-                    android:textSize="15dp"
+                    android:textSize="14dp"
+                    android:textColorHint="@color/gray"
+                    android:textColor="@color/black"
                     android:layout_marginStart="10dp"
                     android:paddingEnd="8dp" />
 
@@ -149,6 +153,8 @@
                 android:fontFamily="@font/opensans"
                 android:backgroundTint="@color/skyblue"
                 android:text="Sign Up"
+                android:padding="10dp"
+                app:cornerRadius="10dp"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
