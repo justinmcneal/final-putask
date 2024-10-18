@@ -116,6 +116,7 @@
                 android:fontFamily="@font/opensans"
                 android:backgroundTint="@color/skyblue"
                 android:text="Log In"
+                android:textColor="@color/white"
                 app:cornerRadius="10dp"
                 android:textSize="16sp"
                 android:padding="10dp"

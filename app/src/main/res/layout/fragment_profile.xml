@@ -109,8 +109,6 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginStart="20dp"
                     android:layout_weight="1"
                     android:gravity="center">
 
@@ -121,13 +119,12 @@
                         android:backgroundTint="@color/skyblue"
                         android:text="Save"
                         android:padding="10dp"
-                        android:textSize="14sp"
+                        android:textSize="12sp"
                         app:cornerRadius="10dp" />
 
                     <View
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"/>
+                        android:layout_width="60dp"
+                        android:layout_height="0dp" />
 
                     <Button
                         android:id="@+id/btnDelete"
@@ -138,7 +135,7 @@
                         android:textColor="@color/white"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:textSize="14sp"
+                        android:textSize="12sp"
                         app:cornerRadius="10dp" />
                     </LinearLayout>
             </LinearLayout>
