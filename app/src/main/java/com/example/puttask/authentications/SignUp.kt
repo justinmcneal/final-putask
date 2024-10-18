@@ -80,8 +80,11 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun validateInputs(username: String, email: String, password: String, confirmPassword: String): Boolean {
+        val maxUsernameLength = 50 // Set the maximum username length
+
         return when {
             username.isEmpty() -> showError("Please enter a username")
+            username.length > maxUsernameLength -> showError("Username cannot exceed $maxUsernameLength characters")
             email.isEmpty() -> showError("Please enter an email")
             !isValidEmail(email) -> showError("Please enter a valid email")
             password.length < 8 -> showError("Password must be at least 8 characters")
