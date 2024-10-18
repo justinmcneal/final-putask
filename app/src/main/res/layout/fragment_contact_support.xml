@@ -57,9 +57,9 @@
             android:gravity="top"
             android:hint="Your Message"
             android:textColorHint="@color/gray"
-            android:textColor="@color/darkgray"            android:padding="16dp"
-            android:layout_margin="12dp"
-            android:maxLines="4"/>
+            android:textColor="@color/darkgray"
+            android:padding="16dp"
+            android:layout_margin="12dp"/>
 
         <Button
             android:id="@+id/btnSubmit"
