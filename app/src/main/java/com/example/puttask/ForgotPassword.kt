@@ -65,6 +65,11 @@ class ForgotPassword : AppCompatActivity() {
             if (email.isNotEmpty() && isValidEmail(email) && isEmailVerified) {
                 sendOTP(EmailRequest(email))
                 Toast.makeText(this, "OTP Resent", Toast.LENGTH_SHORT).show()
+                etNewPassword.visibility = View.GONE
+                etConfirmNewPassword.visibility = View.GONE
+                btnResetPassword.visibility = View.GONE
+                etOTP.visibility = View.VISIBLE
+                btnVerifyOTP.visibility = View.VISIBLE
             } else {
                 Toast.makeText(this, "Please enter a valid email and verify first", Toast.LENGTH_SHORT).show()
             }
@@ -75,23 +80,30 @@ class ForgotPassword : AppCompatActivity() {
             val otp = etOTP.text.toString().toIntOrNull()
             val email = etForgotEmail.text.toString()
             if (otp != null) {
-                verifyOTP(email, otp)
+                verifyOTP(email, otp) // Proceed to verify OTP
             } else {
                 Toast.makeText(this, "Please enter the OTP", Toast.LENGTH_SHORT).show()
             }
         }
 
         // Reset Password button listener
+        // Reset Password button listener
         btnResetPassword.setOnClickListener {
-            val newPassword = etNewPassword.text.toString()
-            val confirmPassword = etConfirmNewPassword.text.toString()
-            val email = etForgotEmail.text.toString().trim()
-            if (newPassword.isNotEmpty() && newPassword == confirmPassword) {
-                resetPassword(email, newPassword, confirmPassword)
+            if (isEmailVerified) {  // Ensure OTP is verified before proceeding
+                val newPassword = etNewPassword.text.toString()
+                val confirmPassword = etConfirmNewPassword.text.toString()
+                val email = etForgotEmail.text.toString().trim()
+
+                if (newPassword.isNotEmpty() && newPassword == confirmPassword) {
+                    resetPassword(email, newPassword, confirmPassword) // Call reset password API
+                } else {
+                    Toast.makeText(this, "Passwords do not match or are empty", Toast.LENGTH_SHORT).show()
+                }
             } else {
-                Toast.makeText(this, "Passwords do not match or are empty", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please verify OTP before resetting the password", Toast.LENGTH_SHORT).show()
             }
         }
+
     }
 
     private fun sendPasswordResetRequest(email: String) {
@@ -106,10 +118,6 @@ class ForgotPassword : AppCompatActivity() {
 
                     if (emailResponse?.email_exists == true) {
                         Toast.makeText(this@ForgotPassword, emailResponse.message, Toast.LENGTH_SHORT).show()
-                        isEmailVerified = true
-                        etOTP.visibility = View.VISIBLE
-                        btnVerifyOTP.visibility = View.VISIBLE
-                        tvResendOTP.visibility = View.VISIBLE
 
                         val emailRequest = EmailRequest(email)
                         sendOTP(emailRequest)
@@ -143,6 +151,12 @@ class ForgotPassword : AppCompatActivity() {
                     retryCount = 0
                     lastFailedAttemptTime = 0
                     Toast.makeText(this@ForgotPassword, "OTP sent to your email", Toast.LENGTH_SHORT).show()
+                    isEmailVerified = true
+                    etOTP.visibility = View.VISIBLE
+                    btnVerifyOTP.visibility = View.VISIBLE
+                    tvResendOTP.visibility = View.VISIBLE
+                    etForgotEmail.visibility = View.GONE
+                    btnSendOTP.visibility = View.GONE
                 } else {
                     val errorBody = response.errorBody()?.string() ?: "Unknown error"
                     Toast.makeText(this@ForgotPassword, "Error: ${response.message()}\n$errorBody", Toast.LENGTH_SHORT).show()
@@ -188,6 +202,9 @@ class ForgotPassword : AppCompatActivity() {
                     etNewPassword.visibility = View.VISIBLE
                     etConfirmNewPassword.visibility = View.VISIBLE
                     btnResetPassword.visibility = View.VISIBLE
+                    etOTP.visibility = View.GONE
+                    btnVerifyOTP.visibility = View.GONE
+                    isEmailVerified = true
                 } else {
                     Toast.makeText(this@ForgotPassword, "Invalid OTP. Please try again.", Toast.LENGTH_SHORT).show()
                 }
