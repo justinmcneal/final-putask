@@ -1,7 +1,5 @@
 package com.example.puttask
 
-import android.app.Activity
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,16 +7,15 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.api.Task
-import com.example.puttask.fragments.AddTask2
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,
     private val onItemClick: (Task) -> Unit
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
-    companion object {
-        const val REQUEST_CODE_EDIT_TASK = 1001
-    }
+//    companion object {
+//        const val REQUEST_CODE_EDIT_TASK = 1001
+//    }
 
     private var onDeleteClick: ((Task) -> Unit)? = null
 
@@ -31,25 +28,15 @@ class ListsAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
 
-        // Debugging: Log the task being bound
-        println("Binding task: ${task.task_name}")
-
         holder.tvTitle.text = task.task_name
         holder.tvTime.text = task.end_date
 
-        // Removed the checkbox handling
+        // Handle click to edit the task
         holder.itemView.setOnClickListener {
-            val intent = Intent(holder.itemView.context, AddTask2::class.java).apply {
-                putExtra("task_id", task.id)
-                putExtra("task_name", task.task_name)
-                putExtra("task_description", task.task_description)
-                putExtra("end_date", task.end_date)
-                putExtra("end_time", task.end_time)
-            }
-            (holder.itemView.context as Activity).startActivityForResult(intent, REQUEST_CODE_EDIT_TASK)
             onItemClick(task)
         }
 
+        // Handle delete task option
         holder.deleteOption.setOnClickListener {
             onDeleteClick?.invoke(task)
         }
@@ -57,27 +44,13 @@ class ListsAdapter(
 
     override fun getItemCount(): Int = taskList.size
 
-    fun addTask(task: Task) {
-        taskList.add(task)
-        notifyItemInserted(taskList.size - 1)
-    }
+    // Method to add a task to the list
+//    fun addTask(task: Task) {
+//        taskList.add(task)
+//        notifyItemInserted(taskList.size - 1)
+//    }
 
-    fun updateTask(updatedTask: Task) {
-        val index = taskList.indexOfFirst { it.id == updatedTask.id }
-        if (index != -1) {
-            taskList[index] = updatedTask
-            notifyItemChanged(index)
-        }
-    }
-
-    fun deleteTask(task: Task) {
-        val index = taskList.indexOf(task)
-        if (index != -1) {
-            taskList.removeAt(index)
-            notifyItemRemoved(index)
-        }
-    }
-
+    // Set the delete listener to handle task deletion
     fun setOnDeleteClickListener(listener: (Task) -> Unit) {
         onDeleteClick = listener
     }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,6 +7,10 @@
     android:orientation="vertical"
     android:background="@color/superskyblue"
     tools:context=".TaskViewRecycler">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -81,6 +85,7 @@
                     android:textStyle="bold" />
 
                 <EditText
+                    android:id="@+id/taskname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints="Add a task name"
@@ -106,6 +111,7 @@
                     android:textStyle="bold" />
 
                 <EditText
+                    android:id="@+id/taskdescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints="Add a Task Description"
@@ -342,40 +348,6 @@
                 android:layout_gravity="center"
                 android:layout_marginEnd="10dp" />
         </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp">
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/tvUpdate"
-                android:layout_width="140dp"
-                android:layout_height="wrap_content"
-                android:text="Update"
-                android:textSize="16dp"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/skyblue"
-                android:background="@drawable/corners_for_greeting" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/tvDelete"
-                android:layout_width="140dp"
-                android:layout_height="wrap_content"
-                android:text="Delete"
-                android:textSize="16dp"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/red"
-                android:background="@drawable/corners_for_greeting" />
-        </LinearLayout>
-
 
     </LinearLayout>
 
@@ -666,12 +638,7 @@
 
         </androidx.cardview.widget.CardView>
 
-
-
+    </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

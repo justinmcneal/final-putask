@@ -9,7 +9,6 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
-import com.example.puttask.MainActivity
 import com.example.puttask.R
 import com.example.puttask.api.CreateRequest
 import com.example.puttask.api.RetrofitClient
@@ -61,8 +60,10 @@ class AddTask2 : AppCompatActivity() {
         findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener { showTimePicker() }
         switchRepeat.setOnCheckedChangeListener { _, isChecked -> updateRepeatUI(isChecked) }
         findViewById<TextView>(R.id.tvCancel).setOnClickListener { clearFields(); togglePopupVisibility(false) }
-        findViewById<TextView>(R.id.tvDone).setOnClickListener { createTask() }
-        createButton.setOnClickListener { createTask() }
+
+        createButton.setOnClickListener {
+            createTask()
+        }
     }
 
     private fun showCategoryPopup() {
@@ -117,34 +118,57 @@ class AddTask2 : AppCompatActivity() {
     }
 
     private fun createTask() {
-        if (etTaskName.text.isEmpty() || etTaskDescription.text.isEmpty() || tvDueDate.text.isEmpty() || tvTimeReminder.text.isEmpty() || tvList.text.isEmpty()) {
-            Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show()
-            return
-        }
+        if (validateFields()) {
+            val createRequest = CreateRequest(
+                task_name = etTaskName.text.toString(),
+                task_description = etTaskDescription.text.toString(),
+                end_date = tvDueDate.text.toString(),
+                end_time = tvTimeReminder.text.toString(),
+                repeat_days = if (switchRepeat.isChecked) repeatDays else null,
+                category = tvList.text.toString()
+            )
 
-        val createRequest = CreateRequest(
-            task_name = etTaskName.text.toString(),
-            task_description = etTaskDescription.text.toString(),
-            end_date = tvDueDate.text.toString(),
-            end_time = tvTimeReminder.text.toString(),
-            repeat_days = if (switchRepeat.isChecked) repeatDays else null,
-            category = tvList.text.toString()
-        )
-
-        CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
-            runOnUiThread {
-                if (response.isSuccessful) {
-                    val createdTask = response.body()!!
-                    val intent = Intent()
-                    intent.putExtra("new_task", createdTask)
-                    setResult(RESULT_OK, intent)
-                    clearFields()
-                    finish()
-                } else {
-                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+            CoroutineScope(Dispatchers.IO).launch {
+                val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        val createdTask = response.body()
+                        val intent = Intent().apply {
+                            putExtra("new_task", createdTask)
+                        }
+                        setResult(RESULT_OK, intent)
+                        finish()
+                    } else {
+                        Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
+        }
+    }
+
+    private fun validateFields(): Boolean {
+        return when {
+            etTaskName.text.isEmpty() -> {
+                Toast.makeText(this, "Task name is required", Toast.LENGTH_SHORT).show()
+                false
+            }
+            etTaskDescription.text.isEmpty() -> {
+                Toast.makeText(this, "Task description is required", Toast.LENGTH_SHORT).show()
+                false
+            }
+            tvDueDate.text.isEmpty() -> {
+                Toast.makeText(this, "Due date is required", Toast.LENGTH_SHORT).show()
+                false
+            }
+            tvTimeReminder.text.isEmpty() -> {
+                Toast.makeText(this, "Time reminder is required", Toast.LENGTH_SHORT).show()
+                false
+            }
+            tvList.text.isEmpty() -> {
+                Toast.makeText(this, "Category is required", Toast.LENGTH_SHORT).show()
+                false
+            }
+            else -> true
         }
     }
 

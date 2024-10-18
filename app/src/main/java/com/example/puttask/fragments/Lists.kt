@@ -7,11 +7,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
-import com.example.puttask.TaskViewRecycler
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.example.puttask.databinding.FragmentListsBinding
@@ -28,10 +31,22 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private lateinit var listsAdapter: ListsAdapter
     private val taskList = mutableListOf<Task>()
+    private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Register the ActivityResultLauncher
+        addTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                // Refresh the task list after returning from AddTask2 activity
+                fetchTasks()
+            }
+        }
+    }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentListsBinding.inflate(inflater, container, false)
@@ -42,26 +57,32 @@ class Lists : Fragment(R.layout.fragment_lists) {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
+        setupSwipeRefresh()
         fetchTasks()
         updateNoTasksMessage()
     }
 
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
-
-        // Initialize adapter
         listsAdapter = ListsAdapter(taskList) { task ->
             handleTaskClick(task)
         }
-
         listsAdapter.setOnDeleteClickListener { task ->
             showDeleteConfirmationDialog(task)
         }
-
         binding.listsrecyclerView.adapter = listsAdapter
     }
 
+    private fun setupSwipeRefresh() {
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            fetchTasks()
+        }
+    }
+
     private fun fetchTasks() {
+        // Show the loading indicator
+        binding.swipeRefreshLayout.isRefreshing = true
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
@@ -82,24 +103,49 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 }
             } catch (e: Exception) {
                 Log.e("ListsFragment", "Exception fetching tasks", e)
+            } finally {
+                // Hide the loading indicator
+                withContext(Dispatchers.Main) {
+                    binding.swipeRefreshLayout.isRefreshing = false
+                }
             }
         }
     }
 
     private fun handleTaskClick(task: Task) {
-        val intent = Intent(requireContext(), TaskViewRecycler::class.java)
-        intent.putExtra("TASK_ID", task.id)
-        startActivity(intent)
+        // Create and show a dialog to display task details
+        val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setTitle("Task Details")
+
+        val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
+        val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
+        val tvDueDate = dialogView.findViewById<TextView>(R.id.tvStartDate)
+        val tvTimeReminder = dialogView.findViewById<TextView>(R.id.tvEndDate)
+        val tvCategory = dialogView.findViewById<TextView>(R.id.tvList)
+
+        // Set task details in the dialog
+        tvTaskName.text = task.task_name
+        tvTaskDescription.text = task.task_description
+        tvDueDate.text = task.end_date
+        tvTimeReminder.text = task.end_time
+        tvCategory.text = task.category
+
+        dialogBuilder.setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+        dialogBuilder.create().show()
     }
 
+
     private fun showDeleteConfirmationDialog(task: Task) {
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("Delete Task")
-            .setMessage("Are you sure you want to delete this task?")
-            .setPositiveButton("Delete") { _, _ -> deleteTask(task) }
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            .create()
-            .show()
+        AlertDialog.Builder(requireContext()).apply {
+            setTitle("Delete Task")
+            setMessage("Are you sure you want to delete this task?")
+            setPositiveButton("Delete") { _, _ -> deleteTask(task) }
+            setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            create()
+            show()
+        }
     }
 
     private fun updateNoTasksMessage() {

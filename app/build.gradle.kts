@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.loggingInterceptor)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
 
     implementation(libs.androidx.core.ktx)
