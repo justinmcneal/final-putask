@@ -11,6 +11,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.puttask.ForgotPassword
 import com.example.puttask.MainActivity
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
@@ -25,6 +26,7 @@ class LogIn : AppCompatActivity() {
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var ivTogglePasswordVisibility: ImageView
+    private lateinit var forgotpass : TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +36,7 @@ class LogIn : AppCompatActivity() {
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
         ivTogglePasswordVisibility = findViewById(R.id.ivTogglePasswordVisibility)
+        forgotpass = findViewById(R.id.tvForgotPassword)
 
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
@@ -42,6 +45,12 @@ class LogIn : AppCompatActivity() {
             if (validateInputs(email, password)) {
                 loginUser(email, password)
             }
+        }
+
+        forgotpass.setOnClickListener {
+            val intent = Intent(this, ForgotPassword::class.java)
+            startActivity(intent)
+            finish()
         }
 
         findViewById<TextView>(R.id.othersSign).setOnClickListener {
