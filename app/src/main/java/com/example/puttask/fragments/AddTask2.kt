@@ -72,9 +72,9 @@ class AddTask2 : AppCompatActivity() {
             setOnMenuItemClickListener { menuItem ->
                 tvList.text = when (menuItem.itemId) {
                     R.id.personal -> "Personal"
-                    R.id.work -> "Work"
-                    R.id.school -> "School"
-                    R.id.social -> "Social"
+                    R.id.work -> "School"
+                    R.id.school -> "Work"
+                    R.id.wishlist -> "Wishlist"
                     else -> ""
                 }
                 true
