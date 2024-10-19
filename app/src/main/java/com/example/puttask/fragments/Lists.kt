@@ -7,10 +7,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
@@ -28,14 +31,16 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private var _binding: FragmentListsBinding? = null
     private val binding get() = _binding!!
-
     private lateinit var listsAdapter: ListsAdapter
+    private lateinit var tvDropdownLists: TextView
+    private lateinit var ic_sort: ImageView
+    private lateinit var popupcardviewLists: CardView
+
     private val taskList = mutableListOf<Task>()
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // Register the ActivityResultLauncher
         addTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == AppCompatActivity.RESULT_OK) {
@@ -56,23 +61,46 @@ class Lists : Fragment(R.layout.fragment_lists) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        ic_sort = view.findViewById(R.id.ic_sort)
+        tvDropdownLists = view.findViewById(R.id.tvDropdownLists)
+        popupcardviewLists = view.findViewById(R.id.popupcardviewLists)
+
         setupRecyclerView()
         setupSwipeRefresh()
-        fetchTasks()
-        updateNoTasksMessage()
-        updateUsernameDisplay()
+        fetchTasks()  // Ensure tasks are fetched when the fragment is created
 
+        // Dropdown setup for sorting options
+        val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
+        val menuMap = mapOf(
+            R.id.allItems to "All Items",
+            R.id.personal to "Personal",
+            R.id.work to "Work",
+            R.id.school to "School",
+            R.id.social to "Social"
+        )
+
+        dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)
+
+        tvDropdownLists.setOnClickListener {
+            dropdownLists.setOnMenuItemClickListener { menuItem ->
+                menuMap[menuItem.itemId]?.let {
+                    tvDropdownLists.text = it
+                    true
+                } ?: false
+            }
+            dropdownLists.show()
+        }
+
+        // Sort options visibility toggle
+        ic_sort.setOnClickListener {
+            visibilityChecker()
+        }
 
         // Fetch and display the username from SharedPreferences
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
-        val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
+        val username = sharedPreferences.getString("username", "User")
         binding.tvUsername.text = "Hi $username!"
-    }
 
-    private fun updateUsernameDisplay() {
-        val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
-        val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
-        binding.tvUsername.text = "Hi $username!"
     }
 
     private fun setupRecyclerView() {
@@ -88,7 +116,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {
-            fetchTasks()
+            fetchTasks()  // Refresh tasks when user swipes
         }
     }
 
@@ -103,12 +131,12 @@ class Lists : Fragment(R.layout.fragment_lists) {
                     response.body()?.let { tasks ->
                         Log.d("ListsFragment", "Fetched tasks: ${tasks.size}")
 
-                        // Clear and update task list on the main thread
+                        // Update task list on the main thread
                         withContext(Dispatchers.Main) {
                             taskList.clear()
                             taskList.addAll(tasks)
                             listsAdapter.notifyDataSetChanged()
-                            updateNoTasksMessage()
+                            updateNoTasksMessage()  // Ensure this is called after updating taskList
                         }
                     }
                 } else {
@@ -125,8 +153,19 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
+    private fun updateNoTasksMessage() {
+        // Check if task list is empty, and show/hide "No task created." message
+        if (taskList.isEmpty()) {
+            binding.tvNotask.visibility = View.VISIBLE
+            binding.listsrecyclerView.visibility = View.GONE
+        } else {
+            binding.tvNotask.visibility = View.GONE
+            binding.listsrecyclerView.visibility = View.VISIBLE
+        }
+    }
+
     private fun handleTaskClick(task: Task) {
-        // Create and show a dialog to display task details
+        // Handle task click to show details in a dialog
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
@@ -149,7 +188,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         dialogBuilder.create().show()
     }
 
-
     private fun showDeleteConfirmationDialog(task: Task) {
         AlertDialog.Builder(requireContext()).apply {
             setTitle("Delete Task")
@@ -158,16 +196,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
             create()
             show()
-        }
-    }
-
-    private fun updateNoTasksMessage() {
-        if (taskList.isEmpty()) {
-            binding.tvNotask.visibility = View.VISIBLE
-            binding.listsrecyclerView.visibility = View.GONE
-        } else {
-            binding.tvNotask.visibility = View.GONE
-            binding.listsrecyclerView.visibility = View.VISIBLE
         }
     }
 
@@ -181,7 +209,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         if (index != -1) {
                             taskList.removeAt(index)
                             listsAdapter.notifyItemRemoved(index)
-                            updateNoTasksMessage()
+                            updateNoTasksMessage()  // Update the visibility after deletion
                         }
                     }
                 } else {
@@ -197,4 +225,10 @@ class Lists : Fragment(R.layout.fragment_lists) {
         super.onDestroyView()
         _binding = null
     }
+
+    // cardview pop up for sort options
+    private fun visibilityChecker() {
+        popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+    }
+
 }

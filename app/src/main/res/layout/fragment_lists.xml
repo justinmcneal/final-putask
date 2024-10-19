@@ -6,13 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".fragments.Lists">
 
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="16dp">
-
+        >
         <ScrollView
             android:id="@+id/scrollView3"
             android:layout_width="match_parent"
@@ -106,8 +105,8 @@
 
                     <ImageView
                         android:id="@+id/ic_sort"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
                         android:layout_gravity="center_vertical"
                         android:src="@drawable/ic_sort" />
                 </LinearLayout>
@@ -136,6 +135,7 @@
 
             </LinearLayout>
         </ScrollView>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -221,6 +221,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
