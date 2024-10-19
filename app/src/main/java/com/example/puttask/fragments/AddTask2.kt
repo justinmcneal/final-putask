@@ -17,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.util.*
 
 class AddTask2 : AppCompatActivity() {
@@ -102,6 +103,7 @@ class AddTask2 : AppCompatActivity() {
     private fun showTimePicker() {
         Calendar.getInstance().let { calendar ->
             TimePickerDialog(this, { _, hourOfDay, minute ->
+                tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
                 // Create a Calendar object for the selected time
                 val selectedTimeCalendar = Calendar.getInstance().apply {
                     set(Calendar.HOUR_OF_DAY, hourOfDay)
@@ -109,23 +111,16 @@ class AddTask2 : AppCompatActivity() {
                     set(Calendar.SECOND, 0)
                 }
 
-                // Create a Calendar object for the current date with the selected time
-                val currentDateTime = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, hourOfDay)
-                    set(Calendar.MINUTE, minute)
-                    set(Calendar.SECOND, 0)
-                }
-
                 // Compare selected time with current time
-                if (selectedTimeCalendar.before(currentDateTime) && tvDueDate.text.isNotEmpty()) {
+                if (selectedTimeCalendar.before(Calendar.getInstance()) && tvDueDate.text.isNotEmpty()) {
                     Toast.makeText(this, "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
                 } else {
-                    // Format the time for display
                     tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
                 }
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
     }
+
 
     private fun updateRepeatUI(isChecked: Boolean) {
         findViewById<HorizontalScrollView>(R.id.hsvDaily).visibility = if (isChecked) View.VISIBLE else View.GONE

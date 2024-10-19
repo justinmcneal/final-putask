@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupMenu
@@ -133,7 +134,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
     }
 
 
-
     private fun handleTaskClick(task: Task) {
         // Create and show a dialog to display task details
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
@@ -174,7 +174,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         dialogBuilder.create().show()
     }
 
-
     // Function to show the popup menu below the ImageView button and update the category TextView
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
         PopupMenu(requireContext(), anchorView).apply {
@@ -210,33 +209,26 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
+    // Function to show TimePickerDialog
     private fun showTimePicker(tvTimeReminder: TextView, tvDueDate: TextView) {
         Calendar.getInstance().let { calendar ->
             TimePickerDialog(requireContext(), { _, hourOfDay, minute ->
-                // Create a Calendar object for the selected time
                 val selectedTimeCalendar = Calendar.getInstance().apply {
                     set(Calendar.HOUR_OF_DAY, hourOfDay)
                     set(Calendar.MINUTE, minute)
                     set(Calendar.SECOND, 0)
                 }
 
-                // Create a Calendar object for the current date with the selected time
-                val currentDateTime = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, hourOfDay)
-                    set(Calendar.MINUTE, minute)
-                    set(Calendar.SECOND, 0)
-                }
-
-                // Compare selected time with current time
-                if (selectedTimeCalendar.before(currentDateTime) && tvDueDate.text.isNotEmpty()) {
+                // Compare selected time with current time and date
+                if (selectedTimeCalendar.before(Calendar.getInstance()) && tvDueDate.text.isNotEmpty()) {
                     Toast.makeText(requireContext(), "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
                 } else {
-                    // Format the time for display
                     tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
                 }
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
     }
+
 
     private fun showDeleteConfirmationDialog(task: Task) {
         AlertDialog.Builder(requireContext()).apply {

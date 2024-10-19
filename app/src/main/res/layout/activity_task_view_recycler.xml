@@ -350,6 +350,18 @@
                 android:layout_marginEnd="10dp" />
         </LinearLayout>
 
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnUpdate"
+            android:layout_width="140dp"
+            android:layout_height="wrap_content"
+            android:text="Update"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center"
+            android:textSize="16dp"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/skyblue"
+            android:background="@drawable/corners_for_greeting"/>
+
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
