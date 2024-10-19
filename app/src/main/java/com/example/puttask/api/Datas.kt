@@ -7,7 +7,10 @@ data class RegistrationRequest(
     val password_confirmation: String)
 data class RegistrationResponse(
     val message: String,
-    val token: String)
+    val token: String,
+    val user: UserInfo  // Initialize user here
+)
+
 
 //login
 data class LoginRequest(
@@ -15,8 +18,9 @@ data class LoginRequest(
     val password: String)
 data class LoginResponse(
     val message: String,
-    val token: String)
-
+    val token: String,
+    val user: UserInfo  // Initialize user here
+)
 
 //change username
 data class UpdateUsernameRequest(

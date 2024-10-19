@@ -99,6 +99,19 @@ class LogIn : AppCompatActivity() {
                     // Save the authentication token using DataManager
                     loginResponse?.token?.let {
                         DataManager(this@LogIn).saveAuthToken(it)
+
+                        // Save the username and token in SharedPreferences
+                        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                        val editor = sharedPreferences.edit()
+
+                        // Clear old data
+                        editor.clear()
+
+                        // Assuming `loginResponse` contains a `user` object with a `username`
+                        val username = loginResponse?.user?.username  // Access the username from the user object
+                        editor.putString("username", username)  // Save username
+                        editor.putString("token", it)  // Save token
+                        editor.apply()  // Apply changes
                     }
 
                     showToast(message)

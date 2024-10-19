@@ -97,8 +97,14 @@ class Profile : Fragment() {
     }
 
     private fun updateUsername(newUsername: String) {
+        val maxUsernameLength = 50 // Define the character limit for the username
+
         lifecycleScope.launch {
-            if (newUsername.isNotBlank()) {
+            if (newUsername.isBlank()) {
+                showError("Username cannot be empty")
+            } else if (newUsername.length > maxUsernameLength) {
+                showError("Username cannot exceed $maxUsernameLength characters")
+            } else {
                 try {
                     val updateUsernameRequest = UpdateUsernameRequest(username = newUsername)
                     val token = "Bearer ${dataManager.getAuthToken()}"
@@ -113,8 +119,6 @@ class Profile : Fragment() {
                 } catch (e: Exception) {
                     showError("Error updating username: ${e.message}")
                 }
-            } else {
-                showError("Username cannot be empty")
             }
         }
     }

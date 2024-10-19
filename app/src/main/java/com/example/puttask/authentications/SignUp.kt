@@ -80,8 +80,11 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun validateInputs(username: String, email: String, password: String, confirmPassword: String): Boolean {
+        val maxUsernameLength = 50 // Set the maximum username length
+
         return when {
             username.isEmpty() -> showError("Please enter a username")
+            username.length > maxUsernameLength -> showError("Username cannot exceed $maxUsernameLength characters")
             email.isEmpty() -> showError("Please enter an email")
             !isValidEmail(email) -> showError("Please enter a valid email")
             password.length < 8 -> showError("Password must be at least 8 characters")
@@ -112,6 +115,18 @@ class SignUp : AppCompatActivity() {
                     // Save the authentication token using DataManager
                     registrationResponse?.token?.let {
                         DataManager(this@SignUp).saveAuthToken(it)
+
+                        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                        val editor = sharedPreferences.edit()
+
+                        // Clear old data
+                        editor.clear()
+
+                        // Assuming `registrationResponse` contains a `user` object with the new username
+                        val username = registrationResponse?.user?.username
+                        editor.putString("username", username)  // Save new username
+                        editor.putString("token", it)  // Save new token
+                        editor.apply()  // Apply changes
                     }
 
                     showToast(message)
