@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.puttask.R
@@ -13,6 +14,7 @@ import com.example.puttask.api.APIService
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.ContactRequest
 import com.example.puttask.api.DataManager
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class ContactSupport : Fragment(R.layout.fragment_contact_support) {
@@ -40,6 +42,9 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
     }
 
     private fun submitContactForm(message: String) {
+        val progressBar = requireView().findViewById<ProgressBar>(R.id.progressBar)
+        progressBar.visibility = View.VISIBLE // Show the progress bar
+
         lifecycleScope.launch {
             try {
                 val token = DataManager(requireContext()).getAuthToken()
@@ -53,7 +58,7 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
                         if (user != null) {
                             val username = user.username
                             val email = user.email
-                            sendContactForm(message, username, email)
+                            sendContactForm(message, username, email, progressBar)
                         } else {
                             Toast.makeText(requireContext(), "Failed to get user data", Toast.LENGTH_SHORT).show()
                         }
@@ -66,14 +71,20 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 Log.e("ContactSupport", "Exception: ${e.message}", e)
+            } finally {
+                // Progress bar will be hidden in sendContactForm
             }
         }
     }
 
-    private fun sendContactForm(message: String, username: String, email: String) {
-        val contactReq = ContactRequest(message, username, email) // Make sure to include username and email in the request
+    private fun sendContactForm(message: String, username: String, email: String, progressBar: ProgressBar) {
+        val contactReq = ContactRequest(message, username, email)
+
         lifecycleScope.launch {
             try {
+                // Show the progress bar when sending the contact form
+                progressBar.visibility = View.VISIBLE
+
                 val response = contactApiService.sendContactForm(contactReq)
 
                 if (response.isSuccessful) {
@@ -92,7 +103,11 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 Log.e("ContactSupport", "Error sending contact form: ${e.message}", e)
+            } finally {
+                delay(1000) // Show the progress bar for 1 second
+                progressBar.visibility = View.GONE
             }
         }
     }
+
 }
