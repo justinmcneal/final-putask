@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
+import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,6 +19,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
@@ -148,6 +150,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val btnCategory = dialogView.findViewById<ImageView>(R.id.imListAdd)
         val addDueIcon = dialogView.findViewById<ImageButton>(R.id.addDueIcon)
         val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
+        val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
 
         // Set task details in the dialog
         tvTaskName.text = task.task_name
@@ -171,8 +174,22 @@ class Lists : Fragment(R.layout.fragment_lists) {
             showTimePicker(tvTimeReminder, tvDueDate) // Pass the TextView for date validation
         }
 
+        // Handle the Update button click event
+        btnUpdate.setOnClickListener {
+            // Code to handle the task update logic
+            // For example, updating the task on the server
+            updateTask(task)
+        }
+
         dialogBuilder.create().show()
     }
+
+    // Function to update task
+    private fun updateTask(task: Task) {
+        // Code to update task details
+        Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
+    }
+
 
     // Function to show the popup menu below the ImageView button and update the category TextView
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
