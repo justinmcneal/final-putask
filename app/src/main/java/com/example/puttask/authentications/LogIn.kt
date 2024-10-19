@@ -18,6 +18,8 @@ import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.LoginRequest
 import com.example.puttask.api.DataManager
 import kotlinx.coroutines.launch
+import org.json.JSONException
+import org.json.JSONObject
 import retrofit2.HttpException
 
 class LogIn : AppCompatActivity() {
@@ -127,8 +129,10 @@ class LogIn : AppCompatActivity() {
                     startActivity(Intent(this@LogIn, MainActivity::class.java))
                     finish() // Close the LogIn screen
                 } else {
-                    val errorBody = response.errorBody()?.string()
-                    showToast(errorBody ?: "Login failed")
+                    // Parse the error response to extract the message
+                    val errorResponse = response.errorBody()?.string()
+                    val errorMessage = extractErrorMessage(errorResponse)
+                    showToast(errorMessage)
                 }
             } catch (e: HttpException) {
                 Log.e("LogInError", "HTTP Error: ${e.message()}", e)
@@ -139,6 +143,20 @@ class LogIn : AppCompatActivity() {
             }
         }
     }
+
+    private fun extractErrorMessage(errorResponse: String?): String {
+        return if (errorResponse != null) {
+            try {
+                val jsonObject = JSONObject(errorResponse)
+                jsonObject.getString("message") // Extract the message field
+            } catch (e: JSONException) {
+                "An error occurred" // Fallback message in case of parsing issues
+            }
+        } else {
+            "An error occurred" // Fallback message if errorBody is null
+        }
+    }
+
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

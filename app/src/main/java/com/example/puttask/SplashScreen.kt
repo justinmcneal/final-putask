@@ -11,7 +11,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.view.View
 import com.example.puttask.authentications.LoginSignin
-import com.example.puttask.MainActivity
 import com.example.puttask.api.DataManager
 
 class SplashScreen : AppCompatActivity() {
@@ -54,6 +53,9 @@ class SplashScreen : AppCompatActivity() {
 
             override fun onAnimationRepeat(animation: Animation?) {}
         })
+
+        // Temporarily clear the token for testing purposes (remove this line after testing)
+        // dataManager.clearAuthToken() // <-- Remove this line
 
         // Check for authentication token
         val token = dataManager.getAuthToken()

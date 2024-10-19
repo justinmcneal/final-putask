@@ -24,6 +24,11 @@ class DataManager(context: Context) {
         return preferences.getString(KEY_AUTH_TOKEN, null)
     }
 
+    // Clear only the auth token
+    fun clearAuthToken() {
+        preferences.edit().remove(KEY_AUTH_TOKEN).apply()
+    }
+
     fun clearLoginData() {
         preferences.edit().remove(KEY_IS_LOGGED_IN).apply()
     }
