@@ -66,7 +66,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         popupcardviewLists = view.findViewById(R.id.popupcardviewLists)
 
         setupRecyclerView()
-        setupSwipeRefresh()
         fetchTasks()  // Ensure tasks are fetched when the fragment is created
 
         // Dropdown setup for sorting options

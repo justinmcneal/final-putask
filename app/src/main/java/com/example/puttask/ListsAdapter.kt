@@ -36,6 +36,7 @@ class ListsAdapter(
             onItemClick(task)
         }
 
+
         // Handle delete task option
         holder.deleteOption.setOnClickListener {
             onDeleteClick?.invoke(task)
