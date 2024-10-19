@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.puttask.ForgotPassword
@@ -112,6 +113,11 @@ class Profile : Fragment() {
 
                     if (response.isSuccessful) {
                         showError("Username updated successfully")
+
+                        // Update SharedPreferences with the new username
+                        val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+                        sharedPreferences.edit().putString("username", newUsername).apply()
+
                         fetchUserInfo() // Refresh user info after update
                     } else {
                         showError("Error updating username: ${response.message()}")
@@ -122,6 +128,7 @@ class Profile : Fragment() {
             }
         }
     }
+
 
     private suspend fun showError(message: String) {
         withContext(Dispatchers.Main) {
