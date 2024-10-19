@@ -102,7 +102,19 @@ class AddTask2 : AppCompatActivity() {
     private fun showTimePicker() {
         Calendar.getInstance().let { calendar ->
             TimePickerDialog(this, { _, hourOfDay, minute ->
-                tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
+                // Create a Calendar object for the selected time
+                val selectedTimeCalendar = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    set(Calendar.MINUTE, minute)
+                    set(Calendar.SECOND, 0)
+                }
+
+                // Compare selected time with current time
+                if (selectedTimeCalendar.before(Calendar.getInstance()) && tvDueDate.text.isNotEmpty()) {
+                    Toast.makeText(this, "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
+                } else {
+                    tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
+                }
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
     }
