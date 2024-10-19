@@ -252,6 +252,7 @@
                     android:layout_marginBottom="16dp"
                     android:layout_weight="1"
                     android:hint="Time Reminder"
+                    android:maxLines="1"
                     android:textColorHint="@color/black"
                     android:textSize="14sp" />
 

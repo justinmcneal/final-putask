@@ -109,13 +109,21 @@ class AddTask2 : AppCompatActivity() {
                     set(Calendar.SECOND, 0)
                 }
 
+                // Create a Calendar object for the current date with the selected time
+                val currentDateTime = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    set(Calendar.MINUTE, minute)
+                    set(Calendar.SECOND, 0)
+                }
+
                 // Compare selected time with current time
-                if (selectedTimeCalendar.before(Calendar.getInstance()) && tvDueDate.text.isNotEmpty()) {
+                if (selectedTimeCalendar.before(currentDateTime) && tvDueDate.text.isNotEmpty()) {
                     Toast.makeText(this, "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
                 } else {
+                    // Format the time for display
                     tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
                 }
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
         }
     }
 
@@ -128,14 +136,33 @@ class AddTask2 : AppCompatActivity() {
 
         if (!isChecked) repeatDays.clear()
     }
-
     private fun createTask() {
         if (validateFields()) {
+            // Combine selected date and time into a single Calendar object
+            val endDateParts = tvDueDate.text.toString().split("/")
+            val endTimeParts = tvTimeReminder.text.toString().split(":")
+
+            val selectedEndDateTime = Calendar.getInstance().apply {
+                set(Calendar.YEAR, endDateParts[0].toInt())
+                set(Calendar.MONTH, endDateParts[1].toInt() - 1) // Month is 0-based
+                set(Calendar.DAY_OF_MONTH, endDateParts[2].toInt())
+                set(Calendar.HOUR_OF_DAY, endTimeParts[0].toInt())
+                set(Calendar.MINUTE, endTimeParts[1].toInt())
+                set(Calendar.SECOND, 0)
+            }
+
+            // Check if the selected end date and time are in the past
+            if (selectedEndDateTime.before(Calendar.getInstance())) {
+                Toast.makeText(this, "Selected end date and time cannot be in the past", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            // Create request object with correct formats
             val createRequest = CreateRequest(
                 task_name = etTaskName.text.toString(),
                 task_description = etTaskDescription.text.toString(),
-                end_date = tvDueDate.text.toString(),
-                end_time = tvTimeReminder.text.toString(),
+                end_date = String.format("%04d-%02d-%02d", selectedEndDateTime.get(Calendar.YEAR), selectedEndDateTime.get(Calendar.MONTH) + 1, selectedEndDateTime.get(Calendar.DAY_OF_MONTH)), // Corrected to YYYY-MM-DD
+                end_time = String.format("%02d:%02d", selectedEndDateTime.get(Calendar.HOUR_OF_DAY), selectedEndDateTime.get(Calendar.MINUTE)), // Format to H:i
                 repeat_days = if (switchRepeat.isChecked) repeatDays else null,
                 category = tvList.text.toString()
             )
@@ -157,6 +184,8 @@ class AddTask2 : AppCompatActivity() {
             }
         }
     }
+
+
 
     private fun validateFields(): Boolean {
         return when {

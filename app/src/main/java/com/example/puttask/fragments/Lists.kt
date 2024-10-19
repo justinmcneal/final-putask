@@ -1,13 +1,19 @@
 package com.example.puttask.fragments
 
 import android.app.AlertDialog
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
+import java.util.Calendar
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
@@ -125,18 +132,22 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
+
+
     private fun handleTaskClick(task: Task) {
         // Create and show a dialog to display task details
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
-            .setTitle("Task Details")
 
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvStartDate)
         val tvTimeReminder = dialogView.findViewById<TextView>(R.id.tvEndDate)
         val tvCategory = dialogView.findViewById<TextView>(R.id.tvList)
+        val btnCategory = dialogView.findViewById<ImageView>(R.id.imListAdd)
+        val addDueIcon = dialogView.findViewById<ImageButton>(R.id.addDueIcon)
+        val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
 
         // Set task details in the dialog
         tvTaskName.text = task.task_name
@@ -145,10 +156,87 @@ class Lists : Fragment(R.layout.fragment_lists) {
         tvTimeReminder.text = task.end_time
         tvCategory.text = task.category
 
-        dialogBuilder.setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+        // When the ImageView button (btnCategory) is clicked, show the popup menu
+        btnCategory.setOnClickListener {
+            showCategoryPopup(btnCategory, tvCategory)
+        }
+
+        // Show date picker when the add due icon is clicked
+        addDueIcon.setOnClickListener {
+            showDatePicker(tvDueDate) // Pass the TextView to update with the selected date
+        }
+
+        // Show time picker when the add time icon is clicked
+        addTimeIcon.setOnClickListener {
+            showTimePicker(tvTimeReminder, tvDueDate) // Pass the TextView for date validation
+        }
+
         dialogBuilder.create().show()
     }
 
+
+    // Function to show the popup menu below the ImageView button and update the category TextView
+    private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
+        PopupMenu(requireContext(), anchorView).apply {
+            menuInflater.inflate(R.menu.popup_categories, menu)
+            setOnMenuItemClickListener { menuItem ->
+                categoryTextView.text = when (menuItem.itemId) {
+                    R.id.personal -> "Personal"
+                    R.id.work -> "Work"
+                    R.id.school -> "School"
+                    R.id.wishlist -> "Wishlist"
+                    else -> ""
+                }
+                true
+            }
+            show()
+        }
+    }
+
+    // Function to show DatePickerDialog
+    private fun showDatePicker(dateTextView: TextView) {
+        Calendar.getInstance().let { calendar ->
+            DatePickerDialog(requireContext(), { _, year, month, day ->
+                val selectedDateCalendar = Calendar.getInstance().apply {
+                    set(year, month, day)
+                }
+
+                if (selectedDateCalendar.before(Calendar.getInstance())) {
+                    Toast.makeText(requireContext(), "Selected date cannot be in the past", Toast.LENGTH_SHORT).show()
+                } else {
+                    dateTextView.text = String.format("%04d/%02d/%02d", year, month + 1, day)
+                }
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
+    }
+
+    private fun showTimePicker(tvTimeReminder: TextView, tvDueDate: TextView) {
+        Calendar.getInstance().let { calendar ->
+            TimePickerDialog(requireContext(), { _, hourOfDay, minute ->
+                // Create a Calendar object for the selected time
+                val selectedTimeCalendar = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    set(Calendar.MINUTE, minute)
+                    set(Calendar.SECOND, 0)
+                }
+
+                // Create a Calendar object for the current date with the selected time
+                val currentDateTime = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    set(Calendar.MINUTE, minute)
+                    set(Calendar.SECOND, 0)
+                }
+
+                // Compare selected time with current time
+                if (selectedTimeCalendar.before(currentDateTime) && tvDueDate.text.isNotEmpty()) {
+                    Toast.makeText(requireContext(), "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Format the time for display
+                    tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
+                }
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+        }
+    }
 
     private fun showDeleteConfirmationDialog(task: Task) {
         AlertDialog.Builder(requireContext()).apply {
