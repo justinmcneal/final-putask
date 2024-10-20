@@ -41,6 +41,8 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private lateinit var tvDateMonth: TextView
     private lateinit var ivCalendarNext: ImageView
     private lateinit var ivCalendarPrevious: ImageView
+    private lateinit var dateRecyclerView: RecyclerView
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,12 +55,15 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        dateRecyclerView = binding.dateRecyclerView
         recyclerView = binding.listsrecyclerView
         tvDateMonth = binding.textDateMonth
         ivCalendarNext = binding.ivCalendarNext
         ivCalendarPrevious = binding.ivCalendarPrevious
 
+        dateRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         recyclerView.layoutManager = LinearLayoutManager(context)
+
         listsAdapter = ListsAdapter(taskList) { task ->
             handleTaskClick(task)
         }
@@ -96,6 +101,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
+        binding.dateRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         listsAdapter = ListsAdapter(taskList) { task ->
             handleTaskClick(task)
         }
@@ -120,6 +126,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
     // Fetch all tasks from the backend
     private fun fetchTasks() {
+        binding.swipeRefreshLayout.isRefreshing = true
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
@@ -138,6 +145,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                 }
             } catch (e: Exception) {
                 Log.e("TimelineFragment", "Exception fetching tasks", e)
+            }finally {
+                withContext(Dispatchers.Main) {
+                    binding.swipeRefreshLayout.isRefreshing = false // Stop the refresh spinner
+                }
             }
         }
     }

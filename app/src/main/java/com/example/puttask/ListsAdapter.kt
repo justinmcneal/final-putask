@@ -68,4 +68,31 @@ class ListsAdapter(
         val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         val deleteOption: ImageButton = itemView.findViewById(R.id.ic_delete)
     }
+
+    class DateAdapter(
+        private val datesList: List<String>,
+        private val onDateClick: (String) -> Unit
+    ) : RecyclerView.Adapter<DateAdapter.DateViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DateViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.datelayout, parent, false)
+            return DateViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: DateViewHolder, position: Int) {
+            val date = datesList[position]
+            holder.tvDate.text = date
+
+            holder.itemView.setOnClickListener {
+                onDateClick(date)
+            }
+        }
+
+        override fun getItemCount(): Int = datesList.size
+
+        class DateViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val tvDate: TextView = itemView.findViewById(R.id.dateRecyclerView) // Assuming you have a TextView for the date
+        }
+    }
 }
