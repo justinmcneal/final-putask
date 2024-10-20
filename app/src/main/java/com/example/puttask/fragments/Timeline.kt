@@ -37,7 +37,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
     private var _binding: FragmentTimelineBinding? = null
     private val binding get() = _binding!!
-
     private lateinit var listsAdapter: ListsAdapter
     private val taskList = mutableListOf<Task>()
     private lateinit var recyclerView: RecyclerView
@@ -61,7 +60,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         tvDateMonth = binding.textDateMonth // Correct if ID is "text_date_month" in XML
         ivCalendarNext = binding.ivCalendarNext // Correct if ID is "iv_calendar_next" in XML
         ivCalendarPrevious = binding.ivCalendarPrevious // Correct if ID is "iv_calendar_previous" in XML
-
         // Set up RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(context)
         listsAdapter = ListsAdapter(taskList) { task ->
@@ -81,7 +79,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             tvDateMonth.text = it
         }
 
-        setupSwipeRefresh()
+//        setupSwipeRefresh()
         fetchTasks()
         updateNoTasksMessage()
     }
@@ -108,15 +106,15 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
 
 
-    private fun setupSwipeRefresh() {
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            fetchTasks()
-        }
-    }
+//    private fun setupSwipeRefresh() {
+//        binding.swipeRefreshLayout.setOnRefreshListener {
+//            fetchTasks()
+//        }
+//    }
 
     private fun fetchTasks() {
         // Show the loading indicator
-        binding.swipeRefreshLayout.isRefreshing = true
+//        binding.swipeRefreshLayout.isRefreshing = true
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -141,7 +139,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             } finally {
                 // Hide the loading indicator
                 withContext(Dispatchers.Main) {
-                    binding.swipeRefreshLayout.isRefreshing = false
+//                    binding.swipeRefreshLayout.isRefreshing = false
                 }
             }
         }
@@ -164,6 +162,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         val addDueIcon = dialogView.findViewById<ImageButton>(R.id.addDueIcon)
         val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
         val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
+        val tvNoTask = dialogView.findViewById<TextView>(R.id.tvNotask)
 
         // Set task details in the dialog
         tvTaskName.text = task.task_name
@@ -266,10 +265,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
     private fun updateNoTasksMessage() {
         if (taskList.isEmpty()) {
-            binding.tvNoTasks.visibility = View.VISIBLE
+            binding.tvNotask.visibility = View.VISIBLE
             binding.listsrecyclerView.visibility = View.GONE
         } else {
-            binding.tvNoTasks.visibility = View.GONE
+            binding.tvNotask.visibility = View.GONE
             binding.listsrecyclerView.visibility = View.VISIBLE
         }
     }

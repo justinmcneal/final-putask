@@ -24,47 +24,65 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     private lateinit var tvsixtyDays: TextView
     private lateinit var tvthreesixtyfiveDays: TextView
     private lateinit var tvCustom: TextView
-
+    private lateinit var tvTaskOverviewDate: TextView
     private val entries = ArrayList<Entry>()
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize the LineChart
+        // Initialize UI components
         lineChart = view.findViewById(R.id.lineChart)
         tvsevenDays = view.findViewById(R.id.tvsevenDays)
         tvtwentyeightDays = view.findViewById(R.id.tvtwentyeightDays)
         tvsixtyDays = view.findViewById(R.id.tvsixtyDays)
         tvthreesixtyfiveDays = view.findViewById(R.id.tvthreesixtyfiveDays)
-        tvCustom = view.findViewById(R.id.tvCustom)
+        tvTaskOverviewDate = view.findViewById(R.id.tvTaskOverviewDate)
 
-        tvsevenDays.setOnClickListener{
-            updateChartForLast7Days()
+        // Set up click listeners for the buttons
+        tvsevenDays.setOnClickListener {
+            updateChart(7, "Last 7 Days Data")
             highlightButton(tvsevenDays)
         }
+        tvtwentyeightDays.setOnClickListener {
+            updateChart(28, "Last 28 Days Data")
+            highlightButton(tvtwentyeightDays)
+        }
+        tvsixtyDays.setOnClickListener {
+            updateChart(60, "Last 60 Days Data")
+            highlightButton(tvsixtyDays)
+        }
+        tvthreesixtyfiveDays.setOnClickListener {
+            updateChart(365, "Last 365 Days Data")
+            highlightButton(tvthreesixtyfiveDays)
+        }
     }
-    private fun updateChartForLast7Days(){
-        lineChart.clear() //to clear the existing data
+
+    // Generic function to update the chart for any range of days
+    private fun updateChart(days: Int, label: String) {
+        lineChart.clear()
         entries.clear()
 
-        // create list of entries for the past 7 days
         val calendar = Calendar.getInstance()
-        val currentDate = calendar.timeInMillis
+        val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
 
-        for (i in 0 until 7){
-            val date = Calendar.getInstance().apply() {
-                timeInMillis = currentDate
-                add(Calendar.DAY_OF_MONTH, -1)
-            }.time
+        // Format the current date
+        val currentDate = dateFormat.format(calendar.time)
 
-            val percentageDataPoint = (Math.random() *100).toFloat()
+        // Subtract the given number of days
+        calendar.add(Calendar.DAY_OF_YEAR, -days)
+        val startDate = dateFormat.format(calendar.time)
 
-            entries.add(Entry (i.toFloat(), percentageDataPoint))
+        // Set the date range in tvTaskOverviewDate
+        tvTaskOverviewDate.text = "$startDate - $currentDate"
 
+        // Create data entries for the past 'days' days
+        for (i in 0 until days) {
+            val percentageDataPoint = (Math.random() * 100).toFloat()
+            entries.add(Entry(i.toFloat(), percentageDataPoint))
         }
-        // Create a dataset and customize it
-        val dataSet = LineDataSet(entries, "Last 7 Days Data")
+
+        // Create and customize dataset
+        val dataSet = LineDataSet(entries, label)
         dataSet.color = resources.getColor(android.R.color.holo_blue_light)
         dataSet.lineWidth = 2f
         dataSet.setDrawCircles(true)
@@ -93,7 +111,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     }
 
     // Function to highlight the clicked button
-    private fun highlightButton(tvsevenDays:TextView) {
-        tvsevenDays.setBackgroundColor(Color.parseColor("#FFBB86FC")) // Change color to purple or any desired color
+    private fun highlightButton(selectedButton: TextView) {
+        selectedButton.setBackgroundColor(Color.parseColor("#FFBB86FC")) // Change color to purple or any desired color
     }
 }
