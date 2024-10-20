@@ -5,7 +5,9 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupMenu
@@ -22,7 +24,7 @@ import com.example.puttask.ListsAdapter
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
-import com.example.puttask.databinding.FragmentTimelineBinding
+import com.example.puttask.databinding.FragmentListsBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,52 +34,40 @@ import java.util.Calendar
 
 class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter.OnItemClickListener {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var tvDateMonth: TextView
-    private lateinit var ivCalendarNext: ImageView
-    private lateinit var ivCalendarPrevious: ImageView
     private lateinit var listsAdapter: ListsAdapter // Declare the listsAdapter
     private var taskList: MutableList<Task> = mutableListOf() // Initialize taskList
-    private var _binding: FragmentTimelineBinding? = null // Make sure to bind your layout
+    private var _binding: FragmentListsBinding? = null
     private val binding get() = _binding!!
+
+    override fun onItemClick(ddMmYy: String, dd: String, day: String) {
+        // Handle the calendar date click event here
+        Toast.makeText(requireContext(), "Selected date: $ddMmYy", Toast.LENGTH_SHORT).show()
+    }
+
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentListsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize views
-        recyclerView = view.findViewById(R.id.recyclerView)
-        tvDateMonth = view.findViewById(R.id.text_date_month)
-        ivCalendarNext = view.findViewById(R.id.iv_calendar_next)
-        ivCalendarPrevious = view.findViewById(R.id.iv_calendar_previous)
-
-        // Set up RecyclerView
         setupRecyclerView()
         setupSwipeRefresh()
         fetchTasks()
+        updateNoTasksMessage()
 
-        // Initialize Horizontal Calendar
-        val calendarSetUp = HorizontalCalendarSetUp()
-        val tvMonth = calendarSetUp.setUpCalendarAdapter(recyclerView, this)
-        tvDateMonth.text = tvMonth
 
-        calendarSetUp.setUpCalendarPrevNextClickListener(ivCalendarNext, ivCalendarPrevious, this) {
-            tvDateMonth.text = it
-        }
-
-        // Update username display
-        updateUsernameDisplay()
-    }
-
-    override fun onItemClick(ddMmYy: String, dd: String, day: String) {
-        // Handle the item click event here
-        Toast.makeText(requireContext(), "Selected date: $ddMmYy", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun updateUsernameDisplay() {
+        // Fetch and display the username from SharedPreferences
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
-        val username = sharedPreferences.getString("username", "User") // Default is "User" if not found
+        val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
         binding.tvUsername.text = "Hi $username!"
     }
+
 
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
@@ -183,6 +173,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
     }
 
+
     // Function to show the popup menu below the ImageView button and update the category TextView
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
         PopupMenu(requireContext(), anchorView).apply {
@@ -234,37 +225,55 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                 } else {
                     tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
                 }
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
     }
 
     private fun showDeleteConfirmationDialog(task: Task) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Delete Task")
-            .setMessage("Are you sure you want to delete this task?")
-            .setPositiveButton("Yes") { _, _ ->
-                deleteTask(task)
-            }
-            .setNegativeButton("No", null)
-            .show()
-    }
-
-    private fun deleteTask(task: Task) {
-        // Code to delete the task from the server
-        Toast.makeText(requireContext(), "Task deleted successfully", Toast.LENGTH_SHORT).show()
+        AlertDialog.Builder(requireContext()).apply {
+            setTitle("Delete Task")
+            setMessage("Are you sure you want to delete this task?")
+            setPositiveButton("Delete") { _, _ -> deleteTask(task) }
+            setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            create()
+            show()
+        }
     }
 
     private fun updateNoTasksMessage() {
-        // Code to update the UI to show a message if there are no tasks
         if (taskList.isEmpty()) {
-            binding.noTasksMessage.visibility = View.VISIBLE
+            binding.tvNotask.visibility = View.VISIBLE
+            binding.listsrecyclerView.visibility = View.GONE
         } else {
-            binding.noTasksMessage.visibility = View.GONE
+            binding.tvNotask.visibility = View.GONE
+            binding.listsrecyclerView.visibility = View.VISIBLE
+        }
+    }
+
+    private fun deleteTask(task: Task) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.getApiService(requireContext()).deleteTask(task.id)
+                if (response.isSuccessful) {
+                    withContext(Dispatchers.Main) {
+                        val index = taskList.indexOf(task)
+                        if (index != -1) {
+                            taskList.removeAt(index)
+                            listsAdapter.notifyItemRemoved(index)
+                            updateNoTasksMessage()
+                        }
+                    }
+                } else {
+                    Log.e("ListsFragment", "Error deleting task: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception deleting task", e)
+            }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null // Clear binding reference to avoid memory leaks
+        _binding = null
     }
 }
