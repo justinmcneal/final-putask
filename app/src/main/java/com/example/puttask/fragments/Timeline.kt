@@ -91,18 +91,22 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         fetchTasksForDate(ddMmYy) // Ensure the format matches your task's end_date
     }
 
+
     private fun fetchTasksForDate(date: String) {
-        Log.d("TimelineFragment", "Fetching tasks for date: $date")
+        // Convert date from "DD/MM/YYYY" to "YYYY-MM-DD" if needed
+        val dateParts = date.split("/")
+        val formattedDate = "${dateParts[2]}-${dateParts[1]}-${dateParts[0]}" // Convert to "YYYY-MM-DD"
 
         // Filter tasks based on the selected date
         val filteredTasks = taskList.filter { task ->
-            task.end_date == date // Adjust according to your date format
+            task.end_date == formattedDate // Ensure this matches your date format
         }
 
-        // Update the RecyclerView with the filtered tasks
-        listsAdapter.updateTaskList(filteredTasks)
+        listsAdapter.updateTasks(filteredTasks)
         updateNoTasksMessage()
     }
+
+
 
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {

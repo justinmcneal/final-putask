@@ -55,6 +55,14 @@ class ListsAdapter(
         onDeleteClick = listener
     }
 
+    // Method to update the list with new tasks
+    fun updateTasks(newTasks: List<Task>) {
+        taskList.clear()
+        taskList.addAll(newTasks)
+        notifyDataSetChanged()
+    }
+
+
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         val tvTime: TextView = itemView.findViewById(R.id.tvTime)
