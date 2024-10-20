@@ -266,10 +266,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
     private fun updateNoTasksMessage() {
         if (taskList.isEmpty()) {
-            binding.tvNoTasks.visibility = View.VISIBLE
+            binding.tvNotasks.visibility = View.VISIBLE
             binding.listsrecyclerView.visibility = View.GONE
         } else {
-            binding.tvNoTasks.visibility = View.GONE
+            binding.tvNotasks.visibility = View.GONE
             binding.listsrecyclerView.visibility = View.VISIBLE
         }
     }
