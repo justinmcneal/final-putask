@@ -13,7 +13,7 @@ import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,16 +34,15 @@ import java.util.Calendar
 
 class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter.OnItemClickListener {
 
-    private lateinit var listsAdapter: ListsAdapter // Declare the listsAdapter
-    private var taskList: MutableList<Task> = mutableListOf() // Initialize taskList
     private var _binding: FragmentListsBinding? = null
     private val binding get() = _binding!!
 
-    override fun onItemClick(ddMmYy: String, dd: String, day: String) {
-        // Handle the calendar date click event here
-        Toast.makeText(requireContext(), "Selected date: $ddMmYy", Toast.LENGTH_SHORT).show()
-    }
-
+    private lateinit var listsAdapter: ListsAdapter
+    private val taskList = mutableListOf<Task>()
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var tvDateMonth: TextView
+    private lateinit var ivCalendarNext: ImageView
+    private lateinit var ivCalendarPrevious: ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,27 +55,39 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupRecyclerView()
-        setupSwipeRefresh()
-        fetchTasks()
-        updateNoTasksMessage()
+        // Initialize views using the binding object
+        recyclerView = binding.listsrecyclerView // Use binding to access the RecyclerView
+        tvDateMonth = binding.text_date_month // Assuming this ID exists in your layout
+        ivCalendarNext = binding.iv_calendar_next // Assuming this ID exists in your layout
+        ivCalendarPrevious = binding.iv_calendar_previous // Assuming this ID exists in your layout
 
-
-        // Fetch and display the username from SharedPreferences
-        val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
-
-    }
-
-
-    private fun setupRecyclerView() {
-        binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
+        // Set up RecyclerView
+        recyclerView.layoutManager = LinearLayoutManager(context)
         listsAdapter = ListsAdapter(taskList) { task ->
             handleTaskClick(task)
         }
         listsAdapter.setOnDeleteClickListener { task ->
             showDeleteConfirmationDialog(task)
         }
-        binding.listsrecyclerView.adapter = listsAdapter
+        recyclerView.adapter = listsAdapter
+
+        // Set up horizontal calendar
+        val calendarSetUp = HorizontalCalendarSetUp()
+        val tvMonth = calendarSetUp.setUpCalendarAdapter(recyclerView, this)
+        tvDateMonth.text = tvMonth
+
+        calendarSetUp.setUpCalendarPrevNextClickListener(ivCalendarNext, ivCalendarPrevious, this) {
+            tvDateMonth.text = it
+        }
+
+        setupSwipeRefresh()
+        fetchTasks()
+        updateNoTasksMessage()
+    }
+
+    override fun onItemClick(ddMmYy: String, dd: String, day: String) {
+        // Fetch tasks based on the selected date
+        fetchTasksForDate(ddMmYy) // Modify this function to fetch tasks for the selected date
     }
 
     private fun setupSwipeRefresh() {
@@ -94,7 +105,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                 val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
                 if (response.isSuccessful) {
                     response.body()?.let { tasks ->
-                        Log.d("ListsFragment", "Fetched tasks: ${tasks.size}")
+                        Log.d("TimelineFragment", "Fetched tasks: ${tasks.size}")
 
                         // Clear and update task list on the main thread
                         withContext(Dispatchers.Main) {
@@ -105,10 +116,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                         }
                     }
                 } else {
-                    Log.e("ListsFragment", "Error fetching tasks: ${response.message()}")
+                    Log.e("TimelineFragment", "Error fetching tasks: ${response.message()}")
                 }
             } catch (e: Exception) {
-                Log.e("ListsFragment", "Exception fetching tasks", e)
+                Log.e("TimelineFragment", "Exception fetching tasks", e)
             } finally {
                 // Hide the loading indicator
                 withContext(Dispatchers.Main) {
@@ -116,6 +127,13 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                 }
             }
         }
+    }
+
+    private fun fetchTasksForDate(date: String) {
+        // Implement the logic to fetch tasks for the selected date
+        // You may need to adjust your API to accept date filtering
+        Log.d("TimelineFragment", "Fetching tasks for date: $date")
+        // You can call your existing fetchTasks function here and modify it to filter by date
     }
 
     private fun handleTaskClick(task: Task) {
@@ -158,20 +176,11 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
         // Handle the Update button click event
         btnUpdate.setOnClickListener {
-            // Code to handle the task update logic
-            // For example, updating the task on the server
             updateTask(task)
         }
 
         dialogBuilder.create().show()
     }
-
-    // Function to update task
-    private fun updateTask(task: Task) {
-        // Code to update task details
-        Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
-    }
-
 
     // Function to show the popup menu below the ImageView button and update the category TextView
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
@@ -191,21 +200,19 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         }
     }
 
-    // Function to show DatePickerDialog
-    private fun showDatePicker(dateTextView: TextView) {
-        Calendar.getInstance().let { calendar ->
-            DatePickerDialog(requireContext(), { _, year, month, day ->
-                val selectedDateCalendar = Calendar.getInstance().apply {
-                    set(year, month, day)
-                }
+    private fun showDatePicker(tvDueDate: TextView) {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-                if (selectedDateCalendar.before(Calendar.getInstance())) {
-                    Toast.makeText(requireContext(), "Selected date cannot be in the past", Toast.LENGTH_SHORT).show()
-                } else {
-                    dateTextView.text = String.format("%04d/%02d/%02d", year, month + 1, day)
-                }
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
-        }
+        val datePickerDialog = DatePickerDialog(requireContext(), { _, selectedYear, selectedMonth, selectedDay ->
+            // Format the selected date and set it to the TextView
+            val formattedDate = String.format("%02d/%02d/%04d", selectedDay, selectedMonth + 1, selectedYear)
+            tvDueDate.text = formattedDate
+        }, year, month, day)
+
+        datePickerDialog.show()
     }
 
     // Function to show TimePickerDialog
@@ -226,6 +233,11 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                 }
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
+    }
+
+    private fun updateTask(task: Task) {
+        // Code to update task details
+        Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
     }
 
     private fun showDeleteConfirmationDialog(task: Task) {
@@ -263,10 +275,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                         }
                     }
                 } else {
-                    Log.e("ListsFragment", "Error deleting task: ${response.message()}")
+                    Log.e("TimelineFragment", "Error deleting task: ${response.message()}")
                 }
             } catch (e: Exception) {
-                Log.e("ListsFragment", "Exception deleting task", e)
+                Log.e("TimelineFragment", "Exception deleting task", e)
             }
         }
     }
