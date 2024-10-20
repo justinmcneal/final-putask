@@ -25,6 +25,7 @@ import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.example.puttask.databinding.FragmentListsBinding
+import com.example.puttask.databinding.FragmentTimelineBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,7 +35,7 @@ import java.util.Calendar
 
 class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter.OnItemClickListener {
 
-    private var _binding: FragmentListsBinding? = null
+    private var _binding: FragmentTimelineBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var listsAdapter: ListsAdapter
@@ -48,7 +49,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentListsBinding.inflate(inflater, container, false)
+        _binding = FragmentTimelineBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -56,10 +57,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         super.onViewCreated(view, savedInstanceState)
 
         // Initialize views using the binding object
-        recyclerView = binding.listsrecyclerView // Use binding to access the RecyclerView
-        tvDateMonth = binding.text_date_month // Assuming this ID exists in your layout
-        ivCalendarNext = binding.iv_calendar_next // Assuming this ID exists in your layout
-        ivCalendarPrevious = binding.iv_calendar_previous // Assuming this ID exists in your layout
+        recyclerView = binding.listsrecyclerView // Correct if ID is "listsrecyclerView" in XML
+        tvDateMonth = binding.textDateMonth // Correct if ID is "text_date_month" in XML
+        ivCalendarNext = binding.ivCalendarNext // Correct if ID is "iv_calendar_next" in XML
+        ivCalendarPrevious = binding.ivCalendarPrevious // Correct if ID is "iv_calendar_previous" in XML
 
         // Set up RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -86,8 +87,21 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     }
 
     override fun onItemClick(ddMmYy: String, dd: String, day: String) {
-        // Fetch tasks based on the selected date
-        fetchTasksForDate(ddMmYy) // Modify this function to fetch tasks for the selected date
+        // Fetch tasks based on the selected end date
+        fetchTasksForDate(ddMmYy) // Ensure the format matches your task's end_date
+    }
+
+    private fun fetchTasksForDate(date: String) {
+        Log.d("TimelineFragment", "Fetching tasks for date: $date")
+
+        // Filter tasks based on the selected date
+        val filteredTasks = taskList.filter { task ->
+            task.end_date == date // Adjust according to your date format
+        }
+
+        // Update the RecyclerView with the filtered tasks
+        listsAdapter.updateTaskList(filteredTasks)
+        updateNoTasksMessage()
     }
 
     private fun setupSwipeRefresh() {
@@ -129,12 +143,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         }
     }
 
-    private fun fetchTasksForDate(date: String) {
-        // Implement the logic to fetch tasks for the selected date
-        // You may need to adjust your API to accept date filtering
-        Log.d("TimelineFragment", "Fetching tasks for date: $date")
-        // You can call your existing fetchTasks function here and modify it to filter by date
-    }
+
 
     private fun handleTaskClick(task: Task) {
         // Create and show a dialog to display task details
@@ -253,10 +262,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
     private fun updateNoTasksMessage() {
         if (taskList.isEmpty()) {
-            binding.tvNotask.visibility = View.VISIBLE
+            binding.tvNoTasks.visibility = View.VISIBLE
             binding.listsrecyclerView.visibility = View.GONE
         } else {
-            binding.tvNotask.visibility = View.GONE
+            binding.tvNoTasks.visibility = View.GONE
             binding.listsrecyclerView.visibility = View.VISIBLE
         }
     }
