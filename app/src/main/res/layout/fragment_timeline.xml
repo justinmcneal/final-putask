@@ -72,17 +72,6 @@
             app:layout_constraintTop_toBottomOf="@id/constraintLayoutHeader"
             tools:listitem="@layout/datelayout" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listsrecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="20dp"
-            android:layout_weight="11"
-            android:nestedScrollingEnabled="false"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recyclerView" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>
