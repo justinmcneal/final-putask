@@ -88,6 +88,7 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
+                app:layoutManager_orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/constraintLayoutHeader"
                 tools:listitem="@layout/datelayout" />
 
