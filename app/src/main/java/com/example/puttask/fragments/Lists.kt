@@ -280,32 +280,46 @@ class Lists : Fragment(R.layout.fragment_lists) {
         timePickerDialog.show()
     }
 
-    // Function to show delete confirmation dialog
     private fun showDeleteConfirmationDialog(task: Task) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Delete Task")
-            .setMessage("Are you sure you want to delete this task?")
-            .setPositiveButton("Yes") { _, _ ->
-                deleteTask(task)
-            }
-            .setNegativeButton("No", null)
-            .show()
-    }
-
-    // Function to delete the task
-    private fun deleteTask(task: Task) {
-        // Code to delete the task
-        Toast.makeText(requireContext(), "Task deleted successfully", Toast.LENGTH_SHORT).show()
-        fetchTasks() // Refresh the task list after deletion
+        AlertDialog.Builder(requireContext()).apply {
+            setTitle("Delete Task")
+            setMessage("Are you sure you want to delete this task?")
+            setPositiveButton("Delete") { _, _ -> deleteTask(task) }
+            setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            create()
+            show()
+        }
     }
 
     private fun updateNoTasksMessage() {
         if (taskList.isEmpty()) {
             binding.tvNotask.visibility = View.VISIBLE
-            //MAYINALIS ME
+            binding.listsrecyclerView.visibility = View.GONE
         } else {
             binding.tvNotask.visibility = View.GONE
-            //MAYINALIS ME
+            binding.listsrecyclerView.visibility = View.VISIBLE
+        }
+    }
+
+    private fun deleteTask(task: Task) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.getApiService(requireContext()).deleteTask(task.id)
+                if (response.isSuccessful) {
+                    withContext(Dispatchers.Main) {
+                        val index = taskList.indexOf(task)
+                        if (index != -1) {
+                            taskList.removeAt(index)
+                            listsAdapter.notifyItemRemoved(index)
+                            updateNoTasksMessage()
+                        }
+                    }
+                } else {
+                    Log.e("ListsFragment", "Error deleting task: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception deleting task", e)
+            }
         }
     }
 
