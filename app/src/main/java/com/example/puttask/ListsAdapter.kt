@@ -13,9 +13,7 @@ class ListsAdapter(
     private val onItemClick: (Task) -> Unit
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
-//    companion object {
-//        const val REQUEST_CODE_EDIT_TASK = 1001
-//    }
+
 
     private var onDeleteClick: ((Task) -> Unit)? = null
 
@@ -43,14 +41,6 @@ class ListsAdapter(
     }
 
     override fun getItemCount(): Int = taskList.size
-
-    // Method to add a task to the list
-//    fun addTask(task: Task) {
-//        taskList.add(task)
-//        notifyItemInserted(taskList.size - 1)
-//    }
-
-    // Set the delete listener to handle task deletion
     fun setOnDeleteClickListener(listener: (Task) -> Unit) {
         onDeleteClick = listener
     }
