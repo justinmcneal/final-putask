@@ -1,12 +1,11 @@
 package com.example.puttask.fragments
 
-import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.cardview.widget.CardView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arjungupta08.horizontal_calendar_date.HorizontalCalendarAdapter
@@ -19,19 +18,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private lateinit var tvDateMonth: TextView
     private lateinit var ivCalendarNext: ImageView
     private lateinit var ivCalendarPrevious: ImageView
-
-    // List of CardView IDs
-    private val cardViewIds = listOf(
-        R.id.cardView1,
-        R.id.cardView2,
-        R.id.cardView3,
-        R.id.cardView4,
-        R.id.cardView5,
-        R.id.cardView6,
-        R.id.cardView7,
-        R.id.cardView8,
-        R.id.cardView9
-    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -51,17 +37,15 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         calendarSetUp.setUpCalendarPrevNextClickListener(ivCalendarNext, ivCalendarPrevious, this) {
             tvDateMonth.text = it
         }
-
-        // Set click listeners for CardViews
-        cardViewIds.forEach { cardViewId ->
-            view.findViewById<CardView>(cardViewId).setOnClickListener {
-                val intent = Intent(requireContext(), AddTask2::class.java)
-                startActivity(intent)
-            }
-        }
     }
 
     override fun onItemClick(ddMmYy: String, dd: String, day: String) {
-        // this where item clicks handle
+        // Handle the item click event here
+        Toast.makeText(requireContext(), "Selected date: $ddMmYy", Toast.LENGTH_SHORT).show()
+
+        // If you want to pass the selected date to another fragment or activity:
+        // val intent = Intent(requireContext(), AnotherActivity::class.java)
+        // intent.putExtra("SELECTED_DATE", ddMmYy)
+        // startActivity(intent)
     }
 }

@@ -8,7 +8,7 @@
     android:background="@drawable/bg_profile"
     android:backgroundTint="@color/skyblue"
     android:layout_marginTop="?attr/actionBarSize"
-    tools:context=".MainActivity">
+    tools:context=".fragments.Profile">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
