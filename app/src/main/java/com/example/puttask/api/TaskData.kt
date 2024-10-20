@@ -18,7 +18,7 @@ data class Task(
     val task_description: String,
     val end_date: String,
     val end_time: String,
-    val repeat_days: List<String>? = null,
+    var repeat_days: List<String>? = null,
     val category: String,
     val isChecked: Boolean
 ) : Parcelable {

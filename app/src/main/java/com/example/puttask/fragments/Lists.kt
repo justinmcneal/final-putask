@@ -36,10 +36,14 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private var _binding: FragmentListsBinding? = null
     private val binding get() = _binding!!
-
     private lateinit var listsAdapter: ListsAdapter
     private val taskList = mutableListOf<Task>()
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
+
+    private lateinit var btnRepeat: AppCompatButton
+    private lateinit var repeatDaysSelected: BooleanArray
+    private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +73,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         fetchTasks()
         updateNoTasksMessage()
         updateUsernameDisplay()
-
 
         // Fetch and display the username from SharedPreferences
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
@@ -140,11 +143,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
 
+        // Initialize all views
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvStartDate)
         val tvTimeReminder = dialogView.findViewById<TextView>(R.id.tvEndDate)
         val tvCategory = dialogView.findViewById<TextView>(R.id.tvList)
+        val tvRepeat = dialogView.findViewById<TextView>(R.id.tvRepeat)
         val btnCategory = dialogView.findViewById<ImageView>(R.id.imListAdd)
         val addDueIcon = dialogView.findViewById<ImageButton>(R.id.addDueIcon)
         val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
@@ -156,6 +161,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         tvDueDate.text = task.end_date
         tvTimeReminder.text = task.end_time
         tvCategory.text = task.category
+        tvRepeat.text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
 
         // When the ImageView button (btnCategory) is clicked, show the popup menu
         btnCategory.setOnClickListener {
@@ -172,6 +178,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
             showTimePicker(tvTimeReminder, tvDueDate) // Pass the TextView for date validation
         }
 
+        dialogView.findViewById<AppCompatButton>(R.id.btnRepeat).setOnClickListener {
+            showRepeatDaysDialog { selectedDays ->
+                task.repeat_days = selectedDays // Update the repeat_days in the task
+                tvRepeat.text = selectedDays.joinToString(", ")
+            }
+        }
+
         // Handle the Update button click event
         btnUpdate.setOnClickListener {
             // Code to handle the task update logic
@@ -182,12 +195,40 @@ class Lists : Fragment(R.layout.fragment_lists) {
         dialogBuilder.create().show()
     }
 
+    private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
+        repeatDaysSelected = BooleanArray(repeatDays.size)
+
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Select Repeat Days")
+        builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
+            repeatDaysSelected[which] = isChecked
+        }
+
+        builder.setPositiveButton("OK") { dialog, _ ->
+            val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
+
+            if (selectedDays.isNotEmpty()) {
+                onDaysSelected(selectedDays) // Pass selected days to the callback
+                Toast.makeText(requireContext(), "Repeats on: ${selectedDays.joinToString(", ")}", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "No repeat days selected", Toast.LENGTH_SHORT).show()
+            }
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        builder.create().show()
+    }
+
+
     // Function to update task
     private fun updateTask(task: Task) {
         // Code to update task details
         Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
     }
-
 
     // Function to show the popup menu below the ImageView button and update the category TextView
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
@@ -207,84 +248,64 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
-    // Function to show DatePickerDialog
-    private fun showDatePicker(dateTextView: TextView) {
-        Calendar.getInstance().let { calendar ->
-            DatePickerDialog(requireContext(), { _, year, month, day ->
-                val selectedDateCalendar = Calendar.getInstance().apply {
-                    set(year, month, day)
-                }
-
-                if (selectedDateCalendar.before(Calendar.getInstance())) {
-                    Toast.makeText(requireContext(), "Selected date cannot be in the past", Toast.LENGTH_SHORT).show()
-                } else {
-                    dateTextView.text = String.format("%04d/%02d/%02d", year, month + 1, day)
-                }
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
-        }
+    // Function to show date picker and update the TextView with the selected date
+    private fun showDatePicker(tvDueDate: TextView) {
+        val calendar = Calendar.getInstance()
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, year, month, dayOfMonth ->
+                val date = "$dayOfMonth/${month + 1}/$year"
+                tvDueDate.text = date
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
     }
 
-    // Function to show TimePickerDialog
+    // Function to show time picker and update the TextView with the selected time
     private fun showTimePicker(tvTimeReminder: TextView, tvDueDate: TextView) {
-        Calendar.getInstance().let { calendar ->
-            TimePickerDialog(requireContext(), { _, hourOfDay, minute ->
-                val selectedTimeCalendar = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, hourOfDay)
-                    set(Calendar.MINUTE, minute)
-                    set(Calendar.SECOND, 0)
-                }
-
-                // Compare selected time with current time and date
-                if (selectedTimeCalendar.before(Calendar.getInstance()) && tvDueDate.text.isNotEmpty()) {
-                    Toast.makeText(requireContext(), "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
-                } else {
-                    tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
-                }
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
-        }
+        val calendar = Calendar.getInstance()
+        val timePickerDialog = TimePickerDialog(
+            requireContext(),
+            { _, hourOfDay, minute ->
+                val time = String.format("%02d:%02d", hourOfDay, minute)
+                tvTimeReminder.text = time
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        )
+        timePickerDialog.show()
     }
 
-
+    // Function to show delete confirmation dialog
     private fun showDeleteConfirmationDialog(task: Task) {
-        AlertDialog.Builder(requireContext()).apply {
-            setTitle("Delete Task")
-            setMessage("Are you sure you want to delete this task?")
-            setPositiveButton("Delete") { _, _ -> deleteTask(task) }
-            setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            create()
-            show()
-        }
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Task")
+            .setMessage("Are you sure you want to delete this task?")
+            .setPositiveButton("Yes") { _, _ ->
+                deleteTask(task)
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
+
+    // Function to delete the task
+    private fun deleteTask(task: Task) {
+        // Code to delete the task
+        Toast.makeText(requireContext(), "Task deleted successfully", Toast.LENGTH_SHORT).show()
+        fetchTasks() // Refresh the task list after deletion
     }
 
     private fun updateNoTasksMessage() {
         if (taskList.isEmpty()) {
             binding.tvNotask.visibility = View.VISIBLE
-            binding.listsrecyclerView.visibility = View.GONE
+            //MAYINALIS ME
         } else {
             binding.tvNotask.visibility = View.GONE
-            binding.listsrecyclerView.visibility = View.VISIBLE
-        }
-    }
-
-    private fun deleteTask(task: Task) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = RetrofitClient.getApiService(requireContext()).deleteTask(task.id)
-                if (response.isSuccessful) {
-                    withContext(Dispatchers.Main) {
-                        val index = taskList.indexOf(task)
-                        if (index != -1) {
-                            taskList.removeAt(index)
-                            listsAdapter.notifyItemRemoved(index)
-                            updateNoTasksMessage()
-                        }
-                    }
-                } else {
-                    Log.e("ListsFragment", "Error deleting task: ${response.message()}")
-                }
-            } catch (e: Exception) {
-                Log.e("ListsFragment", "Exception deleting task", e)
-            }
+            //MAYINALIS ME
         }
     }
 
