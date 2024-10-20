@@ -9,6 +9,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
+import com.example.puttask.MainActivity
 import com.example.puttask.R
 import com.example.puttask.api.CreateRequest
 import com.example.puttask.api.RetrofitClient
@@ -32,6 +33,8 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var createButton: AppCompatButton
     private lateinit var etTaskName: EditText
     private lateinit var etTaskDescription: EditText
+    private lateinit var btnRepeat: AppCompatButton
+    private lateinit var tvBack: TextView
     private var repeatDays: MutableList<String> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +42,48 @@ class AddTask2 : AppCompatActivity() {
         setContentView(R.layout.activity_add_task2)
         initViews()
         setupListeners()
+        val llBtn = findViewById<LinearLayout>(R.id.llBtn)
+
+        btnRepeat.setOnClickListener {
+            llBtn.visibility = View.VISIBLE
+            if (btnRepeat.text == "Yes") {
+                btnRepeat.text = "No"
+                togglePopupVisibility(false)
+                llBtn.visibility = View.GONE
+
+            } else {
+                btnRepeat.text = "Yes"
+                togglePopupVisibility(true)
+
+            }
+        }
+        val click = false
+        tvBack.setOnClickListener{
+           if (click) {
+               togglePopupVisibility(true)
+
+           }
+            else{
+               togglePopupVisibility(false)
+
+           }
+        }
+
+
+        switchRepeat.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                updateRepeatUI(true)
+                tvBack.visibility = View.GONE
+
+            } else {
+                updateRepeatUI(false)
+                tvBack.visibility = View.VISIBLE
+
+            }
+        }
+
+
+
     }
 
     private fun initViews() {
@@ -52,20 +97,21 @@ class AddTask2 : AppCompatActivity() {
         popupCardView = findViewById(R.id.popupCardView)
         createButton = findViewById(R.id.CreateButton)
         switchRepeat = findViewById(R.id.switchRepeat)
+        btnRepeat = findViewById(R.id.btnRepeat)
+        tvBack = findViewById(R.id.tvBack)
     }
 
     private fun setupListeners() {
-        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
         addIcon.setOnClickListener { showCategoryPopup() }
         findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener { showDatePicker() }
         findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener { showTimePicker() }
         switchRepeat.setOnCheckedChangeListener { _, isChecked -> updateRepeatUI(isChecked) }
         findViewById<TextView>(R.id.tvCancel).setOnClickListener { clearFields(); togglePopupVisibility(false) }
-
-        createButton.setOnClickListener {
-            createTask()
-        }
+        findViewById<TextView>(R.id.tvDone).setOnClickListener { createTask() }
+        createButton.setOnClickListener { createTask() }
     }
+
 
     private fun showCategoryPopup() {
         PopupMenu(this, addIcon).apply {
@@ -125,13 +171,12 @@ class AddTask2 : AppCompatActivity() {
     private fun updateRepeatUI(isChecked: Boolean) {
         findViewById<HorizontalScrollView>(R.id.hsvDaily).visibility = if (isChecked) View.VISIBLE else View.GONE
         findViewById<LinearLayout>(R.id.llButtonEnd).visibility = if (isChecked) View.VISIBLE else View.GONE
-        findViewById<LinearLayout>(R.id.llBtn).visibility = if (isChecked) View.GONE else View.VISIBLE
         popupCardView.layoutParams.height = if (isChecked) 900 else 300
         findViewById<AppCompatButton>(R.id.btnRepeat).text = if (isChecked) "Yes" else "No"
-
-        if (!isChecked) repeatDays.clear()
     }
+
     private fun createTask() {
+        val repeatDays = if (switchRepeat.isChecked) listOf("Monday", "Wednesday") else null // Replace with actual selected repeat days
         if (validateFields()) {
             // Combine selected date and time into a single Calendar object
             val endDateParts = tvDueDate.text.toString().split("/")
@@ -221,4 +266,5 @@ class AddTask2 : AppCompatActivity() {
         dimBackground.visibility = if (isVisible) View.VISIBLE else View.GONE
         popupCardView.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
+
 }

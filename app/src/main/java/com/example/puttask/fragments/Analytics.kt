@@ -23,7 +23,6 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     private lateinit var tvtwentyeightDays: TextView
     private lateinit var tvsixtyDays: TextView
     private lateinit var tvthreesixtyfiveDays: TextView
-    private lateinit var tvCustom: TextView
     private lateinit var tvTaskOverviewDate: TextView
     private val entries = ArrayList<Entry>()
 
