@@ -277,39 +277,44 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             null
         }
         Log.d("Timeline", "Formatted date: $formattedDate")
-        if (formattedDate != null && taskList.isNotEmpty()) {
-            filterTasksByDate(formattedDate)
-        } else {
-            Log.d("Timeline", "No tasks available to filter or date is null.")
-        }
+
+        // Call with null if the user clicked on an empty date (you can add your own logic to check for this)
+        filterTasksByDate(formattedDate)
     }
 
 
-    private fun filterTasksByDate(selectedDate: String) {
+    private fun filterTasksByDate(selectedDate: String?) {
         // Log the selected date for debugging
         Log.d("Timeline", "Filtering tasks for date: $selectedDate")
 
-        // Filter tasks by comparing end_date
-        val filteredTasks = originalTaskList.filter { task ->
-            val taskEndDate = task.end_date // Assuming task.end_date is in "YYYY-MM-DD" format
-            Log.d("Timeline", "Comparing task end date: $taskEndDate with selected date: $selectedDate")
-            taskEndDate == selectedDate
-        }
-
-        // Log the filtered tasks for debugging
-        Log.d("Timeline", "Filtered tasks count: ${filteredTasks.size}")
-
-        if (filteredTasks.isNotEmpty()) {
+        if (selectedDate.isNullOrEmpty()) {
+            // Restore original task list if selectedDate is null or empty
             taskList.clear()
-            taskList.addAll(filteredTasks)
+            taskList.addAll(originalTaskList)
+            Toast.makeText(requireContext(), "No date selected. Displaying all tasks.", Toast.LENGTH_SHORT).show()
         } else {
-            taskList.clear() // Clear the list if no tasks match
-            Toast.makeText(requireContext(), "No tasks found for selected date.", Toast.LENGTH_SHORT).show()
+            // Filter tasks by comparing end_date
+            val filteredTasks = originalTaskList.filter { task ->
+                val taskEndDate = task.end_date // Assuming task.end_date is in "YYYY-MM-DD" format
+                Log.d("Timeline", "Comparing task end date: $taskEndDate with selected date: $selectedDate")
+                taskEndDate == selectedDate
+            }
+
+            // Log the filtered tasks for debugging
+            Log.d("Timeline", "Filtered tasks count: ${filteredTasks.size}")
+
+            if (filteredTasks.isNotEmpty()) {
+                taskList.clear()
+                taskList.addAll(filteredTasks)
+            } else {
+                taskList.clear() // Clear the list if no tasks match
+                Toast.makeText(requireContext(), "No tasks found for selected date.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         listsAdapter.notifyDataSetChanged() // Notify the adapter of data changes
         updateNoTasksMessage() // Update the visibility of the no tasks message
-
     }
+
 }
 
