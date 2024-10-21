@@ -1,7 +1,6 @@
 package com.example.puttask.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Button
@@ -33,7 +32,6 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
         btnSubmit.setOnClickListener {
             val message = etMessage.text.toString().trim()
             if (message.isNotEmpty()) {
-                Log.d("ContactSupport", "Submit button clicked")
                 submitContactForm(message)
             } else {
                 Toast.makeText(requireContext(), "Please enter a message", Toast.LENGTH_SHORT).show()
@@ -46,34 +44,18 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
         progressBar.visibility = View.VISIBLE // Show the progress bar
 
         lifecycleScope.launch {
-            try {
-                val token = DataManager(requireContext()).getAuthToken()
-                Log.d("ContactSupport", "Retrieved Token: $token")
+            val token = DataManager(requireContext()).getAuthToken()
 
-                if (token != null) {
-                    val userResponse = contactApiService.getUser("Bearer $token")
+            if (token != null) {
+                val userResponse = contactApiService.getUser("Bearer $token")
+                val user = userResponse.body()
 
-                    if (userResponse.isSuccessful) {
-                        val user = userResponse.body()
-                        if (user != null) {
-                            val username = user.username
-                            val email = user.email
-                            sendContactForm(message, username, email, progressBar)
-                        } else {
-                            Toast.makeText(requireContext(), "Failed to get user data", Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        Toast.makeText(requireContext(), "Failed to get user info: ${userResponse.message()}", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "User not authenticated. Please log in.", Toast.LENGTH_SHORT).show()
+                if (user != null) {
+                    sendContactForm(message, user.username, user.email, progressBar)
                 }
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("ContactSupport", "Exception: ${e.message}", e)
-            } finally {
-                // Progress bar will be hidden in sendContactForm
             }
+
+            // Hide progress bar in sendContactForm
         }
     }
 
@@ -81,33 +63,19 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
         val contactReq = ContactRequest(message, username, email)
 
         lifecycleScope.launch {
-            try {
-                // Show the progress bar when sending the contact form
-                progressBar.visibility = View.VISIBLE
+            progressBar.visibility = View.VISIBLE
 
-                val response = contactApiService.sendContactForm(contactReq)
+            val response = contactApiService.sendContactForm(contactReq)
+            val responseBody = response.body()
 
-                if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    if (responseBody != null) {
-                        val successMessage = responseBody.message
-                        Toast.makeText(requireContext(), successMessage, Toast.LENGTH_SHORT).show()
-                        Log.d("ContactSupport", "Contact submitted successfully: $successMessage")
-                    } else {
-                        Toast.makeText(requireContext(), "Empty response from server", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Failed to send contact form: ${response.message()}", Toast.LENGTH_SHORT).show()
-                }
-
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("ContactSupport", "Error sending contact form: ${e.message}", e)
-            } finally {
-                delay(1000) // Show the progress bar for 1 second
-                progressBar.visibility = View.GONE
+            if (responseBody != null) {
+                Toast.makeText(requireContext(), responseBody.message, Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Empty response from server", Toast.LENGTH_SHORT).show()
             }
+
+            delay(1000) // Show the progress bar for 1 second
+            progressBar.visibility = View.GONE
         }
     }
-
 }

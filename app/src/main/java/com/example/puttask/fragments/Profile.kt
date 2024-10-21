@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -16,123 +15,60 @@ import com.example.puttask.api.APIService
 import com.example.puttask.api.DataManager
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.UpdateUsernameRequest
-import com.example.puttask.api.UserInfo
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class Profile : Fragment() {
 
-    private lateinit var changePasswordTextView: TextView
     private lateinit var dataManager: DataManager
-    private lateinit var btnSave: TextView
     private lateinit var apiService: APIService
     private lateinit var usernameTextView: TextView
     private lateinit var emailTextView: TextView
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
         dataManager = DataManager(requireContext())
+        apiService = RetrofitClient.getApiService(requireContext())
         usernameTextView = view.findViewById(R.id.etUsername)
         emailTextView = view.findViewById(R.id.tvEmail)
-        changePasswordTextView = view.findViewById(R.id.tvChangePassword)
-        btnSave = view.findViewById(R.id.btnSave)
-        apiService = RetrofitClient.getApiService(requireContext())
+
+        view.findViewById<TextView>(R.id.tvChangePassword).setOnClickListener {
+            startActivity(Intent(requireContext(), ForgotPassword::class.java))
+        }
+
+        view.findViewById<TextView>(R.id.btnSave).setOnClickListener {
+            updateUsername(usernameTextView.text.toString())
+        }
+
         loadUserProfile()
-
-        changePasswordTextView.setOnClickListener {
-            val intent = Intent(requireContext(), ForgotPassword::class.java)
-            startActivity(intent)
-        }
-
-        btnSave.setOnClickListener {
-            val newUsername = usernameTextView.text.toString() // Get the new username
-            updateUsername(newUsername)
-        }
         return view
-    }
-
-    private fun loadUserProfile() {
-        lifecycleScope.launch {
-            try {
-                val token = "Bearer ${dataManager.getAuthToken()}"
-                val response = apiService.getUser(token)
-                if (response.isSuccessful) {
-                    response.body()?.let { userInfo ->
-                        usernameTextView.text = userInfo.username
-                        emailTextView.text = userInfo.email
-                    }
-                } else {
-                    showError("Error: ${response.message()}")
-                }
-            } catch (e: Exception) {
-                showError("Error fetching profile: ${e.message}")
-            }
-        }
     }
 
     override fun onResume() {
         super.onResume()
-        fetchUserInfo()
+        loadUserProfile()  // Refresh user info when fragment is resumed
     }
 
-    private fun fetchUserInfo() {
+    private fun loadUserProfile() {
         lifecycleScope.launch {
-            try {
-                val token = "Bearer ${dataManager.getAuthToken()}"
-                val response = apiService.getUser(token)
-                if (response.isSuccessful && response.body() != null) {
-                    val userInfo: UserInfo = response.body()!!
-                    usernameTextView.text = userInfo.username
-                    emailTextView.text = userInfo.email
-                } else {
-                    showError("Error fetching user info: ${response.message()}")
-                }
-            } catch (e: Exception) {
-                showError("Error fetching user info: ${e.message}")
+            val token = "Bearer ${dataManager.getAuthToken()}"
+            apiService.getUser(token).body()?.let { userInfo ->
+                usernameTextView.text = userInfo.username
+                emailTextView.text = userInfo.email
             }
         }
     }
 
     private fun updateUsername(newUsername: String) {
-        val maxUsernameLength = 50 // Define the character limit for the username
-
-        lifecycleScope.launch {
-            if (newUsername.isBlank()) {
-                showError("Username cannot be empty")
-            } else if (newUsername.length > maxUsernameLength) {
-                showError("Username cannot exceed $maxUsernameLength characters")
-            } else {
-                try {
-                    val updateUsernameRequest = UpdateUsernameRequest(username = newUsername)
-                    val token = "Bearer ${dataManager.getAuthToken()}"
-                    val response = apiService.updateUsername(token, updateUsernameRequest)
-
-                    if (response.isSuccessful) {
-                        showError("Username updated successfully")
-
-                        // Update SharedPreferences with the new username
-                        val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
-                        sharedPreferences.edit().putString("username", newUsername).apply()
-
-                        fetchUserInfo() // Refresh user info after update
-                    } else {
-                        showError("Error updating username: ${response.message()}")
-                    }
-                } catch (e: Exception) {
-                    showError("Error updating username: ${e.message}")
+        if (newUsername.isNotBlank() && newUsername.length <= 50) {
+            lifecycleScope.launch {
+                val token = "Bearer ${dataManager.getAuthToken()}"
+                apiService.updateUsername(token, UpdateUsernameRequest(username = newUsername)).takeIf { it.isSuccessful }?.let {
+                    requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+                        .edit().putString("username", newUsername).apply()
+                    loadUserProfile()  // Refresh user info after update
                 }
             }
-        }
-    }
-
-
-    private suspend fun showError(message: String) {
-        withContext(Dispatchers.Main) {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
         }
     }
 }

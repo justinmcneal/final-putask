@@ -3,7 +3,6 @@ package com.example.puttask.authentications
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -17,7 +16,6 @@ import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.RegistrationRequest
 import com.example.puttask.api.DataManager
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 
 class SignUp : AppCompatActivity() {
 
@@ -106,42 +104,33 @@ class SignUp : AppCompatActivity() {
         val registrationRequest = RegistrationRequest(username, email, password, confirmPassword)
 
         lifecycleScope.launch {
-            try {
-                val response = RetrofitClient.getApiService(this@SignUp).register(registrationRequest)
-                if (response.isSuccessful) {
-                    val registrationResponse = response.body()
-                    val message = registrationResponse?.message ?: "Registration successful"
+            val response = RetrofitClient.getApiService(this@SignUp).register(registrationRequest)
+            if (response.isSuccessful) {
+                val registrationResponse = response.body()
+                val message = registrationResponse?.message ?: "Registration successful"
 
-                    // Save the authentication token using DataManager
-                    registrationResponse?.token?.let {
-                        DataManager(this@SignUp).saveAuthToken(it)
+                // Save the authentication token using DataManager
+                registrationResponse?.token?.let {
+                    DataManager(this@SignUp).saveAuthToken(it)
 
-                        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-                        val editor = sharedPreferences.edit()
+                    val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                    val editor = sharedPreferences.edit()
 
-                        // Clear old data
-                        editor.clear()
+                    // Clear old data
+                    editor.clear()
 
-                        // Assuming `registrationResponse` contains a `user` object with the new username
-                        val username = registrationResponse?.user?.username
-                        editor.putString("username", username)  // Save new username
-                        editor.putString("token", it)  // Save new token
-                        editor.apply()  // Apply changes
-                    }
-
-                    showToast(message)
-                    startActivity(Intent(this@SignUp, MainActivity::class.java))
-                    finish()
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    showToast(errorBody ?: "Registration failed")
+                    // Assuming `registrationResponse` contains a `user` object with the new username
+                    val username = registrationResponse.user.username
+                    editor.putString("username", username)  // Save new username
+                    editor.putString("token", it)  // Save new token
+                    editor.apply()  // Apply changes
                 }
-            } catch (e: HttpException) {
-                Log.e("SignUpError", "HTTP Error: ${e.message()}", e)
-                showToast("HTTP Error: ${e.message()}")
-            } catch (e: Throwable) {
-                Log.e("SignUpError", "Network Error: ${e.message}", e)
-                showToast("Network Error: ${e.localizedMessage}")
+
+                showToast(message)
+                startActivity(Intent(this@SignUp, MainActivity::class.java))
+                finish()
+            } else {
+                showToast("Registration failed")
             }
         }
     }

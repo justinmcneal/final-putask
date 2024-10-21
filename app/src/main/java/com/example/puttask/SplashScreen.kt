@@ -2,14 +2,12 @@ package com.example.puttask
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import androidx.appcompat.app.AppCompatActivity
 import android.view.animation.AnimationUtils
+import android.view.View
 import android.view.animation.Animation
 import android.widget.ImageView
 import android.widget.TextView
-import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import com.example.puttask.authentications.LoginSignin
 import com.example.puttask.api.DataManager
 
@@ -26,7 +24,6 @@ class SplashScreen : AppCompatActivity() {
         setContentView(R.layout.activity_splash_screen)
 
         dataManager = DataManager(this)
-
         putasklogo = findViewById(R.id.putasklogo)
         title = findViewById(R.id.tvTitle)
 
@@ -35,41 +32,26 @@ class SplashScreen : AppCompatActivity() {
         val spinToLeftAnimation = AnimationUtils.loadAnimation(this, R.anim.spin_to_left)
         val fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in)
 
-        // Start the left spin animation on the logo
-        putasklogo.startAnimation(spinToLeftAnimation)
-
-        // Set animation listener for the spin-to-left animation
-        spinToLeftAnimation.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation?) {}
-
-            override fun onAnimationEnd(animation: Animation?) {
-                // Start the right spin animation after the left spin ends
-                putasklogo.startAnimation(spinToRightAnimation)
-
-                // Start fading in the title
-                title.visibility = View.VISIBLE
-                title.startAnimation(fadeInAnimation)
-            }
-
-            override fun onAnimationRepeat(animation: Animation?) {}
+        // Start animations
+        putasklogo.startAnimation(spinToLeftAnimation.apply {
+            setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationEnd(animation: Animation?) {
+                    putasklogo.startAnimation(spinToRightAnimation)
+                    title.apply {
+                        visibility = View.VISIBLE
+                        startAnimation(fadeInAnimation)
+                    }
+                }
+                override fun onAnimationStart(animation: Animation?) {}
+                override fun onAnimationRepeat(animation: Animation?) {}
+            })
         })
 
-        // Temporarily clear the token for testing purposes (remove this line after testing)
-        // dataManager.clearAuthToken() // <-- Remove this line
-
-        // Check for authentication token
-        val token = dataManager.getAuthToken()
-
         // Delay before navigating to the next activity
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (token != null) {
-                // Token exists, navigate to MainActivity
-                startActivity(Intent(this, MainActivity::class.java))
-            } else {
-                // No token, navigate to LoginSignin
-                startActivity(Intent(this, LoginSignin::class.java))
-            }
-            finish() // Close the splash screen
+        val token = dataManager.getAuthToken()
+        putasklogo.postDelayed({
+            startActivity(Intent(this, if (token != null) MainActivity::class.java else LoginSignin::class.java))
+            finish()
         }, delayDuration)
     }
 

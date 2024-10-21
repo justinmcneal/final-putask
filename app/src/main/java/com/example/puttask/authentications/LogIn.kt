@@ -3,7 +3,6 @@ package com.example.puttask.authentications
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -17,10 +16,8 @@ import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.LoginRequest
 import com.example.puttask.api.DataManager
+import com.example.puttask.api.LoginResponse
 import kotlinx.coroutines.launch
-import org.json.JSONException
-import org.json.JSONObject
-import retrofit2.HttpException
 
 class LogIn : AppCompatActivity() {
 
@@ -28,54 +25,58 @@ class LogIn : AppCompatActivity() {
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var ivTogglePasswordVisibility: ImageView
-    private lateinit var forgotpass : TextView
+    private lateinit var forgotPassTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log_in)
 
+        // Initialize views
         btnLogin = findViewById(R.id.btnLog)
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
         ivTogglePasswordVisibility = findViewById(R.id.ivTogglePasswordVisibility)
-        forgotpass = findViewById(R.id.tvForgotPassword)
+        forgotPassTextView = findViewById(R.id.tvForgotPassword)
 
-        btnLogin.setOnClickListener {
-            val email = etEmail.text.toString().trim()
-            val password = etPassword.text.toString().trim()
+        // Set click listeners
+        btnLogin.setOnClickListener { handleLogin() }
+        forgotPassTextView.setOnClickListener { navigateToForgotPassword() }
+        findViewById<TextView>(R.id.othersSign).setOnClickListener { navigateToSignUp() }
+        ivTogglePasswordVisibility.setOnClickListener { togglePasswordVisibility() }
+    }
 
-            if (validateInputs(email, password)) {
-                loginUser(email, password)
-            }
-        }
+    private fun handleLogin() {
+        val email = etEmail.text.toString().trim()
+        val password = etPassword.text.toString().trim()
 
-        forgotpass.setOnClickListener {
-            val intent = Intent(this, ForgotPassword::class.java)
-            startActivity(intent)
-            finish()
-        }
-
-        findViewById<TextView>(R.id.othersSign).setOnClickListener {
-            startActivity(Intent(this, SignUp::class.java))
-        }
-
-        ivTogglePasswordVisibility.setOnClickListener {
-            togglePasswordVisibility(etPassword, ivTogglePasswordVisibility)
+        if (validateInputs(email, password)) {
+            loginUser(email, password)
         }
     }
 
-    private fun togglePasswordVisibility(editText: EditText, imageView: ImageView) {
-        if (editText.inputType == InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
+    private fun navigateToForgotPassword() {
+        val intent = Intent(this, ForgotPassword::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun navigateToSignUp() {
+        startActivity(Intent(this, SignUp::class.java))
+    }
+
+    private fun togglePasswordVisibility() {
+        val currentInputType = etPassword.inputType
+        if (currentInputType == InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
             // Hide password
-            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-            imageView.setImageResource(R.drawable.hide)
+            etPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            ivTogglePasswordVisibility.setImageResource(R.drawable.hide)
         } else {
             // Show password
-            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-            imageView.setImageResource(R.drawable.view)
+            etPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            ivTogglePasswordVisibility.setImageResource(R.drawable.view)
         }
         // Move cursor to the end of the text
-        editText.setSelection(editText.text.length)
+        etPassword.setSelection(etPassword.text.length)
     }
 
     private fun validateInputs(email: String, password: String): Boolean {
@@ -83,7 +84,6 @@ class LogIn : AppCompatActivity() {
             email.isEmpty() -> showError("Please enter your email")
             !isValidEmail(email) -> showError("Please enter a valid email")
             password.isEmpty() -> showError("Please enter your password")
-            password.length < 8 -> showError("Password must be at least 8 characters")
             else -> true
         }
     }
@@ -101,62 +101,36 @@ class LogIn : AppCompatActivity() {
         val loginRequest = LoginRequest(email, password)
 
         lifecycleScope.launch {
-            try {
-                val response = RetrofitClient.getApiService(this@LogIn).login(loginRequest)
-                if (response.isSuccessful) {
-                    val loginResponse = response.body()
-                    val message = loginResponse?.message ?: "Login successful"
-
-                    // Save the authentication token using DataManager
-                    loginResponse?.token?.let {
-                        DataManager(this@LogIn).saveAuthToken(it)
-
-                        // Save the username and token in SharedPreferences
-                        val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-                        val editor = sharedPreferences.edit()
-
-                        // Clear old data
-                        editor.clear()
-
-                        // Assuming `loginResponse` contains a `user` object with a `username`
-                        val username = loginResponse?.user?.username  // Access the username from the user object
-                        editor.putString("username", username)  // Save username
-                        editor.putString("token", it)  // Save token
-                        editor.apply()  // Apply changes
-                    }
-
-                    showToast(message)
-                    startActivity(Intent(this@LogIn, MainActivity::class.java))
-                    finish() // Close the LogIn screen
-                } else {
-                    // Parse the error response to extract the message
-                    val errorResponse = response.errorBody()?.string()
-                    val errorMessage = extractErrorMessage(errorResponse)
-                    showToast(errorMessage)
-                }
-            } catch (e: HttpException) {
-                Log.e("LogInError", "HTTP Error: ${e.message()}", e)
-                showToast("HTTP Error: ${e.message()}")
-            } catch (e: Throwable) {
-                Log.e("LogInError", "Network Error: ${e.message}", e)
-                showToast("Network Error: ${e.localizedMessage}")
+            val response = RetrofitClient.getApiService(this@LogIn).login(loginRequest)
+            if (response.isSuccessful) {
+                handleLoginSuccess(response.body())
+            } else {
+                showToast("Wrong Email or Password!")
             }
         }
     }
 
-    private fun extractErrorMessage(errorResponse: String?): String {
-        return if (errorResponse != null) {
-            try {
-                val jsonObject = JSONObject(errorResponse)
-                jsonObject.getString("message") // Extract the message field
-            } catch (e: JSONException) {
-                "An error occurred" // Fallback message in case of parsing issues
-            }
-        } else {
-            "An error occurred" // Fallback message if errorBody is null
-        }
-    }
+    private fun handleLoginSuccess(loginResponse: LoginResponse?) {
+        val message = loginResponse?.message ?: "Login successful"
 
+        // Save the authentication token using DataManager
+        loginResponse?.token?.let {
+            DataManager(this).saveAuthToken(it)
+
+            // Save username and token in SharedPreferences
+            val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
+            sharedPreferences.edit().apply {
+                clear() // Clear old data
+                putString("username", loginResponse.user?.username) // Save username
+                putString("token", it) // Save token
+                apply() // Apply changes
+            }
+        }
+
+        showToast(message)
+        startActivity(Intent(this, MainActivity::class.java))
+        finish() // Close the LogIn screen
+    }
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()

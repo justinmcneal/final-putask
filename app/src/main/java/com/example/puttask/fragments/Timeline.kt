@@ -93,37 +93,84 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     }
 
     private fun fetchTasks() {
-        // Show the loading indicator
         binding.swipeRefreshLayout.isRefreshing = true
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
+
                 if (response.isSuccessful) {
                     response.body()?.let { tasks ->
-                        Log.d("ListsFragment", "Fetched tasks: ${tasks.size}")
-
-                        // Clear and update task list on the main thread
-                        withContext(Dispatchers.Main) {
-                            taskList.clear()
-                            taskList.addAll(tasks)
-                            listsAdapter.notifyDataSetChanged()
-                            updateNoTasksMessage()
+                        // Ensure that UI updates happen on the main thread and when the fragment is attached
+                        if (isAdded && view != null) {
+                            withContext(Dispatchers.Main) {
+                                taskList.clear()
+                                taskList.addAll(tasks)
+                                filterTasksByDate(getCurrentDate())
+                                updateNoTasksMessage()
+                            }
                         }
+                    } ?: run {
+                        Log.e("TimelineFragment", "Response body is null")
+                        showError("No tasks found")
                     }
                 } else {
-                    Log.e("ListsFragment", "Error fetching tasks: ${response.message()}")
+                    Log.e("TimelineFragment", "Error fetching tasks: ${response.message()}")
+                    // Check if the fragment is added before showing the error
+                    if (isAdded && view != null) {
+                        withContext(Dispatchers.Main) {
+                            showError("Error fetching tasks: ${response.message()}")
+                        }
+                    }
                 }
             } catch (e: Exception) {
-                Log.e("ListsFragment", "Exception fetching tasks", e)
+                Log.e("TimelineFragment", "Exception fetching tasks", e)
+                // Check if the fragment is added before showing the error
+                if (isAdded && view != null) {
+                    withContext(Dispatchers.Main) {
+                        showError("Failed to fetch tasks: ${e.message}")
+                    }
+                }
             } finally {
-                // Hide the loading indicator
-                withContext(Dispatchers.Main) {
-                    binding.swipeRefreshLayout.isRefreshing = false
+                // Always check if the fragment is added before manipulating the UI
+                if (isAdded && view != null) {
+                    withContext(Dispatchers.Main) {
+                        binding.swipeRefreshLayout.isRefreshing = false
+                    }
                 }
             }
         }
     }
+
+
+
+    // Function to get the current date in the format dd/MM/yyyy
+    private fun getCurrentDate(): String {
+        val calendar = Calendar.getInstance()
+        return String.format(
+            "%02d/%02d/%04d",
+            calendar.get(Calendar.DAY_OF_MONTH),
+            calendar.get(Calendar.MONTH) + 1,
+            calendar.get(Calendar.YEAR)
+        )
+    }
+    private suspend fun handleEmptyResponse() {
+        withContext(Dispatchers.Main) {
+            taskList.clear()
+            listsAdapter.notifyDataSetChanged()
+            updateNoTasksMessage()
+        }
+    }
+
+    private suspend fun showError(message: String) {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
+    }
+
+
+
 
 
     private fun handleTaskClick(task: Task) {
@@ -319,7 +366,22 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
 
     override fun onItemClick(ddMmYy: String, dd: String, day: String) {
-        // Handle calendar item clicks
+        // Filter tasks based on the selected date
+        filterTasksByDate(ddMmYy)
+        fetchTasks()
     }
+
+    private fun filterTasksByDate(selectedDate: String) {
+        val filteredTasks = taskList.filter { task ->
+            task.end_date == selectedDate // Assuming end_date is in the same format dd/MM/yyyy
+        }
+
+        // Update the adapter with the filtered list
+        listsAdapter.updateTasks(filteredTasks)
+        updateNoTasksMessage()
+    }
+
+
+
 }
 
