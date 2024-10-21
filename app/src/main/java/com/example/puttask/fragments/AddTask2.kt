@@ -108,7 +108,7 @@ class AddTask2 : AppCompatActivity() {
         findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener { showTimePicker() }
         switchRepeat.setOnCheckedChangeListener { _, isChecked -> updateRepeatUI(isChecked) }
         findViewById<TextView>(R.id.tvCancel).setOnClickListener { clearFields(); togglePopupVisibility(false) }
-        findViewById<TextView>(R.id.tvDone).setOnClickListener { createTask() }
+        findViewById<TextView>(R.id.tvDone).setOnClickListener { togglePopupVisibility(false) }//temporary lang for testing pero dapat ifefeeeetch niya ddays
         createButton.setOnClickListener { createTask() }
     }
 
@@ -169,9 +169,9 @@ class AddTask2 : AppCompatActivity() {
 
 
     private fun updateRepeatUI(isChecked: Boolean) {
-        findViewById<HorizontalScrollView>(R.id.hsvDaily).visibility = if (isChecked) View.VISIBLE else View.GONE
+        findViewById<LinearLayout>(R.id.checkboxDaily).visibility = if (isChecked) View.VISIBLE else View.GONE
         findViewById<LinearLayout>(R.id.llButtonEnd).visibility = if (isChecked) View.VISIBLE else View.GONE
-        popupCardView.layoutParams.height = if (isChecked) 900 else 300
+        popupCardView.layoutParams.height = if (isChecked) 1300 else 300
         findViewById<AppCompatButton>(R.id.btnRepeat).text = if (isChecked) "Yes" else "No"
     }
 

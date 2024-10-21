@@ -1,5 +1,6 @@
 package com.example.puttask
 
+import com.example.puttask.fragments.Profile
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
@@ -8,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import com.example.puttask.api.DataManager
+import com.example.puttask.api.Task
 import com.example.puttask.authentications.LoginSignin
 import com.example.puttask.databinding.ActivityMainBinding
 import com.example.puttask.fragments.*
@@ -20,10 +22,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var binding: ActivityMainBinding
     private lateinit var dataManager: DataManager
 
+
+
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
                 binding.drawerLayout.closeDrawer(GravityCompat.END)
+            } else {
             }
         }
     }
@@ -33,12 +38,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dataManager = DataManager(this)
+        dataManager = DataManager(this) // Initialize your DataManager
+
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         binding.hamburgerIcon.setOnClickListener {
-            binding.drawerLayout.apply {
+            with(binding.drawerLayout) {
                 if (isDrawerOpen(GravityCompat.END)) closeDrawer(GravityCompat.END) else openDrawer(GravityCompat.END)
             }
         }
@@ -51,6 +57,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             startActivity(Intent(this, AddTask2::class.java))
         }
 
+        // Add the back press callback
         onBackPressedDispatcher.addCallback(this, backPressedCallback)
     }
 
@@ -72,7 +79,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val fragmentData = when (item.itemId) {
             R.id.ic_lists -> Lists() to "Tasks"
-            R.id.ic_timeline -> Timeline() to "Timeline" // Make sure you create a new instance
+            R.id.ic_timeline -> Timeline() to "Timeline"
             R.id.ic_analytics -> Analytics() to "Analytics"
             R.id.ic_profile -> Profile() to "Profile"
             R.id.ic_contactsupport -> ContactSupport() to "Contact Support"
@@ -82,17 +89,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             else -> null
         }
-        fragmentData?.let {
-            openFragment(it.first, it.second)
-            // Sync bottom navigation with the drawer selection
-            binding.bottomnavigationview.selectedItemId = item.itemId
-        }
+        fragmentData?.let { openFragment(it.first, it.second) }
         binding.drawerLayout.closeDrawer(GravityCompat.END)
         return true
     }
 
+
+
     private fun logout() {
-        dataManager.clearLoginData()
+        dataManager.clearLoginData() // Clear login data
         startActivity(Intent(this, LoginSignin::class.java))
         finish()
     }
@@ -101,6 +106,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         supportFragmentManager.beginTransaction()
             .replace(R.id.flfragment, fragment)
             .commit()
+
         binding.toolbarTitle.text = title
         binding.dateTextView.text = SimpleDateFormat("d MMMM", Locale.getDefault()).format(Date())
     }
