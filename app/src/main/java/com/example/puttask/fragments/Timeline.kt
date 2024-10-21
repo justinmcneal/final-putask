@@ -98,49 +98,30 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
-
                 if (response.isSuccessful) {
                     response.body()?.let { tasks ->
-                        // Ensure that UI updates happen on the main thread and when the fragment is attached
-                        if (isAdded && view != null) {
-                            withContext(Dispatchers.Main) {
-                                taskList.clear()
-                                taskList.addAll(tasks)
-                                filterTasksByDate(getCurrentDate())
-                                updateNoTasksMessage()
-                            }
+                        // Update UI on main thread
+                        withContext(Dispatchers.Main) {
+                            taskList.clear()
+                            taskList.addAll(tasks)
+                            listsAdapter.notifyDataSetChanged()  // Notify adapter of data changes
+                            updateNoTasksMessage()
                         }
                     } ?: run {
-                        Log.e("TimelineFragment", "Response body is null")
+                        // Handle empty body case
                         showError("No tasks found")
                     }
                 } else {
-                    Log.e("TimelineFragment", "Error fetching tasks: ${response.message()}")
-                    // Check if the fragment is added before showing the error
-                    if (isAdded && view != null) {
-                        withContext(Dispatchers.Main) {
-                            showError("Error fetching tasks: ${response.message()}")
-                        }
-                    }
+                    showError("Error fetching tasks: ${response.message()}")
                 }
             } catch (e: Exception) {
-                Log.e("TimelineFragment", "Exception fetching tasks", e)
-                // Check if the fragment is added before showing the error
-                if (isAdded && view != null) {
-                    withContext(Dispatchers.Main) {
-                        showError("Failed to fetch tasks: ${e.message}")
-                    }
-                }
+                showError("Failed to fetch tasks: ${e.message}")
             } finally {
-                // Always check if the fragment is added before manipulating the UI
-                if (isAdded && view != null) {
-                    withContext(Dispatchers.Main) {
-                        binding.swipeRefreshLayout.isRefreshing = false
-                    }
-                }
+                binding.swipeRefreshLayout.isRefreshing = false
             }
         }
     }
+
 
 
 
@@ -358,6 +339,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
