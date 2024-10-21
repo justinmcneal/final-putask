@@ -86,7 +86,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         }
         binding.listsrecyclerView.adapter = listsAdapter
     }
-    
+
+    private var originalTaskList = mutableListOf<Task>()
+
+
     private fun fetchTasks() {
         binding.swipeRefreshLayout.isRefreshing = true
 
@@ -95,6 +98,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             if (response.isSuccessful) {
                 response.body()?.let { tasks ->
                     withContext(Dispatchers.Main) {
+
+                        originalTaskList.clear()
+                        originalTaskList.addAll(tasks) // Store the original task list
+
                         taskList.apply {
                             clear()
                             addAll(tasks)
@@ -283,7 +290,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         Log.d("Timeline", "Filtering tasks for date: $selectedDate")
 
         // Filter tasks by comparing end_date
-        val filteredTasks = taskList.filter { task ->
+        val filteredTasks = originalTaskList.filter { task ->
             val taskEndDate = task.end_date // Assuming task.end_date is in "YYYY-MM-DD" format
             Log.d("Timeline", "Comparing task end date: $taskEndDate with selected date: $selectedDate")
             taskEndDate == selectedDate
@@ -292,11 +299,17 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         // Log the filtered tasks for debugging
         Log.d("Timeline", "Filtered tasks count: ${filteredTasks.size}")
 
-        // Update the adapter with filtered tasks
-        listsAdapter.updateTasks(filteredTasks)
+        if (filteredTasks.isNotEmpty()) {
+            taskList.clear()
+            taskList.addAll(filteredTasks)
+        } else {
+            taskList.clear() // Clear the list if no tasks match
+            Toast.makeText(requireContext(), "No tasks found for selected date.", Toast.LENGTH_SHORT).show()
+        }
 
-        // Update visibility message based on filtered tasks
-        updateNoTasksMessage()
+        listsAdapter.notifyDataSetChanged() // Notify the adapter of data changes
+        updateNoTasksMessage() // Update the visibility of the no tasks message
+
     }
 }
 
