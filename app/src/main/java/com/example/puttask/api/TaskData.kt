@@ -20,7 +20,7 @@ data class Task(
     val end_time: String,
     var repeat_days: List<String>? = null,
     val category: String,
-    val isChecked: Boolean
+    var isVisible: Boolean = false // New property to track completion
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(

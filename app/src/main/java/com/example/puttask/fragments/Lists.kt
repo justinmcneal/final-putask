@@ -104,7 +104,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
     }
 
     private fun fetchTasks() {
-        // Show the loading indicator
         binding.swipeRefreshLayout.isRefreshing = true
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -114,11 +113,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
                     response.body()?.let { tasks ->
                         Log.d("ListsFragment", "Fetched tasks: ${tasks.size}")
 
-                        // Clear and update task list on the main thread
                         withContext(Dispatchers.Main) {
+                            // Update the local task list without filtering
                             taskList.clear()
                             taskList.addAll(tasks)
-                            listsAdapter.notifyDataSetChanged()
+                            listsAdapter.updateTasks(taskList.filter { it.isVisible }) // Filter when updating the adapter
                             updateNoTasksMessage()
                         }
                     }
@@ -128,13 +127,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
             } catch (e: Exception) {
                 Log.e("ListsFragment", "Exception fetching tasks", e)
             } finally {
-                // Hide the loading indicator
                 withContext(Dispatchers.Main) {
                     binding.swipeRefreshLayout.isRefreshing = false
                 }
             }
         }
     }
+
 
 
     private fun handleTaskClick(task: Task) {

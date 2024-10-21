@@ -3,6 +3,7 @@ package com.example.puttask
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -12,10 +13,6 @@ class ListsAdapter(
     private val taskList: MutableList<Task>,
     private val onItemClick: (Task) -> Unit
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
-
-//    companion object {
-//        const val REQUEST_CODE_EDIT_TASK = 1001
-//    }
 
     private var onDeleteClick: ((Task) -> Unit)? = null
 
@@ -36,7 +33,7 @@ class ListsAdapter(
             onItemClick(task)
         }
 
-        // Handle delete task option
+        // Handle delete (hide) task option
         holder.deleteOption.setOnClickListener {
             onDeleteClick?.invoke(task)
         }
@@ -44,13 +41,7 @@ class ListsAdapter(
 
     override fun getItemCount(): Int = taskList.size
 
-    // Method to add a task to the list
-//    fun addTask(task: Task) {
-//        taskList.add(task)
-//        notifyItemInserted(taskList.size - 1)
-//    }
-
-    // Set the delete listener to handle task deletion
+    // Set the delete listener to handle task hiding
     fun setOnDeleteClickListener(listener: (Task) -> Unit) {
         onDeleteClick = listener
     }
@@ -62,10 +53,10 @@ class ListsAdapter(
         notifyDataSetChanged()
     }
 
-
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         val deleteOption: ImageButton = itemView.findViewById(R.id.ic_delete)
     }
 }
+
