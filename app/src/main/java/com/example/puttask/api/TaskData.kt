@@ -20,7 +20,7 @@ data class Task(
     val end_time: String,
     var repeat_days: List<String>? = null,
     val category: String,
-    val isChecked: Boolean
+    var is_completed: Boolean // Add this line
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -32,7 +32,10 @@ data class Task(
         parcel.createStringArrayList(),
         parcel.readString()!!,
         parcel.readByte() != 0.toByte() // Read isChecked as a Boolean from the Parcel
-    )
+    ) {
+        // Read is_completed from the Parcel
+        is_completed = parcel.readByte() != 0.toByte() // Read is_completed as a Boolean from the Parcel
+    }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
@@ -42,6 +45,7 @@ data class Task(
         parcel.writeString(end_time)
         parcel.writeStringList(repeat_days)
         parcel.writeString(category)
+        parcel.writeByte(if (is_completed) 1 else 0) // Write is_completed to the Parcel
     }
 
     override fun describeContents(): Int {
@@ -58,6 +62,7 @@ data class Task(
         }
     }
 }
+
 
 
 

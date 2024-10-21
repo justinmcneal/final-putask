@@ -2,10 +2,15 @@ package com.example.puttask.fragments
 
 import android.graphics.Color
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import com.example.puttask.R
+import com.example.puttask.api.RetrofitClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.Response
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -13,8 +18,9 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.formatter.ValueFormatter
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
+import android.widget.Toast
+import com.example.puttask.api.Task
 
 class Analytics : Fragment(R.layout.fragment_analytics) {
 
@@ -24,6 +30,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     private lateinit var tvsixtyDays: TextView
     private lateinit var tvthreesixtyfiveDays: TextView
     private lateinit var tvTaskOverviewDate: TextView
+    private lateinit var tvPendingTasksCount: TextView // New TextView for pending tasks count
     private val entries = ArrayList<Entry>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -36,6 +43,10 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         tvsixtyDays = view.findViewById(R.id.tvsixtyDays)
         tvthreesixtyfiveDays = view.findViewById(R.id.tvthreesixtyfiveDays)
         tvTaskOverviewDate = view.findViewById(R.id.tvTaskOverviewDate)
+        tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount) // Assuming this TextView is added in your layout
+
+        // Fetch and display pending tasks count
+        fetchPendingTasks()
 
         // Set up click listeners for the buttons
         tvsevenDays.setOnClickListener {
@@ -53,6 +64,32 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         tvthreesixtyfiveDays.setOnClickListener {
             updateChart(365, "Last 365 Days Data")
             highlightButton(tvthreesixtyfiveDays)
+        }
+    }
+
+    private fun fetchPendingTasks() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
+                if (response.isSuccessful) {
+                    val tasks = response.body()
+                    val pendingTasks = tasks?.filter { it.is_completed == false }?.size ?: 0 // Assuming `is_completed` is a Boolean field
+                    // Update UI on main thread
+                    CoroutineScope(Dispatchers.Main).launch {
+                        tvPendingTasksCount.text = "Pending Tasks: $pendingTasks"
+                    }
+                } else {
+                    showError("Failed to fetch tasks: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                showError("An error occurred: ${e.message}")
+            }
+        }
+    }
+
+    private fun showError(message: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         }
     }
 
