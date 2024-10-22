@@ -3,6 +3,7 @@ package com.example.puttask
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -10,7 +11,8 @@ import com.example.puttask.api.Task
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,
-    private val onItemClick: (Task) -> Unit
+    private val onItemClick: (Task) -> Unit,
+    private val onTaskCompleted: (Task) -> Unit
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
 //    companion object {
@@ -30,6 +32,17 @@ class ListsAdapter(
 
         holder.tvTitle.text = task.task_name
         holder.tvTime.text = task.end_date
+
+        // Set checkbox state based on task completion status
+        holder.checkbox.isChecked = task.is_completed
+
+
+        holder.checkbox.setOnCheckedChangeListener { _, isChecked ->
+            task.is_completed = isChecked
+            onTaskCompleted(task)   // Notify the fragment that the task is completed
+        }
+
+
 
         // Handle click to edit the task
         holder.itemView.setOnClickListener {
@@ -66,6 +79,7 @@ class ListsAdapter(
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         val tvTime: TextView = itemView.findViewById(R.id.tvTime)
+        val checkbox: CheckBox = itemView.findViewById(R.id.checkbox) // Assuming you have a checkbox with this ID
         val deleteOption: ImageButton = itemView.findViewById(R.id.ic_delete)
     }
 }

@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,6 +40,8 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private lateinit var ivCalendarPrevious: ImageView
     private lateinit var listsAdapter: ListsAdapter
     private var taskList: MutableList<Task> = mutableListOf() // Store fetched tasks
+    private lateinit var token: String
+
 
     private var _binding: FragmentTimelineBinding? = null
     private val binding get() = _binding!!
@@ -83,14 +86,20 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
-        listsAdapter = ListsAdapter(taskList) { task ->
-            handleTaskClick(task)
-        }
+
+        listsAdapter = ListsAdapter(taskList, { task ->
+            handleTaskClick(task)  // Handle task click
+        }, { completedTask ->
+            markTaskAsComplete(completedTask)  // Handle task completion
+        })
+        binding.listsrecyclerView.adapter = listsAdapter
+
         listsAdapter.setOnDeleteClickListener { task ->
             showDeleteConfirmationDialog(task)
         }
         binding.listsrecyclerView.adapter = listsAdapter
     }
+
 
     private fun fetchTasks() {
         binding.swipeRefreshLayout.isRefreshing = true
@@ -122,6 +131,31 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         }
     }
 
+
+    private fun markTaskAsComplete(task: Task) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Make the API call to complete the task
+                val response = RetrofitClient.getApiService(requireContext()).completeTask("Bearer $token", task.id)
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+
+                    withContext(Dispatchers.Main) {
+                        if (responseBody != null) {
+                            Toast.makeText(requireContext(), "Response: $responseBody", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), "Task marked as complete", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Log.e("ListsFragment", "Error marking task as complete: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception marking task as complete", e)
+            }
+        }
+    }
 
 
 

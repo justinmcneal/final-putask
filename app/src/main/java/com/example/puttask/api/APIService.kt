@@ -73,8 +73,9 @@ interface APIService {
     suspend fun deleteTask(@Path("id") id: String): Response<DeleteResponse>
 
     // Mark Task as Complete
-    @PATCH("api/tasks/{id}/complete")
-    suspend fun completeTask(@Path("id") id: Int, @Header("Authorization") token: String): Response<TaskResponse>
+    @PUT("tasks/{id}/complete")
+    suspend fun completeTask(@Header("Authorization") token: String, @Path("id") taskId: String): Response<String> // Change to Response<String>
+
 
 
 }
