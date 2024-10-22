@@ -4,12 +4,13 @@ import com.example.puttask.fragments.Profile
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import com.example.puttask.api.DataManager
-import com.example.puttask.api.Task
 import com.example.puttask.authentications.LoginSignin
 import com.example.puttask.databinding.ActivityMainBinding
 import com.example.puttask.fragments.*
@@ -21,14 +22,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var dataManager: DataManager
-
-
+    private lateinit var pulseAnimation: Animation
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             if (binding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
                 binding.drawerLayout.closeDrawer(GravityCompat.END)
             } else {
+                // You can add additional back pressed behavior here
             }
         }
     }
@@ -38,26 +39,44 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dataManager = DataManager(this) // Initialize your DataManager
 
+        // Initialize DataManager
+        dataManager = DataManager(this)
+
+        // Setup Toolbar
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
+        // Setup hamburger menu button
         binding.hamburgerIcon.setOnClickListener {
             with(binding.drawerLayout) {
                 if (isDrawerOpen(GravityCompat.END)) closeDrawer(GravityCompat.END) else openDrawer(GravityCompat.END)
             }
         }
 
+        // Setup NavigationView listener
         binding.hamburgerMenu.setNavigationItemSelectedListener(this)
+
+        // Setup Bottom Navigation
         setupBottomNavigation()
         openFragment(Lists(), "Tasks")
 
+        // Load and apply the pulse animation to the FAB
+        pulseAnimation = AnimationUtils.loadAnimation(this, R.anim.pulse_animation_fab).apply {
+            repeatCount = Animation.INFINITE // Loop the animation
+        }
+        binding.btnAdd.startAnimation(pulseAnimation) // Start the animation
+
+        // Handle FAB click for adding a task
         binding.btnAdd.setOnClickListener {
+            // Stop the pulse animation once the FAB is clicked (assuming the user is adding a task)
+            binding.btnAdd.clearAnimation()
+
+            // Start the AddTask2 activity
             startActivity(Intent(this, AddTask2::class.java))
         }
 
-        // Add the back press callback
+        // Add back press callback
         onBackPressedDispatcher.addCallback(this, backPressedCallback)
     }
 
@@ -93,8 +112,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.drawerLayout.closeDrawer(GravityCompat.END)
         return true
     }
-
-
 
     private fun logout() {
         dataManager.clearLoginData() // Clear login data

@@ -81,6 +81,7 @@
                 android:layout_marginBottom="10dp"
                 android:src="@drawable/ic_add"
                 android:backgroundTint="@color/skyblue"
+                android:background="@drawable/fab_background"
                 style="@style/FloatingActionButtonStyle"
                 app:fabSize="mini"
                 app:maxImageSize="35dp"
