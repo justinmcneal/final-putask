@@ -15,6 +15,7 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arjungupta08.horizontal_calendar_date.HorizontalCalendarAdapter
@@ -43,7 +44,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private var _binding: FragmentTimelineBinding? = null
     private val binding get() = _binding!!
     private lateinit var repeatDaysSelected: BooleanArray
+    private lateinit var tvDropdownLists: TextView
+    private lateinit var ic_sort: ImageView
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    private lateinit var popupcardviewLists: CardView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,12 +57,14 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        with(view) {
-            recyclerView = findViewById(R.id.recyclerView)
-            tvDateMonth = findViewById(R.id.text_date_month)
-            ivCalendarNext = findViewById(R.id.iv_calendar_next)
-            ivCalendarPrevious = findViewById(R.id.iv_calendar_previous)
-        }
+        // Access views using the binding instance
+        recyclerView = binding.recyclerView
+        tvDateMonth = binding.textDateMonth
+        ivCalendarNext = binding.ivCalendarNext
+        ivCalendarPrevious = binding.ivCalendarPrevious
+        ic_sort = binding.icSort
+        tvDropdownLists = binding.tvDropdownLists
+        popupcardviewLists = binding.popupcardviewLists
 
         // Set up the RecyclerView and other components before fetching tasks
         setupRecyclerView()
@@ -74,7 +80,35 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         }
 
         updateNoTasksMessage()
+
+        // Set up the dropdown menu
+        val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
+        val menuMap = mapOf(
+            R.id.allItems to "All Items",
+            R.id.personal to "Personal",
+            R.id.work to "Work",
+            R.id.school to "School",
+            R.id.social to "Social"
+        )
+
+        dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)
+
+        binding.tvDropdownLists.setOnClickListener {
+            dropdownLists.setOnMenuItemClickListener { menuItem ->
+                menuMap[menuItem.itemId]?.let {
+                    tvDropdownLists.text = it
+                    true
+                } ?: false
+            }
+            dropdownLists.show()
+        }
+
+        // Sort options
+        ic_sort.setOnClickListener {
+            visibilityChecker()
+        }
     }
+
 
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
@@ -130,12 +164,18 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private fun handleTaskClick(task: Task) {
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
         val dialogBuilder = AlertDialog.Builder(requireContext()).setView(dialogView)
+
+        val dialog = dialogBuilder.create()
+
         with(dialogView) {
             findViewById<TextView>(R.id.taskname).text = task.task_name
             findViewById<TextView>(R.id.taskdescription).text = task.task_description
             findViewById<TextView>(R.id.tvStartDate).text = task.end_date
             findViewById<TextView>(R.id.tvEndDate).text = task.end_time
             findViewById<TextView>(R.id.tvList).text = task.category
+            val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
+            val btnBack = dialogView.findViewById<ImageButton>(R.id.btnBack)
+
             val tvRepeat = findViewById<TextView>(R.id.tvRepeat).apply {
                 text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
             }
@@ -148,15 +188,20 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener {
                 showTimePicker(findViewById(R.id.tvEndDate), findViewById(R.id.tvStartDate))
             }
-            findViewById<AppCompatButton>(R.id.btnRepeat).setOnClickListener {
-                showRepeatDaysDialog { selectedDays ->
-                    task.repeat_days = selectedDays
-                    tvRepeat.text = selectedDays.joinToString(", ")
-                }
+            // Handle "back" button click to dismiss the dialog
+            btnBack.setOnClickListener {
+                dialog.dismiss()  // Dismiss the existing dialog
             }
-            findViewById<AppCompatButton>(R.id.btnUpdate).setOnClickListener { updateTask(task) }
+
+            // Handle "update" button click
+            btnUpdate.setOnClickListener {
+                updateTask(task)  // Handle task update logic
+                dialog.dismiss()  // Dismiss the existing dialog after updating
+            }
+
+            // Show the dialog
+            dialog.show()
         }
-        dialogBuilder.create().show()
     }
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
@@ -314,6 +359,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
         listsAdapter.notifyDataSetChanged() // Notify the adapter of data changes
         updateNoTasksMessage() // Update the visibility of the no tasks message
+    }
+    private fun visibilityChecker() {
+        popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+
     }
 
 }
