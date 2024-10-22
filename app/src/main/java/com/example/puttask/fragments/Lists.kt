@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.ListFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
@@ -193,6 +194,8 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
         val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
 
+        val btnBack = dialogView.findViewById<ImageButton>(R.id.btnBack)
+
         // Set task details in the dialog
         tvTaskName.text = task.task_name
         tvTaskDescription.text = task.task_description
@@ -206,6 +209,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
             showCategoryPopup(btnCategory, tvCategory)
         }
 
+
         // Show date picker when the add due icon is clicked
         addDueIcon.setOnClickListener {
             showDatePicker(tvDueDate) // Pass the TextView to update with the selected date
@@ -214,6 +218,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
         // Show time picker when the add time icon is clicked
         addTimeIcon.setOnClickListener {
             showTimePicker(tvTimeReminder, tvDueDate) // Pass the TextView for date validation
+        }
+        btnBack.setOnClickListener {
+            dialogBuilder.create().dismiss() // Dismiss the dialog
         }
 
         dialogView.findViewById<AppCompatButton>(R.id.btnRepeat).setOnClickListener {
@@ -228,10 +235,15 @@ class Lists : Fragment(R.layout.fragment_lists) {
             // Code to handle the task update logic
             // For example, updating the task on the server
             updateTask(task)
+            dialogBuilder.create().dismiss() // Dismiss the dialog
+
+
         }
 
         dialogBuilder.create().show()
     }
+
+
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
         repeatDaysSelected = BooleanArray(repeatDays.size)

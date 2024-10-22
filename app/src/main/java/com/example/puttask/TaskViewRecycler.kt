@@ -19,8 +19,8 @@ class TaskViewRecycler : AppCompatActivity() {
         btnBack = findViewById(R.id.btnBack)
 
         btnBack.setOnClickListener{
-            val intent = Intent (this, MainActivity::class.java)
-            startActivity(intent)
+
+            finish()
         }
 
     }
