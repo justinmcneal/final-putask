@@ -80,3 +80,9 @@ data class UpdateRequest(
 data class DeleteResponse(
         val message: String?
 )
+
+
+data class TaskResponse(
+    val success: Boolean?,
+    val message: String?
+)
