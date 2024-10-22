@@ -31,7 +31,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -44,7 +43,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private val taskList = mutableListOf<Task>()
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
 
-    private lateinit var btnRepeat: AppCompatButton
     private lateinit var repeatDaysSelected: BooleanArray
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
@@ -190,7 +188,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
 
-// Handle the Update button click event
 // Handle the Update button click event
         btnUpdate.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
