@@ -41,7 +41,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
 
     private lateinit var btnRepeat: AppCompatButton
-    private lateinit var token: String
+    private var token: String? = null
     private lateinit var repeatDaysSelected: BooleanArray
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 

@@ -40,7 +40,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private lateinit var ivCalendarPrevious: ImageView
     private lateinit var listsAdapter: ListsAdapter
     private var taskList: MutableList<Task> = mutableListOf() // Store fetched tasks
-    private lateinit var token: String
+    private var token: String? = null
 
 
     private var _binding: FragmentTimelineBinding? = null
