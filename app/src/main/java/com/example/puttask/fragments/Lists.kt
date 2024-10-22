@@ -18,6 +18,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
@@ -39,7 +40,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var listsAdapter: ListsAdapter
     private val taskList = mutableListOf<Task>()
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
-
+    private lateinit var tvDropdownLists: TextView
+    private lateinit var ic_sort: ImageView
+    private lateinit var popupcardviewLists: CardView
     private lateinit var btnRepeat: AppCompatButton
     private lateinit var repeatDaysSelected: BooleanArray
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
@@ -48,6 +51,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         // Register the ActivityResultLauncher
         addTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == AppCompatActivity.RESULT_OK) {
@@ -55,6 +59,8 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 fetchTasks()
             }
         }
+
+
     }
 
     override fun onCreateView(
@@ -73,11 +79,43 @@ class Lists : Fragment(R.layout.fragment_lists) {
         fetchTasks()
         updateNoTasksMessage()
         updateUsernameDisplay()
+        ic_sort = view.findViewById(R.id.ic_sort)
+        tvDropdownLists = view.findViewById(R.id.tvDropdownLists)
+        popupcardviewLists = view.findViewById(R.id.popupcardviewLists) // Initialize here
 
         // Fetch and display the username from SharedPreferences
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
         val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
         binding.tvUsername.text = "Hi $username!"
+
+
+
+
+        // Updated this lists dropdown as a customized so that icon would be inside
+        val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
+        val menuMap = mapOf(
+            R.id.allItems to "All Items",
+            R.id.personal to "Personal",
+            R.id.work to "Work",
+            R.id.school to "School",
+            R.id.social to "Social"
+        )
+
+        dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)
+
+        tvDropdownLists.setOnClickListener {
+            dropdownLists.setOnMenuItemClickListener { menuItem ->
+                menuMap[menuItem.itemId]?.let {
+                    tvDropdownLists.text = it
+                    true
+                } ?: false
+            }
+            dropdownLists.show()
+        }
+        //sort options
+        ic_sort.setOnClickListener {
+            visibilityChecker()
+        }
     }
 
     private fun updateUsernameDisplay() {
@@ -322,6 +360,12 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
     }
+    // cardview pop up for sort options
+    private fun visibilityChecker() {
+        popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
