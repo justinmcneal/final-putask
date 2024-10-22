@@ -10,7 +10,8 @@ import com.example.puttask.api.Task
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,
-    private val onItemClick: (Task) -> Unit
+    private val onItemClick: (Task) -> Unit,
+    private val onCompleteClick: (Task) -> Unit
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
 //    companion object {

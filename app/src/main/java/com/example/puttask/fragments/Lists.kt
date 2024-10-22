@@ -44,6 +44,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
 
     private lateinit var repeatDaysSelected: BooleanArray
+    private var token: String? = null
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
 
@@ -90,9 +91,14 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
-        listsAdapter = ListsAdapter(taskList) { task ->
-            handleTaskClick(task)
-        }
+
+        listsAdapter = ListsAdapter(taskList, { task ->
+            handleTaskClick(task)  // Handle task click
+        }, { completedTask ->
+            markTaskAsComplete(completedTask)  // Handle task completion
+        })
+        binding.listsrecyclerView.adapter = listsAdapter
+
         listsAdapter.setOnDeleteClickListener { task ->
             showDeleteConfirmationDialog(task)
         }
@@ -137,6 +143,8 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
     }
+
+
 
 
     private fun handleTaskClick(task: Task) {
@@ -265,6 +273,33 @@ class Lists : Fragment(R.layout.fragment_lists) {
         dialogBuilder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
         dialogBuilder.create().show()
     }
+
+    private fun markTaskAsComplete(task: Task) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Make the API call to complete the task
+                val response = RetrofitClient.getApiService(requireContext()).completeTask("Bearer $token", task.id)
+
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+
+                    withContext(Dispatchers.Main) {
+                        if (responseBody != null) {
+                            Toast.makeText(requireContext(), "Response: $responseBody", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), "Task marked as complete", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Log.e("ListsFragment", "Error marking task as complete: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception marking task as complete", e)
+            }
+        }
+    }
+
 
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
