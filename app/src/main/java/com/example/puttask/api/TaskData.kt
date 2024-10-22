@@ -63,10 +63,10 @@ data class Task(
 
 // Request to update an existing task
 data class UpdateRequest(
-    val task_name: String?,       // Nullable in case only some fields are being updated
-    val task_description: String?,
-    val end_date: String?,
-    val end_time: String?,
+    val task_name: String,       // Nullable in case only some fields are being updated
+    val task_description: String,
+    val end_date: String,
+    val end_time: String,
     val repeat_days: List<String>?,
     val category: String
 )

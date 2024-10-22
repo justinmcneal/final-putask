@@ -24,13 +24,17 @@ import com.example.puttask.ListsAdapter
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
+import com.example.puttask.api.UpdateRequest
 import com.example.puttask.databinding.FragmentListsBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
+import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
@@ -178,6 +182,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
             showTimePicker(tvTimeReminder, tvDueDate) // Pass the TextView for date validation
         }
 
+        // Update the repeat days
         dialogView.findViewById<AppCompatButton>(R.id.btnRepeat).setOnClickListener {
             showRepeatDaysDialog { selectedDays ->
                 task.repeat_days = selectedDays // Update the repeat_days in the task
@@ -185,15 +190,85 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
 
-        // Handle the Update button click event
+// Handle the Update button click event
+// Handle the Update button click event
         btnUpdate.setOnClickListener {
-            // Code to handle the task update logic
-            // For example, updating the task on the server
-            updateTask(task)
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    // Fetch the current task by ID
+                    val fetchResponse: Response<Task> = RetrofitClient.getApiService(requireContext()).getTaskById(task.id)
+                    if (fetchResponse.isSuccessful) {
+                        val currentTask = fetchResponse.body()
+
+                        // Get updated values from the TextViews
+                        val newTaskName = tvTaskName.text.toString()
+                        val newTaskDescription = tvTaskDescription.text.toString()
+                        val newEndDate = tvDueDate.text.toString() // Ensure this is in YYYY-MM-DD format
+
+                        // Get the new end time and format it to H:mm
+                        val newEndTime = tvTimeReminder.text.toString().let {
+                            try {
+                                // Parse the input format (e.g., 06:49 AM) to the output format (H:mm)
+                                val inputFormat = SimpleDateFormat("hh:mm a", Locale.getDefault()) // User input format
+                                val outputFormat = SimpleDateFormat("H:mm", Locale.getDefault()) // Required format
+                                val date = inputFormat.parse(it) // Parse user input
+                                outputFormat.format(date) // Format to H:mm
+                            } catch (e: Exception) {
+                                Log.e("UpdateTask", "Error parsing time: $it", e)
+                                ""
+                            }
+                        }
+
+                        Log.d("UpdateTask", "New End Time: $newEndTime")
+
+                        val newCategory = tvCategory.text.toString()
+                        val newRepeatDays = task.repeat_days // Keep the existing repeat days unless updated
+
+                        // Create an UpdateRequest with the current task values and only the updated values
+                        val updateRequest = UpdateRequest(
+                            task_name = newTaskName.takeIf { it.isNotBlank() } ?: currentTask?.task_name ?: "",
+                            task_description = newTaskDescription.takeIf { it.isNotBlank() } ?: currentTask?.task_description ?: "",
+                            end_date = newEndDate.takeIf { it.isNotBlank() } ?: currentTask?.end_date ?: "",
+                            end_time = newEndTime.takeIf { it.isNotBlank() } ?: currentTask?.end_time?.split(":")?.take(2)?.joinToString(":") ?: "",
+                            repeat_days = newRepeatDays ?: currentTask?.repeat_days ?: emptyList(),
+                            category = newCategory.takeIf { it.isNotBlank() } ?: currentTask?.category ?: ""
+                        )
+
+                        // Log the complete update request for debugging
+                        Log.d("UpdateTask", "Update request: $updateRequest")
+
+                        // Make the API call to update the task
+                        val updateResponse: Response<Task> = RetrofitClient.getApiService(requireContext()).updateTask(task.id, updateRequest)
+                        if (updateResponse.isSuccessful) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
+                                fetchTasks() // Refresh the task list to reflect the updated task
+                            }
+                        } else {
+                            Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(requireContext(), "Error updating task", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        Log.e("ListsFragment", "Error fetching task: ${fetchResponse.message()}")
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(requireContext(), "Error fetching task", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("ListsFragment", "Exception updating task", e)
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "Error updating task", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
 
+        dialogBuilder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
         dialogBuilder.create().show()
     }
+
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
         repeatDaysSelected = BooleanArray(repeatDays.size)
@@ -221,13 +296,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
 
         builder.create().show()
-    }
-
-
-    // Function to update task
-    private fun updateTask(task: Task) {
-        // Code to update task details
-        Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
     }
 
     // Function to show the popup menu below the ImageView button and update the category TextView
