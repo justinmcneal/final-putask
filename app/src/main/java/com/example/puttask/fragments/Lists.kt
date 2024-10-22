@@ -182,6 +182,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
 
+        // Create the dialog and store it in a variable
+        val dialog = dialogBuilder.create()
+
         // Initialize all views
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
@@ -193,7 +196,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val addDueIcon = dialogView.findViewById<ImageButton>(R.id.addDueIcon)
         val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
         val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
-
         val btnBack = dialogView.findViewById<ImageButton>(R.id.btnBack)
 
         // Set task details in the dialog
@@ -204,46 +206,35 @@ class Lists : Fragment(R.layout.fragment_lists) {
         tvCategory.text = task.category
         tvRepeat.text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
 
-        // When the ImageView button (btnCategory) is clicked, show the popup menu
+        // Handle category popup
         btnCategory.setOnClickListener {
             showCategoryPopup(btnCategory, tvCategory)
         }
 
-
-        // Show date picker when the add due icon is clicked
+        // Handle date picker
         addDueIcon.setOnClickListener {
-            showDatePicker(tvDueDate) // Pass the TextView to update with the selected date
+            showDatePicker(tvDueDate)
         }
 
-        // Show time picker when the add time icon is clicked
+        // Handle time picker
         addTimeIcon.setOnClickListener {
-            showTimePicker(tvTimeReminder, tvDueDate) // Pass the TextView for date validation
+            showTimePicker(tvTimeReminder, tvDueDate)
         }
+
+        // Handle "back" button click to dismiss the dialog
         btnBack.setOnClickListener {
-            dialogBuilder.create().dismiss() // Dismiss the dialog
+            dialog.dismiss()  // Dismiss the existing dialog
         }
 
-        dialogView.findViewById<AppCompatButton>(R.id.btnRepeat).setOnClickListener {
-            showRepeatDaysDialog { selectedDays ->
-                task.repeat_days = selectedDays // Update the repeat_days in the task
-                tvRepeat.text = selectedDays.joinToString(", ")
-            }
-        }
-
-        // Handle the Update button click event
+        // Handle "update" button click
         btnUpdate.setOnClickListener {
-            // Code to handle the task update logic
-            // For example, updating the task on the server
-            updateTask(task)
-            dialogBuilder.create().dismiss() // Dismiss the dialog
-
-
+            updateTask(task)  // Handle task update logic
+            dialog.dismiss()  // Dismiss the existing dialog after updating
         }
 
-        dialogBuilder.create().show()
+        // Show the dialog
+        dialog.show()
     }
-
-
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
         repeatDaysSelected = BooleanArray(repeatDays.size)
