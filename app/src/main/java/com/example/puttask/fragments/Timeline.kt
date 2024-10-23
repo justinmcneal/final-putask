@@ -47,11 +47,9 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private var _binding: FragmentTimelineBinding? = null
     private val binding get() = _binding!!
     private lateinit var repeatDaysSelected: BooleanArray
-    private lateinit var tvOldesttoNewest: TextView
-    private lateinit var tvNewesttoOldest: TextView
+
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-    private lateinit var popupcardviewLists: CardView
-    private lateinit var tvDropdownLists: TextView
+
     private lateinit var ic_sort: ImageView
     private var originalTaskList = mutableListOf<Task>()
 
@@ -67,11 +65,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         tvDateMonth = binding.textDateMonth
         ivCalendarNext = binding.ivCalendarNext
         ivCalendarPrevious = binding.ivCalendarPrevious
-        ic_sort = binding.icSort
-        tvDropdownLists = binding.tvDropdownLists
-        popupcardviewLists = binding.popupcardviewLists
-        tvOldesttoNewest =binding.tvOldesttoNewest
-        tvNewesttoOldest = binding.tvNewesttoOldest
         // Set up the RecyclerView and other components before fetching tasks
         setupRecyclerView()
 
@@ -85,45 +78,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         calendarSetUp.setUpCalendarPrevNextClickListener(ivCalendarNext, ivCalendarPrevious, this) {
             tvDateMonth.text = it
         }
-
         updateNoTasksMessage()
-
-        // Set up the dropdown menu
-        val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
-        val menuMap = mapOf(
-            R.id.allItems to "All Items",
-            R.id.personal to "Personal",
-            R.id.work to "Work",
-            R.id.school to "School",
-            R.id.wishlist to "Wishlist"
-        )
-
-        dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)
-
-        binding.tvDropdownLists.setOnClickListener {
-            dropdownLists.setOnMenuItemClickListener { menuItem ->
-                menuMap[menuItem.itemId]?.let { selectedCategory ->
-                    tvDropdownLists.text = selectedCategory
-                    filterTasksByCategory(selectedCategory) // Pass the correct category
-                    true
-                } ?: false
-            }
-            dropdownLists.show()
-        }
-        binding.tvNewesttoOldest.setOnClickListener {
-            sortTasksByDateDescending() // Sort from newest to oldest
-            visibilityChecker() // Hide the popup after selection
-        }
-
-        binding.tvOldesttoNewest.setOnClickListener {
-            sortTasksByDateAscending() // Sort from oldest to newest
-            visibilityChecker() // Hide the popup after selection
-        }
-
-        // Sort options
-        ic_sort.setOnClickListener {
-            visibilityChecker()
-        }
     }
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {
@@ -337,41 +292,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         dialogBuilder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
         dialogBuilder.create().show()
     }
-    private fun filterTasksByCategory(category: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response: Response<List<Task>> =
-                    RetrofitClient.getApiService(requireContext()).getAllTasks()
-                if (response.isSuccessful) {
-                    response.body()?.let { tasks ->
-                        // If "All Items" is selected, show all tasks
-                        val filteredTasks = if (category == "All Items") {
-                            tasks // Show all tasks
-                        } else {
-                            tasks.filter { it.category == category } // Filter by selected category
-                        }
-
-                        withContext(Dispatchers.Main) {
-                            taskList.clear()
-                            taskList.addAll(filteredTasks)
-                            listsAdapter.notifyDataSetChanged()
-                            updateNoTasksMessage()
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("ListsFragment", "Exception fetching tasks", e)
-            }
-        }
-    }
-    private fun sortTasksByDateDescending() {
-        taskList.sortByDescending { parseDate(it.end_date) ?: Date(0) } // Handle null dates
-        listsAdapter.notifyDataSetChanged()
-    }
-    private fun sortTasksByDateAscending() {
-        taskList.sortBy { parseDate(it.end_date) ?: Date(Long.MAX_VALUE) }
-        listsAdapter.notifyDataSetChanged()
-    }
     private fun parseDate(dateString: String): Date? {
         return try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -542,10 +462,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
         listsAdapter.notifyDataSetChanged() // Notify the adapter of data changes
         updateNoTasksMessage() // Update the visibility of the no tasks message
-    }
-    private fun visibilityChecker() {
-        popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-
     }
 }
 
