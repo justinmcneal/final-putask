@@ -3,6 +3,7 @@ package com.example.puttask.fragments
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,7 +16,6 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arjungupta08.horizontal_calendar_date.HorizontalCalendarAdapter
@@ -47,10 +47,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private var _binding: FragmentTimelineBinding? = null
     private val binding get() = _binding!!
     private lateinit var repeatDaysSelected: BooleanArray
-
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-
-    private lateinit var ic_sort: ImageView
     private var originalTaskList = mutableListOf<Task>()
 
     override fun onCreateView(
@@ -59,26 +56,19 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     ): View = FragmentTimelineBinding.inflate(inflater, container, false).also { _binding = it }.root
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Access views using the binding instance
         recyclerView = binding.recyclerView
         tvDateMonth = binding.textDateMonth
         ivCalendarNext = binding.ivCalendarNext
         ivCalendarPrevious = binding.ivCalendarPrevious
-        // Set up the RecyclerView and other components before fetching tasks
         setupRecyclerView()
-
-        // Fetch tasks first
         fetchTasks()
         setupSwipeRefresh()
-
-        // Set up calendar after tasks have been fetched
+        updateNoTasksMessage()
         val calendarSetUp = HorizontalCalendarSetUp()
         tvDateMonth.text = calendarSetUp.setUpCalendarAdapter(recyclerView, this)
         calendarSetUp.setUpCalendarPrevNextClickListener(ivCalendarNext, ivCalendarPrevious, this) {
             tvDateMonth.text = it
         }
-        updateNoTasksMessage()
     }
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {
@@ -104,12 +94,18 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                     response.body()?.let { tasks ->
                         Log.d("ListsFragment", "Fetched tasks: ${tasks.size}")
 
-                        // Clear and update task list on the main thread
                         withContext(Dispatchers.Main) {
                             originalTaskList.clear()
-                            originalTaskList.addAll(tasks) // Store fetched tasks in originalTaskList
+                            originalTaskList.addAll(tasks)
                             taskList.clear()
-                            taskList.addAll(originalTaskList) // Initialize taskList with all tasks
+                            taskList.addAll(originalTaskList)
+
+                            // Check if there's a selected date stored
+                            val selectedDate = getSelectedDate()
+                            if (selectedDate != null) {
+                                filterTasksByDate(selectedDate)
+                            }
+
                             listsAdapter.notifyDataSetChanged()
                             updateNoTasksMessage()
                         }
@@ -126,6 +122,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             }
         }
     }
+
     private fun handleTaskClick(task: Task) {
         // Create and show a dialog to display task details
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
@@ -292,15 +289,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         dialogBuilder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
         dialogBuilder.create().show()
     }
-    private fun parseDate(dateString: String): Date? {
-        return try {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            dateFormat.parse(dateString)
-        } catch (e: ParseException) {
-            Log.e("ListsFragment", "Error parsing date: $dateString", e)
-            null
-        }
-    }
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
         PopupMenu(requireContext(), anchorView).apply {
             menuInflater.inflate(R.menu.popup_categories, menu)
@@ -416,6 +404,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         super.onDestroyView()
         _binding = null
     }
+
     override fun onItemClick(ddMmYy: String, dd: String, day: String) {
         val inputFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -426,42 +415,55 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             Log.e("Timeline", "Error parsing clicked date: $e")
             null
         }
-        Log.d("Timeline", "Formatted date: $formattedDate")
 
-        // Call the method to filter tasks based on the selected date
-        filterTasksByDate(formattedDate)
+        formattedDate?.let {
+            saveSelectedDate(it)  // Save the selected date
+            Log.d("Timeline", "Formatted date: $formattedDate")
+
+            // Filter tasks based on the selected date
+            filterTasksByDate(it)
+        }
     }
+
+    // Save the selected date in SharedPreferences
+    private fun saveSelectedDate(selectedDate: String) {
+        val sharedPreferences = requireContext().getSharedPreferences("TasksPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("selectedDate", selectedDate)
+        editor.apply()
+    }
+
+    // Retrieve the selected date from SharedPreferences
+    private fun getSelectedDate(): String? {
+        val sharedPreferences = requireContext().getSharedPreferences("TasksPrefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("selectedDate", null)
+    }
+
     private fun filterTasksByDate(selectedDate: String?) {
-        // Log the selected date for debugging
         Log.d("Timeline", "Filtering tasks for date: $selectedDate")
 
         if (selectedDate.isNullOrEmpty()) {
-            // Restore original task list if selectedDate is null or empty
             taskList.clear()
             taskList.addAll(originalTaskList)
             Toast.makeText(requireContext(), "No date selected. Displaying all tasks.", Toast.LENGTH_SHORT).show()
         } else {
-            // Filter tasks by comparing end_date
             val filteredTasks = originalTaskList.filter { task ->
-                val taskEndDate = task.end_date // Assuming task.end_date is in "YYYY-MM-DD" format
-                Log.d("Timeline", "Comparing task end date: $taskEndDate with selected date: $selectedDate")
-                taskEndDate == selectedDate
+                task.end_date == selectedDate
             }
 
-            // Log the filtered tasks for debugging
             Log.d("Timeline", "Filtered tasks count: ${filteredTasks.size}")
 
             if (filteredTasks.isNotEmpty()) {
                 taskList.clear()
                 taskList.addAll(filteredTasks)
             } else {
-                taskList.clear() // Clear the list if no tasks match
+                taskList.clear()
                 Toast.makeText(requireContext(), "No tasks found for selected date.", Toast.LENGTH_SHORT).show()
             }
         }
 
-        listsAdapter.notifyDataSetChanged() // Notify the adapter of data changes
-        updateNoTasksMessage() // Update the visibility of the no tasks message
+        listsAdapter.notifyDataSetChanged()
+        updateNoTasksMessage()
     }
 }
 
