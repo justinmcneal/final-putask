@@ -2,19 +2,28 @@ package com.example.puttask.fragments
 
 import android.graphics.Color
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.puttask.R
+import com.example.puttask.api.RetrofitClient
+import com.example.puttask.api.Task
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.formatter.ValueFormatter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.Response
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Analytics : Fragment(R.layout.fragment_analytics) {
 
@@ -25,6 +34,9 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     private lateinit var tvthreesixtyfiveDays: TextView
     private lateinit var tvTaskOverviewDate: TextView
     private val entries = ArrayList<Entry>()
+
+    private lateinit var tvPendingTasksCount: TextView
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -37,80 +49,152 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         tvthreesixtyfiveDays = view.findViewById(R.id.tvthreesixtyfiveDays)
         tvTaskOverviewDate = view.findViewById(R.id.tvTaskOverviewDate)
 
+        tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount)
+        // Fetch tasks and update pending tasks count
+        fetchPendingTasksCount()
+
+
+
         // Set up click listeners for the buttons
         tvsevenDays.setOnClickListener {
-            updateChart(7, "Last 7 Days Data")
+            updateChart(7, "Pending Tasks - Last 7 Days")
             highlightButton(tvsevenDays)
         }
         tvtwentyeightDays.setOnClickListener {
-            updateChart(28, "Last 28 Days Data")
+            updateChart(28, "Pending Tasks - Last 28 Days")
             highlightButton(tvtwentyeightDays)
         }
         tvsixtyDays.setOnClickListener {
-            updateChart(60, "Last 60 Days Data")
+            updateChart(60, "Pending Tasks - Last 60 Days")
             highlightButton(tvsixtyDays)
         }
         tvthreesixtyfiveDays.setOnClickListener {
-            updateChart(365, "Last 365 Days Data")
+            updateChart(365, "Pending Tasks - Last 365 Days")
             highlightButton(tvthreesixtyfiveDays)
         }
     }
 
-    // Generic function to update the chart for any range of days
+    // Fetch tasks and update chart
     private fun updateChart(days: Int, label: String) {
         lineChart.clear()
         entries.clear()
 
+        // Get current date and calculate date range
         val calendar = Calendar.getInstance()
         val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
-
-        // Format the current date
         val currentDate = dateFormat.format(calendar.time)
-
-        // Subtract the given number of days
         calendar.add(Calendar.DAY_OF_YEAR, -days)
         val startDate = dateFormat.format(calendar.time)
 
         // Set the date range in tvTaskOverviewDate
         tvTaskOverviewDate.text = "$startDate - $currentDate"
 
-        // Create data entries for the past 'days' days
-        for (i in 0 until days) {
-            val percentageDataPoint = (Math.random() * 100).toFloat()
-            entries.add(Entry(i.toFloat(), percentageDataPoint))
-        }
+        // Fetch tasks using API
+        lifecycleScope.launch {
+            val response = getTasksFromApi()
+            if (response.isSuccessful) {
+                // Filter tasks where the end date is in the future (pending tasks)
+                val pendingTasks = response.body()?.filter { task ->
+                    val taskEndDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)
+                    taskEndDate?.after(Date()) == true
+                } ?: listOf()
 
-        // Create and customize dataset
-        val dataSet = LineDataSet(entries, label)
-        dataSet.color = resources.getColor(android.R.color.holo_blue_light)
-        dataSet.lineWidth = 2f
-        dataSet.setDrawCircles(true)
-        dataSet.setDrawValues(false)
+                val tasksGroupedByDay = groupTasksByDay(pendingTasks, days)
 
-        // Set data to the chart
-        val lineData = LineData(dataSet)
-        lineChart.data = lineData
+                // Create data entries for the past 'days' days based on pending tasks
+                for (i in 0 until days) {
+                    val taskCountForDay = tasksGroupedByDay[i] ?: 0 // Default to 0 if no tasks for the day
+                    entries.add(Entry(i.toFloat(), taskCountForDay.toFloat()))
+                }
 
-        // Set x-axis value formatter
-        lineChart.xAxis.valueFormatter = object : ValueFormatter() {
-            private val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
+                // Create and customize dataset
+                val dataSet = LineDataSet(entries, label)
+                dataSet.color = resources.getColor(android.R.color.holo_blue_light)
+                dataSet.lineWidth = 2f
+                dataSet.setDrawCircles(true)
+                dataSet.setDrawValues(false)
 
-            override fun getFormattedValue(value: Float): String {
-                val calendar = Calendar.getInstance()
-                calendar.add(Calendar.DAY_OF_MONTH, -value.toInt())
-                return dateFormat.format(calendar.time)
+                // Set data to the chart
+                val lineData = LineData(dataSet)
+                lineChart.data = lineData
+
+                // Set x-axis value formatter
+                lineChart.xAxis.valueFormatter = object : ValueFormatter() {
+                    private val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
+
+                    override fun getFormattedValue(value: Float): String {
+                        val calendar = Calendar.getInstance()
+                        calendar.add(Calendar.DAY_OF_MONTH, -value.toInt())
+                        return dateFormat.format(calendar.time)
+                    }
+                }
+
+                // Customize chart appearance
+                lineChart.xAxis.labelRotationAngle = -45f
+                lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+                lineChart.axisRight.isEnabled = false
+                lineChart.invalidate() // Refresh the chart with new data
             }
         }
+    }
 
-        // Customize chart appearance
-        lineChart.xAxis.labelRotationAngle = -45f
-        lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
-        lineChart.axisRight.isEnabled = false
-        lineChart.invalidate() // Refresh the chart with new data
+    // Group tasks by day for the given date range
+    private fun groupTasksByDay(tasks: List<Task>, days: Int): Map<Int, Int> {
+        val calendar = Calendar.getInstance()
+        val tasksPerDay = mutableMapOf<Int, Int>()
+        val currentDate = calendar.timeInMillis
+
+        for (task in tasks) {
+            val taskDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)?.time ?: continue
+            val dayDifference = ((currentDate - taskDate) / (1000 * 60 * 60 * 24)).toInt()
+
+            // Only include tasks within the specified date range
+            if (dayDifference in 0 until days) {
+                tasksPerDay[dayDifference] = tasksPerDay.getOrDefault(dayDifference, 0) + 1
+            }
+        }
+        return tasksPerDay
     }
 
     // Function to highlight the clicked button
     private fun highlightButton(selectedButton: TextView) {
         selectedButton.setBackgroundColor(Color.parseColor("#FFBB86FC")) // Change color to purple or any desired color
+    }
+
+    // Make the API call to fetch tasks
+    private suspend fun getTasksFromApi(): Response<List<Task>> {
+        return RetrofitClient.getApiService(requireContext()).getAllTasks()
+    }
+
+    private fun fetchPendingTasksCount() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = getTasksFromApi() // Your existing function
+                if (response.isSuccessful) {
+                    val tasks = response.body() ?: emptyList()
+
+                    // Current date in the same format as the end_date
+                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                    Log.d("PendingTasks", "Current date: $currentDate") // Log the current date
+
+                    // Count pending tasks: those with end_date >= currentDate
+                    val pendingTasksCount = tasks.count { task ->
+                        Log.d("PendingTasks", "Task: ${task.end_date}") // Log each task's end_date
+                        task.end_date >= currentDate
+                    }
+
+                    Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount") // Log the count
+
+                    withContext(Dispatchers.Main) {
+                        tvPendingTasksCount.text = pendingTasksCount.toString()
+                    }
+                } else {
+                    // Handle error (e.g., show a toast)
+                }
+            } catch (e: Exception) {
+                // Handle exception (e.g., show a toast)
+                Log.e("PendingTasks", "Error fetching tasks: ${e.message}")
+            }
+        }
     }
 }
