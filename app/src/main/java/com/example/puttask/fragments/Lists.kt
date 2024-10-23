@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
@@ -140,6 +141,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
+
+        val dialog = dialogBuilder.create()
+
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvStartDate)
@@ -185,10 +189,10 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         val newEndDate = tvDueDate.text.toString()
                         Log.d("UpdateTask", "Raw End Date Input: $newEndDate")
 
+                        // Parse the selected date
                         val dateFormatInput = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                         val dateFormatAPI = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-                        // Parse the selected date
                         val selectedDate: Date? = try {
                             dateFormatInput.parse(newEndDate)
                         } catch (e: ParseException) {
@@ -203,18 +207,16 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         // Parse the end time
                         val newEndTime = tvTimeReminder.text.toString().let {
                             try {
-                                val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault()) // Change format to HH:mm
+                                val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
                                 val date = inputFormat.parse(it)
-                                // Format with leading zeros
                                 SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
                             } catch (e: Exception) {
                                 Log.e("UpdateTask", "Error parsing time: $it", e)
-                                "" // Consider handling this case better by notifying the user
+                                ""
                             }
                         }
                         Log.d("UpdateTask", "New End Time: $newEndTime")
 
-                        // Ensure end time is valid for the selected end date
                         val combinedDateTime = selectedDate?.let {
                             Calendar.getInstance().apply {
                                 time = it
@@ -228,16 +230,12 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
                         // Validate combined date-time
                         if (selectedDate != null) {
-                            // Check if the selected date is in the future
                             if (selectedDate.after(currentDate)) {
-                                // Proceed to update, regardless of the end time
+                                // Valid future date
                             } else {
-                                // If the date is today, check if the time is in the past
                                 if (Calendar.getInstance().get(Calendar.YEAR) == selectedDate.year + 1900 &&
                                     Calendar.getInstance().get(Calendar.MONTH) == selectedDate.month &&
                                     Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == selectedDate.date) {
-
-                                    // If the time is before now, show a warning
                                     if (combinedDateTime?.before(Calendar.getInstance()) == true) {
                                         withContext(Dispatchers.Main) {
                                             Toast.makeText(requireContext(), "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
@@ -251,7 +249,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         val newCategory = tvCategory.text.toString()
                         val newRepeatDays = task.repeat_days
 
-                        // Create UpdateRequest object
                         val updateRequest = UpdateRequest(
                             task_name = newTaskName.takeIf { it.isNotBlank() } ?: currentTask?.task_name ?: "",
                             task_description = newTaskDescription.takeIf { it.isNotBlank() } ?: currentTask?.task_description ?: "",
@@ -269,6 +266,8 @@ class Lists : Fragment(R.layout.fragment_lists) {
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
                                 fetchTasks() // Refresh task list
+                                dialog.dismiss() // Dismiss the dialog after successful update
+
                             }
                         } else {
                             Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")
@@ -290,8 +289,14 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 }
             }
         }
-        dialogBuilder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+
+// Cancel button
+        dialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss() // Dismiss the dialog on cancel
+        }
+
         dialogBuilder.create().show()
+
     }
 
 
