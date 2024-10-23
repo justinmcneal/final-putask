@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
@@ -233,7 +234,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
-
+        val dialog = dialogBuilder.create()
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvStartDate)
@@ -244,6 +245,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val addDueIcon = dialogView.findViewById<ImageButton>(R.id.addDueIcon)
         val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
         val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
+        val btnBack = dialogView.findViewById<ImageButton>(R.id.btnBack)
         tvTaskName.text = task.task_name
         tvTaskDescription.text = task.task_description
         tvDueDate.text = task.end_date
@@ -251,6 +253,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
         tvCategory.text = task.category
         tvRepeat.text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
 
+        btnBack.setOnClickListener {
+            dialog.dismiss()
+        }
         btnCategory.setOnClickListener {
             showCategoryPopup(btnCategory, tvCategory)
         }
@@ -271,6 +276,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 try {
                     val fetchResponse: Response<Task> = RetrofitClient.getApiService(requireContext()).getTaskById(task.id)
                     if (fetchResponse.isSuccessful) {
+
                         val currentTask = fetchResponse.body()
 
                         // Retrieve input values
@@ -369,7 +375,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
                                 fetchTasks() // Refresh task list
+
+                                    dialog.dismiss()
+
                                 Log.d("UpdateTask", "Dismissing dialog after successful update")
+
                             }
                         } else {
                             Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")
@@ -390,15 +400,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
                     }
                 }
             }
+
+
         }
 
-// Cancel button
-        dialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss() // Dismiss the dialog on cancel
-        }
-
-        dialogBuilder.create().show()
-
+        dialog.show()
     }
 
 

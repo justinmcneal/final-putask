@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val fragmentData = when (item.itemId) {
             R.id.ic_lists -> Lists() to "Tasks"
@@ -112,4 +113,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.toolbarTitle.text = title
         binding.dateTextView.text = SimpleDateFormat("d MMMM", Locale.getDefault()).format(Date())
     }
+
 }
+
