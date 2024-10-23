@@ -36,7 +36,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     private val entries = ArrayList<Entry>()
 
     private lateinit var tvPendingTasksCount: TextView
-
+    private lateinit var tvOverdueTasksCount: TextView // Add this for overdue tasks
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -50,6 +50,9 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         tvTaskOverviewDate = view.findViewById(R.id.tvTaskOverviewDate)
 
         tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount)
+        tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount) // Initialize overdue TextView
+
+
         // Fetch tasks and update pending tasks count
         fetchPendingTasksCount()
 
@@ -156,12 +159,9 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         return tasksPerDay
     }
 
-    // Function to highlight the clicked button
     private fun highlightButton(selectedButton: TextView) {
         selectedButton.setBackgroundColor(Color.parseColor("#FFBB86FC")) // Change color to purple or any desired color
     }
-
-    // Make the API call to fetch tasks
     private suspend fun getTasksFromApi(): Response<List<Task>> {
         return RetrofitClient.getApiService(requireContext()).getAllTasks()
     }
@@ -169,32 +169,40 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     private fun fetchPendingTasksCount() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = getTasksFromApi() // Your existing function
+                val response = getTasksFromApi()
                 if (response.isSuccessful) {
                     val tasks = response.body() ?: emptyList()
 
                     // Current date in the same format as the end_date
                     val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                    Log.d("PendingTasks", "Current date: $currentDate") // Log the current date
+                    Log.d("PendingTasks", "Current date: $currentDate")
 
-                    // Count pending tasks: those with end_date >= currentDate
+                    // Count pending tasks: those with end_date >= currentDate (upcoming tasks)
                     val pendingTasksCount = tasks.count { task ->
-                        Log.d("PendingTasks", "Task: ${task.end_date}") // Log each task's end_date
-                        task.end_date >= currentDate
+                        val taskEndDate = task.end_date
+                        taskEndDate >= currentDate // Tasks with future or same-day end_date
                     }
 
-                    Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount") // Log the count
+                    // Count overdue tasks: those with end_date < currentDate
+                    val overdueTasksCount = tasks.count { task ->
+                        val taskEndDate = task.end_date
+                        taskEndDate < currentDate // Tasks with a past end_date
+                    }
+
+                    Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount")
+                    Log.d("OverdueTasks", "Overdue tasks count: $overdueTasksCount")
 
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
+                        tvOverdueTasksCount.text = overdueTasksCount.toString() // Display overdue count
                     }
                 } else {
-                    // Handle error (e.g., show a toast)
                 }
             } catch (e: Exception) {
-                // Handle exception (e.g., show a toast)
                 Log.e("PendingTasks", "Error fetching tasks: ${e.message}")
             }
         }
     }
 }
+
+
