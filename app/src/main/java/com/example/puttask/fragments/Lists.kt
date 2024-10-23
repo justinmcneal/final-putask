@@ -18,6 +18,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
@@ -46,8 +47,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private val taskList = mutableListOf<Task>()
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
     private lateinit var repeatDaysSelected: BooleanArray
-    private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
+    private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    private lateinit var popupcardviewLists: CardView
+    private lateinit var tvDropdownLists: TextView
+    private lateinit var ic_sort: ImageView
+    private lateinit var tvOldesttoNewest: TextView
+    private lateinit var tvNewesttoOldest: TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -70,17 +76,105 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        ic_sort = binding.icSort
+        tvDropdownLists = binding.tvDropdownLists
+        popupcardviewLists = binding.popupcardviewLists
+        tvOldesttoNewest =binding.tvOldesttoNewest
+        tvNewesttoOldest = binding.tvNewesttoOldest
         setupRecyclerView()
         setupSwipeRefresh()
         fetchTasks()
         updateNoTasksMessage()
         updateUsernameDisplay()
 
+        val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
+        val menuMap = mapOf(
+            R.id.allItems to "All Items",
+            R.id.personal to "Personal",
+            R.id.work to "Work",
+            R.id.school to "School",
+            R.id.social to "Social"
+        )
+
+        dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)
+
+        binding.tvDropdownLists.setOnClickListener {
+            dropdownLists.setOnMenuItemClickListener { menuItem ->
+                menuMap[menuItem.itemId]?.let { selectedCategory ->
+                    tvDropdownLists.text = selectedCategory
+                    filterTasksByCategory(selectedCategory) // Pass the correct category
+                    true
+                } ?: false
+            }
+            dropdownLists.show()
+        }
+        binding.tvNewesttoOldest.setOnClickListener {
+            sortTasksByDateDescending() // Sort from newest to oldest
+            visibilityChecker() // Hide the popup after selection
+        }
+
+        binding.tvOldesttoNewest.setOnClickListener {
+            sortTasksByDateAscending() // Sort from oldest to newest
+            visibilityChecker() // Hide the popup after selection
+        }
+
+        // Sort options
+        ic_sort.setOnClickListener {
+            visibilityChecker()
+        }
+
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
         val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
         binding.tvUsername.text = "Hi $username!"
     }
+    private fun sortTasksByDateDescending() {
+        taskList.sortByDescending { parseDate(it.end_date) ?: Date(0) } // Handle null dates
+        listsAdapter.notifyDataSetChanged()
+    }
+
+    private fun sortTasksByDateAscending() {
+        taskList.sortBy { parseDate(it.end_date) ?: Date(Long.MAX_VALUE) }
+        listsAdapter.notifyDataSetChanged()
+    }
+
+    private fun parseDate(dateString: String): Date? {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            dateFormat.parse(dateString)
+        } catch (e: ParseException) {
+            Log.e("ListsFragment", "Error parsing date: $dateString", e)
+            null
+        }
+    }
+
+
+    private fun filterTasksByCategory(category: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
+                if (response.isSuccessful) {
+                    response.body()?.let { tasks ->
+                        // If "All Items" is selected, show all tasks
+                        val filteredTasks = if (category == "All Items") {
+                            tasks // Show all tasks
+                        } else {
+                            tasks.filter { it.category == category } // Filter by selected category
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            taskList.clear()
+                            taskList.addAll(filteredTasks)
+                            listsAdapter.notifyDataSetChanged()
+                            updateNoTasksMessage()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception fetching tasks", e)
+            }
+        }
+    }
+
 
     private fun updateUsernameDisplay() {
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
@@ -419,5 +513,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+    private fun visibilityChecker() {
+        popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+
     }
 }
