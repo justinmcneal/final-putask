@@ -91,6 +91,7 @@
                     android:inputType="textPassword"
                     android:background="@null"
                     android:textColor="@color/black"
+                    android:fontFamily="@font/opensans"
                     android:textSize="14dp"
                     android:layout_marginStart="10dp"
                     android:paddingEnd="8dp" />
@@ -124,6 +125,7 @@
                     android:inputType="textPassword"
                     android:background="@null"
                     android:textSize="14dp"
+                    android:fontFamily="@font/opensans"
                     android:textColorHint="@color/gray"
                     android:textColor="@color/black"
                     android:layout_marginStart="10dp"

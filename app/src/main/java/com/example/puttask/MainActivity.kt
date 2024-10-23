@@ -97,10 +97,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
     private fun logout() {
-        dataManager.clearLoginData() // Clear login data
+        dataManager.clearAuthToken() // Clear the auth token
+        dataManager.clearLoginData() // Clear login state
         startActivity(Intent(this, LoginSignin::class.java))
         finish()
     }
+
 
     private fun openFragment(fragment: Fragment, title: String) {
         supportFragmentManager.beginTransaction()
