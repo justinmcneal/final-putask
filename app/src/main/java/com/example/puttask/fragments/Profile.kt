@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -64,6 +65,7 @@ class Profile : Fragment() {
             lifecycleScope.launch {
                 val token = "Bearer ${dataManager.getAuthToken()}"
                 apiService.updateUsername(token, UpdateUsernameRequest(username = newUsername)).takeIf { it.isSuccessful }?.let {
+                    Toast.makeText(requireContext(), "Username changed.", Toast.LENGTH_SHORT).show()
                     requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
                         .edit().putString("username", newUsername).apply()
                     loadUserProfile()  // Refresh user info after update
