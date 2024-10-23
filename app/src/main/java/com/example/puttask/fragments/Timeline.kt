@@ -216,10 +216,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                         val newEndDate = tvDueDate.text.toString()
                         Log.d("UpdateTask", "Raw End Date Input: $newEndDate")
 
+                        // Parse the selected date
                         val dateFormatInput = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                         val dateFormatAPI = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-                        // Parse the selected date
                         val selectedDate: Date? = try {
                             dateFormatInput.parse(newEndDate)
                         } catch (e: ParseException) {
@@ -227,25 +227,33 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                             null
                         }
 
+
+
+
                         val formattedEndDate = selectedDate?.let { dateFormatAPI.format(it) }
                         val currentDate = dateFormatAPI.parse(dateFormatAPI.format(Date()))
                         Log.d("UpdateTask", "Current Date: ${dateFormatAPI.format(currentDate)}")
 
+                        if (formattedEndDate != null) {
+                            Log.d("UpdateTask", "Formatted End Date: $formattedEndDate")
+                        } else {
+                            Log.e("UpdateTask", "Failed to format end date")
+                        }
+
                         // Parse the end time
                         val newEndTime = tvTimeReminder.text.toString().let {
                             try {
-                                val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault()) // Change format to HH:mm
+                                val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
                                 val date = inputFormat.parse(it)
-                                // Format with leading zeros
                                 SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
                             } catch (e: Exception) {
                                 Log.e("UpdateTask", "Error parsing time: $it", e)
-                                "" // Consider handling this case better by notifying the user
+                                ""
                             }
                         }
                         Log.d("UpdateTask", "New End Time: $newEndTime")
 
-                        // Ensure end time is valid for the selected end date
+                        // Combine date and time
                         val combinedDateTime = selectedDate?.let {
                             Calendar.getInstance().apply {
                                 time = it
@@ -259,17 +267,16 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
                         // Validate combined date-time
                         if (selectedDate != null) {
-                            // Check if the selected date is in the future
                             if (selectedDate.after(currentDate)) {
-                                // Proceed to update, regardless of the end time
+                                // Valid future date
                             } else {
-                                // If the date is today, check if the time is in the past
-                                if (Calendar.getInstance().get(Calendar.YEAR) == selectedDate.year + 1900 &&
-                                    Calendar.getInstance().get(Calendar.MONTH) == selectedDate.month &&
-                                    Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == selectedDate.date) {
-
-                                    // If the time is before now, show a warning
-                                    if (combinedDateTime?.before(Calendar.getInstance()) == true) {
+                                // Check if it's the same day
+                                val now = Calendar.getInstance()
+                                if (now.get(Calendar.YEAR) == selectedDate.year + 1900 &&
+                                    now.get(Calendar.MONTH) == selectedDate.month &&
+                                    now.get(Calendar.DAY_OF_MONTH) == selectedDate.date) {
+                                    // Validate time
+                                    if (combinedDateTime?.before(now) == true) {
                                         withContext(Dispatchers.Main) {
                                             Toast.makeText(requireContext(), "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
                                         }
@@ -282,7 +289,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                         val newCategory = tvCategory.text.toString()
                         val newRepeatDays = task.repeat_days
 
-                        // Create UpdateRequest object
                         val updateRequest = UpdateRequest(
                             task_name = newTaskName.takeIf { it.isNotBlank() } ?: currentTask?.task_name ?: "",
                             task_description = newTaskDescription.takeIf { it.isNotBlank() } ?: currentTask?.task_description ?: "",
@@ -300,6 +306,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
                                 fetchTasks() // Refresh task list
+                                Log.d("UpdateTask", "Dismissing dialog after successful update")
                             }
                         } else {
                             Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")

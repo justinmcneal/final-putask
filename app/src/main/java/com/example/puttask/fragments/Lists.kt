@@ -196,9 +196,18 @@ class Lists : Fragment(R.layout.fragment_lists) {
                             null
                         }
 
+
+
+
                         val formattedEndDate = selectedDate?.let { dateFormatAPI.format(it) }
                         val currentDate = dateFormatAPI.parse(dateFormatAPI.format(Date()))
                         Log.d("UpdateTask", "Current Date: ${dateFormatAPI.format(currentDate)}")
+
+                        if (formattedEndDate != null) {
+                            Log.d("UpdateTask", "Formatted End Date: $formattedEndDate")
+                        } else {
+                            Log.e("UpdateTask", "Failed to format end date")
+                        }
 
                         // Parse the end time
                         val newEndTime = tvTimeReminder.text.toString().let {
@@ -213,6 +222,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         }
                         Log.d("UpdateTask", "New End Time: $newEndTime")
 
+                        // Combine date and time
                         val combinedDateTime = selectedDate?.let {
                             Calendar.getInstance().apply {
                                 time = it
@@ -229,10 +239,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
                             if (selectedDate.after(currentDate)) {
                                 // Valid future date
                             } else {
-                                if (Calendar.getInstance().get(Calendar.YEAR) == selectedDate.year + 1900 &&
-                                    Calendar.getInstance().get(Calendar.MONTH) == selectedDate.month &&
-                                    Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == selectedDate.date) {
-                                    if (combinedDateTime?.before(Calendar.getInstance()) == true) {
+                                // Check if it's the same day
+                                val now = Calendar.getInstance()
+                                if (now.get(Calendar.YEAR) == selectedDate.year + 1900 &&
+                                    now.get(Calendar.MONTH) == selectedDate.month &&
+                                    now.get(Calendar.DAY_OF_MONTH) == selectedDate.date) {
+                                    // Validate time
+                                    if (combinedDateTime?.before(now) == true) {
                                         withContext(Dispatchers.Main) {
                                             Toast.makeText(requireContext(), "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
                                         }
@@ -293,6 +306,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
         dialogBuilder.create().show()
 
     }
+
+
+
 
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
