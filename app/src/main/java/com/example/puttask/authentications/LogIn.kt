@@ -30,15 +30,11 @@ class LogIn : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log_in)
-
-        // Initialize views
         btnLogin = findViewById(R.id.btnLog)
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
         ivTogglePasswordVisibility = findViewById(R.id.ivTogglePasswordVisibility)
         forgotPassTextView = findViewById(R.id.tvForgotPassword)
-
-        // Set click listeners
         btnLogin.setOnClickListener { handleLogin() }
         forgotPassTextView.setOnClickListener { navigateToForgotPassword() }
         findViewById<TextView>(R.id.othersSign).setOnClickListener { navigateToSignUp() }
@@ -67,15 +63,12 @@ class LogIn : AppCompatActivity() {
     private fun togglePasswordVisibility() {
         val currentInputType = etPassword.inputType
         if (currentInputType == InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
-            // Hide password
             etPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
             ivTogglePasswordVisibility.setImageResource(R.drawable.hide)
         } else {
-            // Show password
             etPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             ivTogglePasswordVisibility.setImageResource(R.drawable.view)
         }
-        // Move cursor to the end of the text
         etPassword.setSelection(etPassword.text.length)
     }
 

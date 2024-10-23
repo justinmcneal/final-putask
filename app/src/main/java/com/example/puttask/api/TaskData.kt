@@ -3,11 +3,11 @@ import android.os.Parcel
 import android.os.Parcelable
 
 data class CreateRequest(
-    val task_name: String,        // Ensure this matches the API's expected JSON format
+    val task_name: String,
     val task_description: String,
     val end_date: String?,
     val end_time: String?,
-    val repeat_days: List<String>?, // Nullable in case it's optional
+    val repeat_days: List<String>?,
     val category: String
 )
 
@@ -31,7 +31,7 @@ data class Task(
         parcel.readString()!!,
         parcel.createStringArrayList(),
         parcel.readString()!!,
-        parcel.readByte() != 0.toByte() // Read isChecked as a Boolean from the Parcel
+        parcel.readByte() != 0.toByte()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -59,11 +59,8 @@ data class Task(
     }
 }
 
-
-
-// Request to update an existing task
 data class UpdateRequest(
-    val task_name: String?,       // Nullable in case only some fields are being updated
+    val task_name: String?,
     val task_description: String?,
     val end_date: String?,
     val end_time: String?,
@@ -71,7 +68,6 @@ data class UpdateRequest(
     val category: String
 )
 
-// Response after deleting a task
 data class DeleteResponse(
         val message: String?
 )

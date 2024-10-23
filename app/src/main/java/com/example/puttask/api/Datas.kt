@@ -66,7 +66,6 @@ data class ResetPasswordResponse(
     val success: Boolean,
     val message: String)
 
-
 //contact
 data class ContactRequest(
     val message: String,

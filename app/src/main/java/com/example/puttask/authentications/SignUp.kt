@@ -30,7 +30,6 @@ class SignUp : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
-
         btnSign = findViewById(R.id.btnSign)
         etUsername = findViewById(R.id.etUsername)
         etEmail = findViewById(R.id.etEmail)
@@ -38,26 +37,21 @@ class SignUp : AppCompatActivity() {
         etConfirmPassword = findViewById(R.id.etConfirmPassword)
         ivTogglePasswordVisibility = findViewById(R.id.ivTogglePasswordVisibility)
         ivToggleConfirmPasswordVisibility = findViewById(R.id.ivToggleConfirmPasswordVisibility)
-
         btnSign.setOnClickListener {
             val username = etUsername.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
             val confirmPassword = etConfirmPassword.text.toString().trim()
-
             if (validateInputs(username, email, password, confirmPassword)) {
                 registerUser(username, email, password, confirmPassword)
             }
         }
-
         findViewById<TextView>(R.id.othersLog).setOnClickListener {
             startActivity(Intent(this, LogIn::class.java))
         }
-
         ivTogglePasswordVisibility.setOnClickListener {
             togglePasswordVisibility(etPassword, ivTogglePasswordVisibility)
         }
-
         ivToggleConfirmPasswordVisibility.setOnClickListener {
             togglePasswordVisibility(etConfirmPassword, ivToggleConfirmPasswordVisibility)
         }
@@ -78,8 +72,7 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun validateInputs(username: String, email: String, password: String, confirmPassword: String): Boolean {
-        val maxUsernameLength = 50 // Set the maximum username length
-
+        val maxUsernameLength = 50
         return when {
             username.isEmpty() -> showError("Please enter a username")
             username.length > maxUsernameLength -> showError("Username cannot exceed $maxUsernameLength characters")
@@ -108,15 +101,11 @@ class SignUp : AppCompatActivity() {
             if (response.isSuccessful) {
                 val registrationResponse = response.body()
                 val message = registrationResponse?.message ?: "Registration successful"
-
-                // Save the authentication token using DataManager
                 registrationResponse?.token?.let {
                     DataManager(this@SignUp).saveAuthToken(it)
 
                     val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
                     val editor = sharedPreferences.edit()
-
-                    // Clear old data
                     editor.clear()
 
                     // Assuming `registrationResponse` contains a `user` object with the new username
