@@ -135,7 +135,7 @@
                 android:orientation="horizontal">
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="150dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     app:cardBackgroundColor="@android:color/transparent"
                     app:cardElevation="0dp"> <!-- Makes CardView transparent so the inner layout shows the border -->
@@ -165,13 +165,11 @@
                             android:textAlignment="center"
                             android:textColor="@color/black"
                             android:textSize="20dp" />
-
                     </LinearLayout>
-
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="150dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     app:cardBackgroundColor="@android:color/transparent"
@@ -202,9 +200,42 @@
                             android:textAlignment="center"
                             android:textColor="@color/black"
                             android:textSize="20dp" />
-
                     </LinearLayout>
+                </androidx.cardview.widget.CardView>
 
+                <androidx.cardview.widget.CardView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardElevation="0dp"> <!-- Makes CardView transparent so the inner layout shows the border -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/cardview_border"
+                        android:orientation="vertical"
+                        android:paddingBottom="10dp"> <!-- You can adjust padding as needed -->
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="Overdue Tasks"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
+                            android:textSize="12dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="10dp"
+                            android:text="0"
+                            android:textAlignment="center"
+                            android:textColor="@color/black"
+                            android:textSize="20dp" />
+                    </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
 
@@ -217,8 +248,6 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="30dp"
                 android:elevation="4dp" />
-
-
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
