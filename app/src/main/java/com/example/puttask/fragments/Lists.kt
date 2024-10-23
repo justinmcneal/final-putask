@@ -31,8 +31,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class Lists : Fragment(R.layout.fragment_lists) {
@@ -175,12 +177,40 @@ class Lists : Fragment(R.layout.fragment_lists) {
                     val fetchResponse: Response<Task> = RetrofitClient.getApiService(requireContext()).getTaskById(task.id)
                     if (fetchResponse.isSuccessful) {
                         val currentTask = fetchResponse.body()
+
+                        // Retrieve input values
                         val newTaskName = tvTaskName.text.toString()
                         val newTaskDescription = tvTaskDescription.text.toString()
                         val newEndDate = tvDueDate.text.toString()
+                        Log.d("UpdateTask", "Raw End Date Input: $newEndDate")
+
+                        val dateFormatInput = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val dateFormatAPI = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+                        // Parse the selected date
+                        val selectedDate: Date? = try {
+                            dateFormatInput.parse(newEndDate)
+                        } catch (e: ParseException) {
+                            Log.e("UpdateTask", "Error parsing end date: $newEndDate", e)
+                            null
+                        }
+
+                        val formattedEndDate = selectedDate?.let { dateFormatAPI.format(it) }
+                        val currentDate = dateFormatAPI.parse(dateFormatAPI.format(Date()))
+                        Log.d("UpdateTask", "Current Date: ${dateFormatAPI.format(currentDate)}")
+
+                        // Validate the selected date
+                        if (formattedEndDate == null || selectedDate.before(currentDate)) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(requireContext(), "End date must be today or a future date.", Toast.LENGTH_SHORT).show()
+                            }
+                            return@launch
+                        }
+
+                        // Parse the end time
                         val newEndTime = tvTimeReminder.text.toString().let {
                             try {
-                                val inputFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                                val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault()) // Change format to HH:mm
                                 val outputFormat = SimpleDateFormat("H:mm", Locale.getDefault())
                                 val date = inputFormat.parse(it)
                                 outputFormat.format(date)
@@ -191,28 +221,47 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         }
                         Log.d("UpdateTask", "New End Time: $newEndTime")
 
-                        val newCategory = tvCategory.text.toString()
-                        val newRepeatDays = task.repeat_days // Keep the existing repeat days unless updated
+                        // Ensure end time is valid for the selected end date
+                        val combinedDateTime = selectedDate?.let {
+                            Calendar.getInstance().apply {
+                                time = it
+                                val timeParts = newEndTime.split(":")
+                                if (timeParts.size == 2) {
+                                    set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
+                                    set(Calendar.MINUTE, timeParts[1].toInt())
+                                }
+                            }
+                        }
 
-                        // Create an UpdateRequest with the current task values and only the updated values
+                        // Validate combined date-time
+                        if (combinedDateTime != null && combinedDateTime.before(Calendar.getInstance())) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(requireContext(), "Selected date and time cannot be in the past", Toast.LENGTH_SHORT).show()
+                            }
+                            return@launch
+                        }
+
+                        val newCategory = tvCategory.text.toString()
+                        val newRepeatDays = task.repeat_days
+
+                        // Create UpdateRequest object
                         val updateRequest = UpdateRequest(
                             task_name = newTaskName.takeIf { it.isNotBlank() } ?: currentTask?.task_name ?: "",
                             task_description = newTaskDescription.takeIf { it.isNotBlank() } ?: currentTask?.task_description ?: "",
-                            end_date = newEndDate.takeIf { it.isNotBlank() } ?: currentTask?.end_date ?: "",
+                            end_date = formattedEndDate ?: currentTask?.end_date ?: "",
                             end_time = newEndTime.takeIf { it.isNotBlank() } ?: currentTask?.end_time?.split(":")?.take(2)?.joinToString(":") ?: "",
                             repeat_days = newRepeatDays ?: currentTask?.repeat_days ?: emptyList(),
                             category = newCategory.takeIf { it.isNotBlank() } ?: currentTask?.category ?: ""
                         )
 
-                        // Log the complete update request for debugging
                         Log.d("UpdateTask", "Update request: $updateRequest")
 
-                        // Make the API call to update the task
+                        // Make the API call
                         val updateResponse: Response<Task> = RetrofitClient.getApiService(requireContext()).updateTask(task.id, updateRequest)
                         if (updateResponse.isSuccessful) {
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
-                                fetchTasks() // Refresh the task list to reflect the updated task
+                                fetchTasks() // Refresh task list
                             }
                         } else {
                             Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")
