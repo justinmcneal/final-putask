@@ -95,7 +95,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             R.id.personal to "Personal",
             R.id.work to "Work",
             R.id.school to "School",
-            R.id.social to "Social"
+            R.id.wishlist to "Wishlist"
         )
 
         dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)

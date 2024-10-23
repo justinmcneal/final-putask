@@ -13,6 +13,6 @@
         android:id="@+id/work"
         android:title="Work" />
     <item
-        android:id="@+id/social"
-        android:title="Social" />
+        android:id="@+id/wishlist"
+        android:title="Wishlist" />
 </menu>
