@@ -193,6 +193,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
+
                     android:text="Newest to Oldest"
                     android:textAlignment="center"
                     android:textColor="@color/gray"
@@ -208,6 +209,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
+
                     android:text="Oldest to Newest"
                     android:textAlignment="center"
                     android:textColor="@color/gray"

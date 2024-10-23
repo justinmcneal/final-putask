@@ -47,10 +47,12 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private var _binding: FragmentTimelineBinding? = null
     private val binding get() = _binding!!
     private lateinit var repeatDaysSelected: BooleanArray
-    private lateinit var tvDropdownLists: TextView
-    private lateinit var ic_sort: ImageView
+    private lateinit var tvOldesttoNewest: TextView
+    private lateinit var tvNewesttoOldest: TextView
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
     private lateinit var popupcardviewLists: CardView
+    private lateinit var tvDropdownLists: TextView
+    private lateinit var ic_sort: ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,7 +70,8 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         ic_sort = binding.icSort
         tvDropdownLists = binding.tvDropdownLists
         popupcardviewLists = binding.popupcardviewLists
-
+        tvOldesttoNewest =binding.tvOldesttoNewest
+        tvNewesttoOldest = binding.tvNewesttoOldest
         // Set up the RecyclerView and other components before fetching tasks
         setupRecyclerView()
 
@@ -99,12 +102,22 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
         binding.tvDropdownLists.setOnClickListener {
             dropdownLists.setOnMenuItemClickListener { menuItem ->
-                menuMap[menuItem.itemId]?.let {
-                    tvDropdownLists.text = it
+                menuMap[menuItem.itemId]?.let { selectedCategory ->
+                    tvDropdownLists.text = selectedCategory
+                    filterTasksByCategory(selectedCategory) // Pass the correct category
                     true
                 } ?: false
             }
             dropdownLists.show()
+        }
+        binding.tvNewesttoOldest.setOnClickListener {
+            sortTasksByDateDescending() // Sort from newest to oldest
+            visibilityChecker() // Hide the popup after selection
+        }
+
+        binding.tvOldesttoNewest.setOnClickListener {
+            sortTasksByDateAscending() // Sort from oldest to newest
+            visibilityChecker() // Hide the popup after selection
         }
 
         // Sort options
@@ -113,8 +126,53 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         }
     }
 
+    private fun sortTasksByDateDescending() {
+        taskList.sortByDescending { parseDate(it.end_date) ?: Date(0) } // Handle null dates
+        listsAdapter.notifyDataSetChanged()
+    }
 
+    private fun sortTasksByDateAscending() {
+        taskList.sortBy { parseDate(it.end_date) ?: Date(Long.MAX_VALUE) }
+        listsAdapter.notifyDataSetChanged()
+    }
 
+    private fun parseDate(dateString: String): Date? {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            dateFormat.parse(dateString)
+        } catch (e: ParseException) {
+            Log.e("ListsFragment", "Error parsing date: $dateString", e)
+            null
+        }
+    }
+
+    private fun filterTasksByCategory(category: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response: Response<List<Task>> =
+                    RetrofitClient.getApiService(requireContext()).getAllTasks()
+                if (response.isSuccessful) {
+                    response.body()?.let { tasks ->
+                        // If "All Items" is selected, show all tasks
+                        val filteredTasks = if (category == "All Items") {
+                            tasks // Show all tasks
+                        } else {
+                            tasks.filter { it.category == category } // Filter by selected category
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            taskList.clear()
+                            taskList.addAll(filteredTasks)
+                            listsAdapter.notifyDataSetChanged()
+                            updateNoTasksMessage()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception fetching tasks", e)
+            }
+        }
+    }
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {
             fetchTasks()
