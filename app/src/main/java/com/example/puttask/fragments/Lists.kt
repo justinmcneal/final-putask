@@ -200,24 +200,16 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         val currentDate = dateFormatAPI.parse(dateFormatAPI.format(Date()))
                         Log.d("UpdateTask", "Current Date: ${dateFormatAPI.format(currentDate)}")
 
-                        // Validate the selected date
-                        if (formattedEndDate == null || selectedDate.before(currentDate)) {
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(requireContext(), "End date must be today or a future date.", Toast.LENGTH_SHORT).show()
-                            }
-                            return@launch
-                        }
-
                         // Parse the end time
                         val newEndTime = tvTimeReminder.text.toString().let {
                             try {
                                 val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault()) // Change format to HH:mm
-                                val outputFormat = SimpleDateFormat("H:mm", Locale.getDefault())
+                                val outputFormat = SimpleDateFormat("H:mm", Locale.getDefault()) // H:mm for output without leading zeros
                                 val date = inputFormat.parse(it)
                                 outputFormat.format(date)
                             } catch (e: Exception) {
                                 Log.e("UpdateTask", "Error parsing time: $it", e)
-                                ""
+                                "" // Consider handling this case better by notifying the user
                             }
                         }
                         Log.d("UpdateTask", "New End Time: $newEndTime")
@@ -235,11 +227,25 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         }
 
                         // Validate combined date-time
-                        if (combinedDateTime != null && combinedDateTime.before(Calendar.getInstance())) {
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(requireContext(), "Selected date and time cannot be in the past", Toast.LENGTH_SHORT).show()
+                        if (selectedDate != null) {
+                            // Check if the selected date is in the future
+                            if (selectedDate.after(currentDate)) {
+                                // Proceed to update, regardless of the end time
+                            } else {
+                                // If the date is today, check if the time is in the past
+                                if (Calendar.getInstance().get(Calendar.YEAR) == selectedDate.year + 1900 &&
+                                    Calendar.getInstance().get(Calendar.MONTH) == selectedDate.month &&
+                                    Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == selectedDate.date) {
+
+                                    // If the time is before now, show a warning
+                                    if (combinedDateTime?.before(Calendar.getInstance()) == true) {
+                                        withContext(Dispatchers.Main) {
+                                            Toast.makeText(requireContext(), "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
+                                        }
+                                        return@launch
+                                    }
+                                }
                             }
-                            return@launch
                         }
 
                         val newCategory = tvCategory.text.toString()
@@ -284,7 +290,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 }
             }
         }
-
         dialogBuilder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
         dialogBuilder.create().show()
     }
