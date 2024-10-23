@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.util.*
 
 class AddTask2 : AppCompatActivity() {
@@ -116,11 +118,28 @@ class AddTask2 : AppCompatActivity() {
                     set(Calendar.SECOND, 0)
                 }
 
-                if (selectedTimeCalendar.before(Calendar.getInstance()) && tvDueDate.text.isNotEmpty()) {
-                    Toast.makeText(this, "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
-                } else {
-                    tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
+                // Parse the selected date from the `tvDueDate` text view
+                val selectedDate = tvDueDate.text.toString()
+                val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+                val today = Calendar.getInstance()
+
+                // Only allow the time validation if the date is today
+                if (selectedDate.isNotEmpty()) {
+                    val parsedDate = dateFormat.parse(selectedDate)
+                    val selectedDateCalendar = Calendar.getInstance().apply { time = parsedDate!! }
+
+                    // If the selected date is today and the selected time is in the past, show a warning
+                    if (selectedDateCalendar.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+                        selectedDateCalendar.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) &&
+                        selectedTimeCalendar.before(Calendar.getInstance())
+                    ) {
+                        Toast.makeText(this, "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
+                        return@TimePickerDialog
+                    }
                 }
+
+                // Update the time if the time is valid
+                tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
     }
