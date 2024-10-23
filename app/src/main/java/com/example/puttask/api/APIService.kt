@@ -56,7 +56,7 @@ interface APIService {
 
     // Get a specific task by ID
     @GET("api/tasks/{id}")
-    suspend fun getTaskById(@Path("id") id: Int): Response<Task>
+    suspend fun getTaskById(@Path("id") id: String): Response<Task>
 
     // Create Task
     @POST("api/tasks")
@@ -64,7 +64,7 @@ interface APIService {
 
     // Update Task
     @PUT("api/tasks/{id}")
-    suspend fun updateTask(@Path("id") id: Int, @Body updateRequest: UpdateRequest): Response<Task>
+    suspend fun updateTask(@Path("id") id: String, @Body updateRequest: UpdateRequest): Response<Task>
 
     // Delete Task
     @DELETE("api/tasks/{id}")

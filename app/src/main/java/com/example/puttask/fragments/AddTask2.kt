@@ -1,6 +1,5 @@
 package com.example.puttask.fragments
 
-import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
@@ -9,6 +8,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.cardview.widget.CardView
 import com.example.puttask.MainActivity
 import com.example.puttask.R
 import com.example.puttask.api.CreateRequest
@@ -18,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.util.*
 
 class AddTask2 : AppCompatActivity() {
@@ -27,21 +28,62 @@ class AddTask2 : AppCompatActivity() {
     private lateinit var switchRepeat: Switch
     private lateinit var tvDueDate: TextView
     private lateinit var tvTimeReminder: TextView
-    private lateinit var tvRepeat: TextView
+    private lateinit var dimBackground: View
+    private lateinit var popupCardView: CardView
     private lateinit var createButton: AppCompatButton
     private lateinit var etTaskName: EditText
     private lateinit var etTaskDescription: EditText
     private lateinit var btnRepeat: AppCompatButton
     private lateinit var tvBack: TextView
-    private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-    private var repeatDaysSelected = BooleanArray(repeatDays.size)
-    private var selectedRepeatDays: List<String>? = null
+    private var repeatDays: MutableList<String> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task2)
         initViews()
         setupListeners()
+        val llBtn = findViewById<LinearLayout>(R.id.llBtn)
+
+        btnRepeat.setOnClickListener {
+            llBtn.visibility = View.VISIBLE
+            if (btnRepeat.text == "Yes") {
+                btnRepeat.text = "No"
+                togglePopupVisibility(false)
+                llBtn.visibility = View.GONE
+
+            } else {
+                btnRepeat.text = "Yes"
+                togglePopupVisibility(true)
+
+            }
+        }
+        val click = false
+        tvBack.setOnClickListener{
+            if (click) {
+                togglePopupVisibility(true)
+
+            }
+            else{
+                togglePopupVisibility(false)
+
+            }
+        }
+
+
+        switchRepeat.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                updateRepeatUI(true)
+                tvBack.visibility = View.GONE
+
+            } else {
+                updateRepeatUI(false)
+                tvBack.visibility = View.VISIBLE
+
+            }
+        }
+
+
+
     }
 
     private fun initViews() {
@@ -51,7 +93,8 @@ class AddTask2 : AppCompatActivity() {
         etTaskDescription = findViewById(R.id.taskdescription)
         tvDueDate = findViewById(R.id.tvStartDate)
         tvTimeReminder = findViewById(R.id.tvEndDate)
-        tvRepeat = findViewById(R.id.tvRepeat)
+        dimBackground = findViewById(R.id.dimBackground)
+        popupCardView = findViewById(R.id.popupCardView)
         createButton = findViewById(R.id.CreateButton)
         switchRepeat = findViewById(R.id.switchRepeat)
         btnRepeat = findViewById(R.id.btnRepeat)
@@ -63,16 +106,12 @@ class AddTask2 : AppCompatActivity() {
         addIcon.setOnClickListener { showCategoryPopup() }
         findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener { showDatePicker() }
         findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener { showTimePicker() }
-        btnRepeat.setOnClickListener { showRepeatDaysDialog { selectedDays -> selectedRepeatDays = selectedDays; updateRepeatUI() } }
+        switchRepeat.setOnCheckedChangeListener { _, isChecked -> updateRepeatUI(isChecked) }
+        findViewById<TextView>(R.id.tvCancel).setOnClickListener { clearFields(); togglePopupVisibility(false) }
+        findViewById<TextView>(R.id.tvDone).setOnClickListener { togglePopupVisibility(false) }//temporary lang for testing pero dapat ifefeeeetch niya ddays
         createButton.setOnClickListener { createTask() }
     }
-    private fun setupRepeatDays() {
-        // Pass a lambda to handle the selected days
-        showRepeatDaysDialog { selectedDays ->
-            // Do something with the selectedDays, for example:
-            Toast.makeText(this, "Selected Days: $selectedDays", Toast.LENGTH_SHORT).show()
-        }
-    }
+
 
     private fun showCategoryPopup() {
         PopupMenu(this, addIcon).apply {
@@ -80,8 +119,8 @@ class AddTask2 : AppCompatActivity() {
             setOnMenuItemClickListener { menuItem ->
                 tvList.text = when (menuItem.itemId) {
                     R.id.personal -> "Personal"
-                    R.id.school -> "School"
                     R.id.work -> "Work"
+                    R.id.school -> "School"
                     R.id.wishlist -> "Wishlist"
                     else -> ""
                 }
@@ -110,12 +149,15 @@ class AddTask2 : AppCompatActivity() {
     private fun showTimePicker() {
         Calendar.getInstance().let { calendar ->
             TimePickerDialog(this, { _, hourOfDay, minute ->
+                tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
+                // Create a Calendar object for the selected time
                 val selectedTimeCalendar = Calendar.getInstance().apply {
                     set(Calendar.HOUR_OF_DAY, hourOfDay)
                     set(Calendar.MINUTE, minute)
                     set(Calendar.SECOND, 0)
                 }
 
+                // Compare selected time with current time
                 if (selectedTimeCalendar.before(Calendar.getInstance()) && tvDueDate.text.isNotEmpty()) {
                     Toast.makeText(this, "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
                 } else {
@@ -125,100 +167,104 @@ class AddTask2 : AppCompatActivity() {
         }
     }
 
-    private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
-        // The dialog will use the currently stored repeatDaysSelected array
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Select Repeat Days")
 
-        // Set multi-choice items and listen to changes
-        builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
-            repeatDaysSelected[which] = isChecked // Update the stored state when an item is checked/unchecked
-        }
-
-        // Handle "OK" button press
-        builder.setPositiveButton("OK") { dialog, _ ->
-            // Get the selected days based on the stored state
-            val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
-            onDaysSelected(selectedDays) // Pass selected days to the callback
-            dialog.dismiss()
-        }
-
-        // Handle "Cancel" button press
-        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-
-        builder.create().show()
-    }
-
-    private fun updateRepeatUI() {
-        if (selectedRepeatDays.isNullOrEmpty()) {
-            tvRepeat.text = "No repeat days selected" // Default message when no days are selected
-            btnRepeat.text = "No" // Change button text to "No" when no days are selected
-
-        } else {
-            tvRepeat.text = selectedRepeatDays?.joinToString(", ")
-            btnRepeat.text = "Yes" // Change button text to "YEs" when no days are selected
-
-        }
+    private fun updateRepeatUI(isChecked: Boolean) {
+        findViewById<LinearLayout>(R.id.checkboxDaily).visibility = if (isChecked) View.VISIBLE else View.GONE
+        findViewById<LinearLayout>(R.id.llButtonEnd).visibility = if (isChecked) View.VISIBLE else View.GONE
+        popupCardView.layoutParams.height = if (isChecked) 1300 else 300
+        findViewById<AppCompatButton>(R.id.btnRepeat).text = if (isChecked) "Yes" else "No"
     }
 
     private fun createTask() {
-        if (!validateFields()) return
+        val repeatDays = if (switchRepeat.isChecked) listOf("Monday", "Wednesday") else null // Replace with actual selected repeat days
+        if (validateFields()) {
+            // Combine selected date and time into a single Calendar object
+            val endDateParts = tvDueDate.text.toString().split("/")
+            val endTimeParts = tvTimeReminder.text.toString().split(":")
 
-        val endDateParts = tvDueDate.text.toString().split("/")
-        val endTimeParts = tvTimeReminder.text.toString().split(":")
-        val selectedEndDateTime = Calendar.getInstance().apply {
-            set(Calendar.YEAR, endDateParts[0].toInt())
-            set(Calendar.MONTH, endDateParts[1].toInt() - 1)
-            set(Calendar.DAY_OF_MONTH, endDateParts[2].toInt())
-            set(Calendar.HOUR_OF_DAY, endTimeParts[0].toInt())
-            set(Calendar.MINUTE, endTimeParts[1].toInt())
-            set(Calendar.SECOND, 0)
-        }
+            val selectedEndDateTime = Calendar.getInstance().apply {
+                set(Calendar.YEAR, endDateParts[0].toInt())
+                set(Calendar.MONTH, endDateParts[1].toInt() - 1) // Month is 0-based
+                set(Calendar.DAY_OF_MONTH, endDateParts[2].toInt())
+                set(Calendar.HOUR_OF_DAY, endTimeParts[0].toInt())
+                set(Calendar.MINUTE, endTimeParts[1].toInt())
+                set(Calendar.SECOND, 0)
+            }
 
-        if (selectedEndDateTime.before(Calendar.getInstance())) {
-            Toast.makeText(this, "Selected end date and time cannot be in the past", Toast.LENGTH_SHORT).show()
-            return
-        }
+            // Check if the selected end date and time are in the past
+            if (selectedEndDateTime.before(Calendar.getInstance())) {
+                Toast.makeText(this, "Selected end date and time cannot be in the past", Toast.LENGTH_SHORT).show()
+                return
+            }
 
-        val createRequest = CreateRequest(
-            task_name = etTaskName.text.toString(),
-            task_description = etTaskDescription.text.toString(),
-            end_date = String.format("%04d-%02d-%02d", selectedEndDateTime.get(Calendar.YEAR), selectedEndDateTime.get(Calendar.MONTH) + 1, selectedEndDateTime.get(Calendar.DAY_OF_MONTH)),
-            end_time = String.format("%02d:%02d", selectedEndDateTime.get(Calendar.HOUR_OF_DAY), selectedEndDateTime.get(Calendar.MINUTE)),
-            repeat_days = if (switchRepeat.isChecked) selectedRepeatDays else null,
-            category = tvList.text.toString()
-        )
+            // Create request object with correct formats
+            val createRequest = CreateRequest(
+                task_name = etTaskName.text.toString(),
+                task_description = etTaskDescription.text.toString(),
+                end_date = String.format("%04d-%02d-%02d", selectedEndDateTime.get(Calendar.YEAR), selectedEndDateTime.get(Calendar.MONTH) + 1, selectedEndDateTime.get(Calendar.DAY_OF_MONTH)), // Corrected to YYYY-MM-DD
+                end_time = String.format("%02d:%02d", selectedEndDateTime.get(Calendar.HOUR_OF_DAY), selectedEndDateTime.get(Calendar.MINUTE)), // Format to H:i
+                repeat_days = if (switchRepeat.isChecked) repeatDays else null,
+                category = tvList.text.toString()
+            )
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
-            runOnUiThread {
-                if (response.isSuccessful) {
-                    val createdTask = response.body()
-                    val intent = Intent().apply {
-                        putExtra("new_task", createdTask)
+            CoroutineScope(Dispatchers.IO).launch {
+                val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        val createdTask = response.body()
+                        val intent = Intent().apply {
+                            putExtra("new_task", createdTask)
+                        }
+                        setResult(RESULT_OK, intent)
+                        finish()
+                    } else {
+                        Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                     }
-                    setResult(RESULT_OK, intent)
-                    finish()
-                } else {
-                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
+
+
     private fun validateFields(): Boolean {
-        if (etTaskName.text.isEmpty()) {
-            etTaskName.error = "Please enter a task name"
-            return false
+        return when {
+            etTaskName.text.isEmpty() -> {
+                Toast.makeText(this, "Task name is required", Toast.LENGTH_SHORT).show()
+                false
+            }
+            etTaskDescription.text.isEmpty() -> {
+                Toast.makeText(this, "Task description is required", Toast.LENGTH_SHORT).show()
+                false
+            }
+            tvDueDate.text.isEmpty() -> {
+                Toast.makeText(this, "Due date is required", Toast.LENGTH_SHORT).show()
+                false
+            }
+            tvTimeReminder.text.isEmpty() -> {
+                Toast.makeText(this, "Time reminder is required", Toast.LENGTH_SHORT).show()
+                false
+            }
+            tvList.text.isEmpty() -> {
+                Toast.makeText(this, "Category is required", Toast.LENGTH_SHORT).show()
+                false
+            }
+            else -> true
         }
-        if (tvDueDate.text.isEmpty()) {
-            Toast.makeText(this, "Please select a due date", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        if (tvTimeReminder.text.isEmpty()) {
-            Toast.makeText(this, "Please select a reminder time", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        return true
     }
+
+    private fun clearFields() {
+        etTaskName.text.clear()
+        etTaskDescription.text.clear()
+        tvList.text = ""
+        tvTimeReminder.text = ""
+        tvDueDate.text = ""
+        repeatDays.clear()
+    }
+
+    private fun togglePopupVisibility(isVisible: Boolean) {
+        dimBackground.visibility = if (isVisible) View.VISIBLE else View.GONE
+        popupCardView.visibility = if (isVisible) View.VISIBLE else View.GONE
+    }
+
 }

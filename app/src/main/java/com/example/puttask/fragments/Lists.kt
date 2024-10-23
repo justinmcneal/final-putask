@@ -18,21 +18,22 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
-import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.ListFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
+import com.example.puttask.api.UpdateRequest
 import com.example.puttask.databinding.FragmentListsBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class Lists : Fragment(R.layout.fragment_lists) {
 
@@ -41,17 +42,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var listsAdapter: ListsAdapter
     private val taskList = mutableListOf<Task>()
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
-    private lateinit var tvDropdownLists: TextView
-    private lateinit var ic_sort: ImageView
-    private lateinit var popupcardviewLists: CardView
-    private lateinit var btnRepeat: AppCompatButton
+
     private lateinit var repeatDaysSelected: BooleanArray
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         // Register the ActivityResultLauncher
         addTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -60,8 +57,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 fetchTasks()
             }
         }
-
-
     }
 
     override fun onCreateView(
@@ -80,43 +75,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
         fetchTasks()
         updateNoTasksMessage()
         updateUsernameDisplay()
-        ic_sort = view.findViewById(R.id.ic_sort)
-        tvDropdownLists = view.findViewById(R.id.tvDropdownLists)
-        popupcardviewLists = view.findViewById(R.id.popupcardviewLists) // Initialize here
 
         // Fetch and display the username from SharedPreferences
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
         val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
         binding.tvUsername.text = "Hi $username!"
-
-
-
-
-        // Updated this lists dropdown as a customized so that icon would be inside
-        val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
-        val menuMap = mapOf(
-            R.id.allItems to "All Items",
-            R.id.personal to "Personal",
-            R.id.work to "Work",
-            R.id.school to "School",
-            R.id.social to "Social"
-        )
-
-        dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)
-
-        tvDropdownLists.setOnClickListener {
-            dropdownLists.setOnMenuItemClickListener { menuItem ->
-                menuMap[menuItem.itemId]?.let {
-                    tvDropdownLists.text = it
-                    true
-                } ?: false
-            }
-            dropdownLists.show()
-        }
-        //sort options
-        ic_sort.setOnClickListener {
-            visibilityChecker()
-        }
     }
 
     private fun updateUsernameDisplay() {
@@ -182,9 +145,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
 
-        // Create the dialog and store it in a variable
-        val dialog = dialogBuilder.create()
-
         // Initialize all views
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
@@ -196,7 +156,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val addDueIcon = dialogView.findViewById<ImageButton>(R.id.addDueIcon)
         val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
         val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
-        val btnBack = dialogView.findViewById<ImageButton>(R.id.btnBack)
 
         // Set task details in the dialog
         tvTaskName.text = task.task_name
@@ -206,35 +165,107 @@ class Lists : Fragment(R.layout.fragment_lists) {
         tvCategory.text = task.category
         tvRepeat.text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
 
-        // Handle category popup
+        // When the ImageView button (btnCategory) is clicked, show the popup menu
         btnCategory.setOnClickListener {
             showCategoryPopup(btnCategory, tvCategory)
         }
 
-        // Handle date picker
+        // Show date picker when the add due icon is clicked
         addDueIcon.setOnClickListener {
-            showDatePicker(tvDueDate)
+            showDatePicker(tvDueDate) // Pass the TextView to update with the selected date
         }
 
-        // Handle time picker
+        // Show time picker when the add time icon is clicked
         addTimeIcon.setOnClickListener {
-            showTimePicker(tvTimeReminder, tvDueDate)
+            showTimePicker(tvTimeReminder, tvDueDate) // Pass the TextView for date validation
         }
 
-        // Handle "back" button click to dismiss the dialog
-        btnBack.setOnClickListener {
-            dialog.dismiss()  // Dismiss the existing dialog
+        // Update the repeat days
+        dialogView.findViewById<AppCompatButton>(R.id.btnRepeat).setOnClickListener {
+            showRepeatDaysDialog { selectedDays ->
+                task.repeat_days = selectedDays // Update the repeat_days in the task
+                tvRepeat.text = selectedDays.joinToString(", ")
+            }
         }
 
-        // Handle "update" button click
+// Handle the Update button click event
         btnUpdate.setOnClickListener {
-            updateTask(task)  // Handle task update logic
-            dialog.dismiss()  // Dismiss the existing dialog after updating
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    // Fetch the current task by ID
+                    val fetchResponse: Response<Task> = RetrofitClient.getApiService(requireContext()).getTaskById(task.id)
+                    if (fetchResponse.isSuccessful) {
+                        val currentTask = fetchResponse.body()
+
+                        // Get updated values from the TextViews
+                        val newTaskName = tvTaskName.text.toString()
+                        val newTaskDescription = tvTaskDescription.text.toString()
+                        val newEndDate = tvDueDate.text.toString() // Ensure this is in YYYY-MM-DD format
+
+                        // Get the new end time and format it to H:mm
+                        val newEndTime = tvTimeReminder.text.toString().let {
+                            try {
+                                // Parse the input format (e.g., 06:49 AM) to the output format (H:mm)
+                                val inputFormat = SimpleDateFormat("hh:mm a", Locale.getDefault()) // User input format
+                                val outputFormat = SimpleDateFormat("H:mm", Locale.getDefault()) // Required format
+                                val date = inputFormat.parse(it) // Parse user input
+                                outputFormat.format(date) // Format to H:mm
+                            } catch (e: Exception) {
+                                Log.e("UpdateTask", "Error parsing time: $it", e)
+                                ""
+                            }
+                        }
+
+                        Log.d("UpdateTask", "New End Time: $newEndTime")
+
+                        val newCategory = tvCategory.text.toString()
+                        val newRepeatDays = task.repeat_days // Keep the existing repeat days unless updated
+
+                        // Create an UpdateRequest with the current task values and only the updated values
+                        val updateRequest = UpdateRequest(
+                            task_name = newTaskName.takeIf { it.isNotBlank() } ?: currentTask?.task_name ?: "",
+                            task_description = newTaskDescription.takeIf { it.isNotBlank() } ?: currentTask?.task_description ?: "",
+                            end_date = newEndDate.takeIf { it.isNotBlank() } ?: currentTask?.end_date ?: "",
+                            end_time = newEndTime.takeIf { it.isNotBlank() } ?: currentTask?.end_time?.split(":")?.take(2)?.joinToString(":") ?: "",
+                            repeat_days = newRepeatDays ?: currentTask?.repeat_days ?: emptyList(),
+                            category = newCategory.takeIf { it.isNotBlank() } ?: currentTask?.category ?: ""
+                        )
+
+                        // Log the complete update request for debugging
+                        Log.d("UpdateTask", "Update request: $updateRequest")
+
+                        // Make the API call to update the task
+                        val updateResponse: Response<Task> = RetrofitClient.getApiService(requireContext()).updateTask(task.id, updateRequest)
+                        if (updateResponse.isSuccessful) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
+                                fetchTasks() // Refresh the task list to reflect the updated task
+                            }
+                        } else {
+                            Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(requireContext(), "Error updating task", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        Log.e("ListsFragment", "Error fetching task: ${fetchResponse.message()}")
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(requireContext(), "Error fetching task", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("ListsFragment", "Exception updating task", e)
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "Error updating task", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
 
-        // Show the dialog
-        dialog.show()
+        dialogBuilder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+        dialogBuilder.create().show()
     }
+
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
         repeatDaysSelected = BooleanArray(repeatDays.size)
@@ -262,13 +293,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
 
         builder.create().show()
-    }
-
-
-    // Function to update task
-    private fun updateTask(task: Task) {
-        // Code to update task details
-        Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
     }
 
     // Function to show the popup menu below the ImageView button and update the category TextView
@@ -363,12 +387,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
     }
-    // cardview pop up for sort options
-    private fun visibilityChecker() {
-        popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-
-    }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
