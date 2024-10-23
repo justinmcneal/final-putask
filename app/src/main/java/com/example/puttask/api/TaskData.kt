@@ -20,7 +20,7 @@ data class Task(
     val end_time: String,
     var repeat_days: List<String>?,
     val category: String,
-    val isChecked: Boolean
+    val is_checked: Boolean
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
