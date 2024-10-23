@@ -235,9 +235,9 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                         val newEndTime = tvTimeReminder.text.toString().let {
                             try {
                                 val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault()) // Change format to HH:mm
-                                val outputFormat = SimpleDateFormat("H:mm", Locale.getDefault()) // H:mm for output without leading zeros
                                 val date = inputFormat.parse(it)
-                                outputFormat.format(date)
+                                // Format with leading zeros
+                                SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
                             } catch (e: Exception) {
                                 Log.e("UpdateTask", "Error parsing time: $it", e)
                                 "" // Consider handling this case better by notifying the user
