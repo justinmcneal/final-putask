@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.example.puttask.R
+import com.example.puttask.api.CompleteTaskRequest
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.github.mikephil.charting.charts.LineChart
@@ -18,6 +19,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -90,7 +92,44 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         }
     }
 
+
+    private fun markTaskComplete(task: Task) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Make the API call to update the task's status
+                val response = RetrofitClient.getApiService(requireContext())
+                    .markTaskComplete(task.id, CompleteTaskRequest(task.isChecked))
+
+                if (response.isSuccessful) {
+                    val updatedTask = response.body()
+
+                    // Update the task list or UI
+                    withContext(Dispatchers.Main) {
+                        showSuccess("Task marked as ${if (task.isChecked) "complete" else "incomplete"}")
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        showError("Failed to update task status: ${response.message()}")
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showError("Error occurred: ${e.message}")
+                }
+            }
+        }
+    }
+
+
+
+
     private fun showError(message: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showSuccess(message: String) {
         CoroutineScope(Dispatchers.Main).launch {
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         }

@@ -69,4 +69,8 @@ interface APIService {
     // Delete Task
     @DELETE("api/tasks/{id}")
     suspend fun deleteTask(@Path("id") id: String): Response<DeleteResponse>
+
+    @PUT("api/tasks/{id}/complete")
+    suspend fun markTaskComplete(@Path("id") id: String, @Body request: CompleteTaskRequest): Response<Task>
+
 }

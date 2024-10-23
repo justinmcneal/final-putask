@@ -3,6 +3,7 @@ package com.example.puttask
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +12,7 @@ import com.example.puttask.api.Task
 class ListsAdapter(
     private val taskList: MutableList<Task>,
     private val onItemClick: (Task) -> Unit
+
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
 //    companion object {
@@ -28,6 +30,7 @@ class ListsAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
 
+        // Set the task name and end date
         holder.tvTitle.text = task.task_name
         holder.tvTime.text = task.end_date
 
@@ -36,11 +39,23 @@ class ListsAdapter(
             onItemClick(task)
         }
 
-        // Handle delete task option
+        // Handle delete task optio     n
         holder.deleteOption.setOnClickListener {
             onDeleteClick?.invoke(task)
         }
+
+        // Set the checkbox state based on the task's isChecked status
+        holder.checkBox.isChecked = task.isChecked
+
+        // Set up a listener for when the user checks/unchecks the checkbox
+        holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
+            task.isChecked = isChecked
+            // Mark task as complete/incomplete
+            markTaskComplete(task)
+        }
     }
+
+
 
     override fun getItemCount(): Int = taskList.size
 
@@ -67,5 +82,6 @@ class ListsAdapter(
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         val tvTime: TextView = itemView.findViewById(R.id.tvTime)
         val deleteOption: ImageButton = itemView.findViewById(R.id.ic_delete)
+        val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
     }
 }
