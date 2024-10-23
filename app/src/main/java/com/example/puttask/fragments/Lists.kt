@@ -19,14 +19,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.example.puttask.api.UpdateRequest
-import com.example.puttask.authentications.LogIn
 import com.example.puttask.databinding.FragmentListsBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -141,8 +139,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
-
-        val dialog = dialogBuilder.create()
 
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
@@ -266,8 +262,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
                                 fetchTasks() // Refresh task list
-                                dialog.dismiss() // Dismiss the dialog after successful update
-
+                                Log.d("UpdateTask", "Dismissing dialog after successful update")
                             }
                         } else {
                             Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")
