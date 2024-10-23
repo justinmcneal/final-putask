@@ -251,8 +251,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
             if (selectedDays.isNotEmpty()) {
                 onDaysSelected(selectedDays) // Pass selected days to the callback
                 Toast.makeText(requireContext(), "Repeats on: ${selectedDays.joinToString(", ")}", Toast.LENGTH_SHORT).show()
+                btnRepeat.text = "Yes" // Change button text to "YEs" when no days are selected
+
             } else {
                 Toast.makeText(requireContext(), "No repeat days selected", Toast.LENGTH_SHORT).show()
+                btnRepeat.text = "No" // Change button text to "No" when no days are selected
             }
             dialog.dismiss()
         }
