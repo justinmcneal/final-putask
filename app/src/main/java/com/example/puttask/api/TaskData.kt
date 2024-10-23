@@ -20,7 +20,7 @@ data class Task(
     val end_time: String,
     var repeat_days: List<String>?,
     val category: String,
-    val is_checked: Boolean
+    val isChecked: Boolean
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -42,6 +42,7 @@ data class Task(
         parcel.writeString(end_time)
         parcel.writeStringList(repeat_days)
         parcel.writeString(category)
+        parcel.writeByte(if (isChecked) 1 else 0)
     }
 
     override fun describeContents(): Int {
