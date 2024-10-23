@@ -205,8 +205,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
                         // Clear and update task list on the main thread
                         withContext(Dispatchers.Main) {
+                            originalTaskList.clear()
+                            originalTaskList.addAll(tasks) // Store fetched tasks in originalTaskList
                             taskList.clear()
-                            taskList.addAll(tasks)
+                            taskList.addAll(originalTaskList) // Initialize taskList with all tasks
                             listsAdapter.notifyDataSetChanged()
                             updateNoTasksMessage()
                         }
@@ -223,7 +225,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             }
         }
     }
-
     private fun handleTaskClick(task: Task) {
         // Create and show a dialog to display task details
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
@@ -525,10 +526,9 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         }
         Log.d("Timeline", "Formatted date: $formattedDate")
 
-        // Call with null if the user clicked on an empty date (you can add your own logic to check for this)
+        // Call the method to filter tasks based on the selected date
         filterTasksByDate(formattedDate)
     }
-
 
     private fun filterTasksByDate(selectedDate: String?) {
         // Log the selected date for debugging
