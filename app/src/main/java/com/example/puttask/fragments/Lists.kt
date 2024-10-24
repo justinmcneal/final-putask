@@ -46,9 +46,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var listsAdapter: ListsAdapter
     private val taskList = mutableListOf<Task>()
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
-    private lateinit var repeatDaysSelected: BooleanArray
-
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    private var repeatDaysSelected = BooleanArray(repeatDays.size)
+
     private lateinit var popupcardviewLists: CardView
     private lateinit var tvDropdownLists: TextView
     private lateinit var ic_sort: ImageView
@@ -261,7 +261,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
             tvRepeat.text = "No repeat days selected"
             btnRepeat.text = "No"
         }
-
+        repeatDaysSelected = repeatDaysSelected.clone()
 
         btnBack.setOnClickListener {
             dialog.dismiss()
@@ -375,6 +375,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                                 fetchTasks() // Refresh task list
                                 Log.d("UpdateTask", "Dismissing dialog after successful update")
                                 dialog.dismiss()
+
                             }
                         } else {
                             Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")
@@ -399,25 +400,32 @@ class Lists : Fragment(R.layout.fragment_lists) {
         dialog.show()
     }
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
-        repeatDaysSelected = BooleanArray(repeatDays.size)
+        // Load the previously selected state into repeatDaysSelected
+        repeatDaysSelected = repeatDaysSelected.clone()
+
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Select Repeat Days")
         builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
             repeatDaysSelected[which] = isChecked
         }
+
         builder.setPositiveButton("OK") { dialog, _ ->
             val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
             if (selectedDays.isNotEmpty()) {
                 onDaysSelected(selectedDays) // Pass selected days to the callback
                 Toast.makeText(requireContext(), "Repeats on: ${selectedDays.joinToString(", ")}", Toast.LENGTH_SHORT).show()
+                // Save the selected state so it's remembered next time
+                repeatDaysSelected = repeatDaysSelected.clone()
             } else {
                 Toast.makeText(requireContext(), "No repeat days selected", Toast.LENGTH_SHORT).show()
             }
             dialog.dismiss()
         }
+
         builder.setNegativeButton("Cancel") { dialog, _ ->
             dialog.dismiss()
         }
+
         builder.create().show()
     }
 

@@ -132,7 +132,8 @@ class AddTask2 : AppCompatActivity() {
     }
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
-        repeatDaysSelected = BooleanArray(repeatDays.size)
+        // Load the previously selected state into repeatDaysSelected
+        repeatDaysSelected = repeatDaysSelected.clone()
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Select Repeat Days")
@@ -146,10 +147,11 @@ class AddTask2 : AppCompatActivity() {
             if (selectedDays.isNotEmpty()) {
                 onDaysSelected(selectedDays)
                 btnRepeat.text = "Yes"
+                // Save the state to selectedDaysState so it persists for future dialogs
+                repeatDaysSelected = repeatDaysSelected.clone()
             } else {
                 Toast.makeText(this, "No repeat days selected", Toast.LENGTH_SHORT).show()
                 btnRepeat.text = "No"
-
             }
             dialog.dismiss()
         }
@@ -160,7 +162,6 @@ class AddTask2 : AppCompatActivity() {
 
         builder.create().show()
     }
-
     private fun createTask() {
         if (!validateFields()) return
 

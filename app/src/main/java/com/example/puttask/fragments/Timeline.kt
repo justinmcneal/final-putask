@@ -47,8 +47,9 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private var taskList = mutableListOf<Task>()
     private var _binding: FragmentTimelineBinding? = null
     private val binding get() = _binding!!
-    private lateinit var repeatDaysSelected: BooleanArray
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    private  var repeatDaysSelected = BooleanArray(repeatDays.size)
+
     private var originalTaskList = mutableListOf<Task>()
 
     override fun onCreateView(
@@ -358,7 +359,8 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         timePickerDialog.show()
     }
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
-        repeatDaysSelected = BooleanArray(repeatDays.size)
+        // Load the previously selected state into repeatDaysSelected
+        repeatDaysSelected = repeatDaysSelected.clone()
 
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Select Repeat Days")
@@ -368,10 +370,11 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
         builder.setPositiveButton("OK") { dialog, _ ->
             val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
-
             if (selectedDays.isNotEmpty()) {
                 onDaysSelected(selectedDays) // Pass selected days to the callback
                 Toast.makeText(requireContext(), "Repeats on: ${selectedDays.joinToString(", ")}", Toast.LENGTH_SHORT).show()
+                // Save the selected state so it's remembered next time
+                repeatDaysSelected = repeatDaysSelected.clone()
             } else {
                 Toast.makeText(requireContext(), "No repeat days selected", Toast.LENGTH_SHORT).show()
             }
