@@ -119,9 +119,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
 
         listsAdapter.onTaskCheckedChangeListener = { task, isChecked ->
-            if (isChecked) {
-                markTaskAsComplete(task) // Call the method to mark the task as complete
-            }
+            markTaskAsComplete(task, isChecked) // Call the method to mark the task as complete
         }
 
 
@@ -236,6 +234,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
+        val dialog = dialogBuilder.create()
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvStartDate)
@@ -246,6 +245,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val addDueIcon = dialogView.findViewById<ImageButton>(R.id.addDueIcon)
         val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
         val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
+        val btnBack = dialogView.findViewById<ImageButton>(R.id.btnBack)
         tvTaskName.text = task.task_name
         tvTaskDescription.text = task.task_description
         tvDueDate.text = task.end_date
@@ -253,6 +253,10 @@ class Lists : Fragment(R.layout.fragment_lists) {
         tvCategory.text = task.category
         tvRepeat.text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
 
+
+        btnBack.setOnClickListener {
+            dialog.dismiss()
+        }
         btnCategory.setOnClickListener {
             showCategoryPopup(btnCategory, tvCategory)
         }
@@ -361,6 +365,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                                 Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
                                 fetchTasks() // Refresh task list
                                 Log.d("UpdateTask", "Dismissing dialog after successful update")
+                                dialog.dismiss()
                             }
                         } else {
                             Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")
@@ -382,10 +387,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 }
             }
         }
-        dialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss() // Dismiss the dialog on cancel
-        }
-        dialogBuilder.create().show()
+        dialog.show()
     }
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
         repeatDaysSelected = BooleanArray(repeatDays.size)
@@ -506,19 +508,20 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     }
 
-
-
-    private fun markTaskAsComplete(task: Task) {
+    private fun markTaskAsComplete(task: Task, isChecked: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response: Response<Task> = RetrofitClient.getApiService(requireContext()).markTaskComplete(task.id, CompleteTaskRequest(id = task.id, isChecked = true))
+                val response: Response<Task> = RetrofitClient.getApiService(requireContext()).markTaskComplete(task.id, CompleteTaskRequest(id = task.id, isChecked = isChecked))
                 if (response.isSuccessful) {
-                    // Mark the task as complete in the local list
-                    taskList.remove(task)
-
-                    // Notify the adapter about the item removed
                     withContext(Dispatchers.Main) {
-                        listsAdapter.notifyDataSetChanged()
+                        if (isChecked) {
+                            // Remove the task from the local list if marked complete
+                            taskList.remove(task)
+                            listsAdapter.notifyItemRemoved(taskList.indexOf(task))
+                        } else {
+                            // If unchecked, you might want to re-fetch the task and re-add it to the list
+                            fetchTasks() // Optional: You can also re-fetch tasks instead of manually adding back
+                        }
                         updateNoTasksMessage() // Update the visibility of the no tasks message
                     }
                 } else {
@@ -529,7 +532,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
     }
-
 
 
 }

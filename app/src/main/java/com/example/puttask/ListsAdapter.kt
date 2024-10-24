@@ -53,12 +53,6 @@ class ListsAdapter(
 
             // Notify the listener for the change
             onTaskCheckedChangeListener?.invoke(task, isChecked) // Notify parent fragment
-
-            // Mark as complete if checked
-            if (isChecked) {
-                // Call the method to mark the task as complete
-                onTaskCheckedChangeListener?.invoke(task, true) // Optionally, pass true or handle it accordingly
-            }
         }
     }
 

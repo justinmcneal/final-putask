@@ -32,6 +32,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_back"
+                    android:layout_gravity="center"
+                    android:background="@android:color/transparent"/>
+
 
                 <TextView
                     android:id="@+id/tvCreateNew"
