@@ -161,6 +161,14 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         tvCategory.text = task.category
         tvRepeat.text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
 
+        if (task.repeat_days?.isNotEmpty() == true) {
+            tvRepeat.text = task.repeat_days!!.joinToString(", ")
+            btnRepeat.text = "Yes"
+        } else {
+            tvRepeat.text = "No repeat days selected"
+            btnRepeat.text = "No"
+        }
+
         btnBack.setOnClickListener {
             dialog.dismiss()
         }

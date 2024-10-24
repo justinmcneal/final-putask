@@ -246,12 +246,21 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
         val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
         val btnBack = dialogView.findViewById<ImageButton>(R.id.btnBack)
+        val btnRepeat = dialogView.findViewById<AppCompatButton>(R.id.btnRepeat)
         tvTaskName.text = task.task_name
         tvTaskDescription.text = task.task_description
         tvDueDate.text = task.end_date
         tvTimeReminder.text = task.end_time
         tvCategory.text = task.category
         tvRepeat.text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
+
+        if (task.repeat_days?.isNotEmpty() == true) {
+            tvRepeat.text = task.repeat_days!!.joinToString(", ")
+            btnRepeat.text = "Yes"
+        } else {
+            tvRepeat.text = "No repeat days selected"
+            btnRepeat.text = "No"
+        }
 
 
         btnBack.setOnClickListener {
