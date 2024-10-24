@@ -75,6 +75,7 @@
                     android:inputType="textPassword"
                     android:background="@null"
                     android:textSize="14dp"
+                    android:textColor="@color/darkgray"
                     android:layout_marginStart="10dp"
                     android:paddingEnd="8dp" />
 

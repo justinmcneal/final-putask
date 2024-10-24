@@ -126,10 +126,19 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                     private val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
 
                     override fun getFormattedValue(value: Float): String {
+                        // Create a calendar instance and set it to the past (days ago) and move towards the current date
                         val calendar = Calendar.getInstance()
-                        calendar.add(Calendar.DAY_OF_MONTH, -value.toInt())
+
+                        // Subtract (total days - value) to get dates leading up to today
+                        val totalDays = lineChart.data.xMax.toInt() // Total days in the chart
+                        val daysAgo = totalDays - value.toInt()
+
+                        calendar.add(Calendar.DAY_OF_MONTH, -daysAgo) // Move the calendar back by the calculated number of days
+
+                        // Format the date to "MM/dd" and return
                         return dateFormat.format(calendar.time)
                     }
+
                 }
 
                 // Customize chart appearance
