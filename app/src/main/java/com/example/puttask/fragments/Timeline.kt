@@ -1,9 +1,11 @@
 package com.example.puttask.fragments
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -81,7 +83,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             fetchTasks()
         }
     }
-
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
         listsAdapter = ListsAdapter(taskList) { task ->
@@ -130,7 +131,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             }
         }
     }
-
     private fun handleTaskClick(task: Task) {
         // Create and show a dialog to display task details
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
@@ -318,9 +318,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         }
         dialog.show()
     }
-
-
-
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
         PopupMenu(requireContext(), anchorView).apply {
             menuInflater.inflate(R.menu.popup_categories, menu)
@@ -402,7 +399,8 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
 
         // Create and show the dialog
         builder.create().show()
-    }private fun showDeleteConfirmationDialog(task: Task) {
+    }
+    private fun showDeleteConfirmationDialog(task: Task) {
         AlertDialog.Builder(requireContext()).apply {
             setTitle("Delete Task")
             setMessage("Are you sure you want to delete this task?")
@@ -446,7 +444,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         super.onDestroyView()
         _binding = null
     }
-
     override fun onItemClick(ddMmYy: String, dd: String, day: String) {
         val inputFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -466,7 +463,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             filterTasksByDate(it)
         }
     }
-
     // Save the selected date in SharedPreferences
     private fun saveSelectedDate(selectedDate: String) {
         val sharedPreferences = requireContext().getSharedPreferences("TasksPrefs", Context.MODE_PRIVATE)
@@ -474,13 +470,11 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         editor.putString("selectedDate", selectedDate)
         editor.apply()
     }
-
     // Retrieve the selected date from SharedPreferences
     private fun getSelectedDate(): String? {
         val sharedPreferences = requireContext().getSharedPreferences("TasksPrefs", Context.MODE_PRIVATE)
         return sharedPreferences.getString("selectedDate", null)
     }
-
     private fun filterTasksByDate(selectedDate: String?) {
         Log.d("Timeline", "Filtering tasks for date: $selectedDate")
 
@@ -507,7 +501,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         listsAdapter.notifyDataSetChanged()
         updateNoTasksMessage()
     }
-
     private fun markTaskAsComplete(task: Task, isChecked: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
             try {

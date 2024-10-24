@@ -207,9 +207,9 @@ class AddTask2 : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val createdTask = response.body()
                     val intent = Intent().apply {
-                        putExtra("new_task", createdTask)
+                        putExtra("new_task", createdTask) // Pass the created task object
                     }
-                    setResult(RESULT_OK, intent)
+                    setResult(RESULT_OK, intent) // Set result code and intent containing the new task
                     finish()
                 } else {
                     Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
