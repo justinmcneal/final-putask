@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.puttask.R
+import com.example.puttask.api.CompleteTaskRequest
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.github.mikephil.charting.charts.LineChart
@@ -140,6 +142,59 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
             }
         }
     }
+
+    private fun markTaskComplete(task: Task) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Log the task being marked as complete/incomplete
+                Log.d("TaskManager", "Attempting to mark task (ID: ${task.id}) as ${if (task.isChecked) "complete" else "incomplete"}")
+
+                // Make the API call to update the task's status
+                val response = RetrofitClient.getApiService(requireContext())
+                    .markTaskComplete(task.id, CompleteTaskRequest(task.isChecked))
+
+                if (response.isSuccessful) {
+                    val updatedTask = response.body()
+
+                    // Log successful response
+                    Log.i("TaskManager", "Successfully updated task (ID: ${task.id}) status to ${if (task.isChecked) "complete" else "incomplete"}")
+
+                    // Update the task list or UI
+                    withContext(Dispatchers.Main) {
+                        showSuccess("Task marked as ${if (task.isChecked) "complete" else "incomplete"}")
+                    }
+                } else {
+                    // Log API failure response
+                    Log.e("TaskManager", "Failed to update task status (ID: ${task.id}): ${response.message()}")
+
+                    withContext(Dispatchers.Main) {
+                        showError("Failed to update task status: ${response.message()}")
+                    }
+                }
+            } catch (e: Exception) {
+                // Log the exception
+                Log.e("TaskManager", "Error occurred while updating task (ID: ${task.id}): ${e.message}", e)
+
+                withContext(Dispatchers.Main) {
+                    showError("Error occurred: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun showError(message: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showSuccess(message: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
 
     // Group tasks by day for the given date range
     private fun groupTasksByDay(tasks: List<Task>, days: Int): Map<Int, Int> {
