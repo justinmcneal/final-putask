@@ -187,6 +187,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                 }
             }
         }
+
         btnUpdate.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
@@ -210,10 +211,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                             Log.e("UpdateTask", "Error parsing end date: $newEndDate", e)
                             null
                         }
-
-
-
-
                         val formattedEndDate = selectedDate?.let { dateFormatAPI.format(it) }
                         val currentDate = dateFormatAPI.parse(dateFormatAPI.format(Date()))
                         Log.d("UpdateTask", "Current Date: ${dateFormatAPI.format(currentDate)}")
@@ -223,7 +220,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                         } else {
                             Log.e("UpdateTask", "Failed to format end date")
                         }
-
                         // Parse the end time
                         val newEndTime = tvTimeReminder.text.toString().let {
                             try {
@@ -236,7 +232,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                             }
                         }
                         Log.d("UpdateTask", "New End Time: $newEndTime")
-
                         // Combine date and time
                         val combinedDateTime = selectedDate?.let {
                             Calendar.getInstance().apply {
@@ -248,7 +243,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                                 }
                             }
                         }
-
                         // Validate combined date-time
                         if (selectedDate != null) {
                             if (selectedDate.after(currentDate)) {
@@ -269,10 +263,8 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                                 }
                             }
                         }
-
                         val newCategory = tvCategory.text.toString()
                         val newRepeatDays = task.repeat_days
-
                         val updateRequest = UpdateRequest(
                             task_name = newTaskName.takeIf { it.isNotBlank() } ?: currentTask?.task_name ?: "",
                             task_description = newTaskDescription.takeIf { it.isNotBlank() } ?: currentTask?.task_description ?: "",
@@ -281,9 +273,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                             repeat_days = newRepeatDays ?: currentTask?.repeat_days ?: emptyList(),
                             category = newCategory.takeIf { it.isNotBlank() } ?: currentTask?.category ?: ""
                         )
-
                         Log.d("UpdateTask", "Update request: $updateRequest")
-
                         // Make the API call
                         val updateResponse: Response<Task> = RetrofitClient.getApiService(requireContext()).updateTask(task.id, updateRequest)
                         if (updateResponse.isSuccessful) {
@@ -313,7 +303,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                 }
             }
         }
-
         dialog.show()
     }
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
