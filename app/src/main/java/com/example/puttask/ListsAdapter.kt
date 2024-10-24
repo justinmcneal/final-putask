@@ -8,19 +8,14 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.api.Task
-import com.example.puttask.fragments.Analytics
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,
     private val onItemClick: (Task) -> Unit
-
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
-//    companion object {
-//        const val REQUEST_CODE_EDIT_TASK = 1001
-//    }
-
     private var onDeleteClick: ((Task) -> Unit)? = null
+    var onTaskCheckedChangeListener: ((Task, Boolean) -> Unit)? = null // Listener for checkbox changes
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -40,7 +35,7 @@ class ListsAdapter(
             onItemClick(task)
         }
 
-        // Handle delete task optio     n
+        // Handle delete task option
         holder.deleteOption.setOnClickListener {
             onDeleteClick?.invoke(task)
         }
@@ -48,39 +43,31 @@ class ListsAdapter(
         // Set the checkbox state based on the task's isChecked status
         holder.checkBox.isChecked = task.isChecked
 
-        // Set up a listener for when the user checks/unchecks the checkbox
+        // Clear previous listener to avoid triggering the listener on initialization
+        holder.checkBox.setOnCheckedChangeListener(null)
+
+        // Set a listener on the checkbox
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
+            // Update the task's isChecked property
             task.isChecked = isChecked
-            onTaskCheckedChangeListener?.invoke(task, isChecked) // Trigger the listener
+
+            // Notify the listener for the change
+            onTaskCheckedChangeListener?.invoke(task, isChecked) // Notify parent fragment
+
+            // Mark as complete if checked
+            if (isChecked) {
+                // Call the method to mark the task as complete
+                onTaskCheckedChangeListener?.invoke(task, true) // Optionally, pass true or handle it accordingly
+            }
         }
     }
 
-    private fun onTaskCheckedChangeListener {
-
-    }
-
-
-
     override fun getItemCount(): Int = taskList.size
-
-    // Method to add a task to the list
-//    fun addTask(task: Task) {
-//        taskList.add(task)
-//        notifyItemInserted(taskList.size - 1)
-//    }
 
     // Set the delete listener to handle task deletion
     fun setOnDeleteClickListener(listener: (Task) -> Unit) {
         onDeleteClick = listener
     }
-
-    // Method to update the list with new tasks
-    fun updateTasks(newTasks: List<Task>) {
-        taskList.clear()
-        taskList.addAll(newTasks)
-        notifyDataSetChanged()
-    }
-
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
@@ -89,3 +76,4 @@ class ListsAdapter(
         val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
     }
 }
+

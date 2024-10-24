@@ -74,6 +74,8 @@ data class DeleteResponse(
 )
 
 data class CompleteTaskRequest(
+    val id: String,
     val isChecked: Boolean
 )
+
 

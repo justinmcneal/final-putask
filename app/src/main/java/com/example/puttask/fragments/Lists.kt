@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
+import com.example.puttask.api.CompleteTaskRequest
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.example.puttask.api.UpdateRequest
@@ -94,9 +95,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
             R.id.school to "School",
             R.id.wishlist to "Wishlist"
         )
-
         dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)
-
         binding.tvDropdownLists.setOnClickListener {
             dropdownLists.setOnMenuItemClickListener { menuItem ->
                 menuMap[menuItem.itemId]?.let { selectedCategory ->
@@ -111,21 +110,20 @@ class Lists : Fragment(R.layout.fragment_lists) {
             sortTasksByDateDescending() // Sort from newest to oldest
             visibilityChecker() // Hide the popup after selection
         }
-
         binding.tvOldesttoNewest.setOnClickListener {
             sortTasksByDateAscending() // Sort from oldest to newest
             visibilityChecker() // Hide the popup after selection
         }
-
-        listsAdapter.onTaskCheckedChangeListener = { task, isChecked ->
-            task.isChecked = isChecked
-            markTaskComplete(task)
-        }
-
-            // Sort options
         ic_sort.setOnClickListener {
             visibilityChecker()
         }
+
+        listsAdapter.onTaskCheckedChangeListener = { task, isChecked ->
+            if (isChecked) {
+                markTaskAsComplete(task) // Call the method to mark the task as complete
+            }
+        }
+
 
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
         val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
@@ -215,7 +213,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         // Clear and update task list on the main thread
                         withContext(Dispatchers.Main) {
                             taskList.clear()
-                            taskList.addAll(tasks)
+                            taskList.addAll(tasks.filter { !it.isChecked }) // Filter out completed tasks
                             listsAdapter.notifyDataSetChanged()
                             updateNoTasksMessage()
                         }
@@ -238,7 +236,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
-
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvStartDate)
@@ -294,10 +291,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
                             Log.e("UpdateTask", "Error parsing end date: $newEndDate", e)
                             null
                         }
-
-
-
-
                         val formattedEndDate = selectedDate?.let { dateFormatAPI.format(it) }
                         val currentDate = dateFormatAPI.parse(dateFormatAPI.format(Date()))
                         Log.d("UpdateTask", "Current Date: ${dateFormatAPI.format(currentDate)}")
@@ -307,7 +300,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         } else {
                             Log.e("UpdateTask", "Failed to format end date")
                         }
-
                         // Parse the end time
                         val newEndTime = tvTimeReminder.text.toString().let {
                             try {
@@ -320,7 +312,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
                             }
                         }
                         Log.d("UpdateTask", "New End Time: $newEndTime")
-
                         // Combine date and time
                         val combinedDateTime = selectedDate?.let {
                             Calendar.getInstance().apply {
@@ -332,7 +323,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
                                 }
                             }
                         }
-
                         // Validate combined date-time
                         if (selectedDate != null) {
                             if (selectedDate.after(currentDate)) {
@@ -353,10 +343,8 @@ class Lists : Fragment(R.layout.fragment_lists) {
                                 }
                             }
                         }
-
                         val newCategory = tvCategory.text.toString()
                         val newRepeatDays = task.repeat_days
-
                         val updateRequest = UpdateRequest(
                             task_name = newTaskName.takeIf { it.isNotBlank() } ?: currentTask?.task_name ?: "",
                             task_description = newTaskDescription.takeIf { it.isNotBlank() } ?: currentTask?.task_description ?: "",
@@ -365,9 +353,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                             repeat_days = newRepeatDays ?: currentTask?.repeat_days ?: emptyList(),
                             category = newCategory.takeIf { it.isNotBlank() } ?: currentTask?.category ?: ""
                         )
-
                         Log.d("UpdateTask", "Update request: $updateRequest")
-
                         // Make the API call
                         val updateResponse: Response<Task> = RetrofitClient.getApiService(requireContext()).updateTask(task.id, updateRequest)
                         if (updateResponse.isSuccessful) {
@@ -396,32 +382,20 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 }
             }
         }
-
-// Cancel button
         dialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
             dialog.dismiss() // Dismiss the dialog on cancel
         }
-
         dialogBuilder.create().show()
-
     }
-
-
-
-
-
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
         repeatDaysSelected = BooleanArray(repeatDays.size)
-
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Select Repeat Days")
         builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
             repeatDaysSelected[which] = isChecked
         }
-
         builder.setPositiveButton("OK") { dialog, _ ->
             val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
-
             if (selectedDays.isNotEmpty()) {
                 onDaysSelected(selectedDays) // Pass selected days to the callback
                 Toast.makeText(requireContext(), "Repeats on: ${selectedDays.joinToString(", ")}", Toast.LENGTH_SHORT).show()
@@ -430,15 +404,12 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
             dialog.dismiss()
         }
-
         builder.setNegativeButton("Cancel") { dialog, _ ->
             dialog.dismiss()
         }
-
         builder.create().show()
     }
 
-    // Function to show the popup menu below the ImageView button and update the category TextView
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
         PopupMenu(requireContext(), anchorView).apply {
             menuInflater.inflate(R.menu.popup_categories, menu)
@@ -455,8 +426,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             show()
         }
     }
-
-    // Function to show date picker and update the TextView with the selected date
     private fun showDatePicker(tvDueDate: TextView) {
         val calendar = Calendar.getInstance()
         val datePickerDialog = DatePickerDialog(
@@ -471,8 +440,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         )
         datePickerDialog.show()
     }
-
-    // Function to show time picker and update the TextView with the selected time
     private fun showTimePicker(tvTimeReminder: TextView, tvDueDate: TextView) {
         val calendar = Calendar.getInstance()
         val timePickerDialog = TimePickerDialog(
@@ -487,7 +454,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         )
         timePickerDialog.show()
     }
-
     private fun showDeleteConfirmationDialog(task: Task) {
         AlertDialog.Builder(requireContext()).apply {
             setTitle("Delete Task")
@@ -499,6 +465,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
+    // Update the UI to reflect no tasks available
     private fun updateNoTasksMessage() {
         if (taskList.isEmpty()) {
             binding.tvNotask.visibility = View.VISIBLE
@@ -530,7 +497,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -539,4 +505,31 @@ class Lists : Fragment(R.layout.fragment_lists) {
         popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
 
     }
+
+
+
+    private fun markTaskAsComplete(task: Task) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response: Response<Task> = RetrofitClient.getApiService(requireContext()).markTaskComplete(task.id, CompleteTaskRequest(id = task.id, isChecked = true))
+                if (response.isSuccessful) {
+                    // Mark the task as complete in the local list
+                    taskList.remove(task)
+
+                    // Notify the adapter about the item removed
+                    withContext(Dispatchers.Main) {
+                        listsAdapter.notifyDataSetChanged()
+                        updateNoTasksMessage() // Update the visibility of the no tasks message
+                    }
+                } else {
+                    Log.e("ListsFragment", "Error marking task complete: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception marking task complete", e)
+            }
+        }
+    }
+
+
+
 }
