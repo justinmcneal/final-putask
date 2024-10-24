@@ -515,9 +515,14 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 if (response.isSuccessful) {
                     withContext(Dispatchers.Main) {
                         if (isChecked) {
+                            // Get the correct position of the task before removing it
+                            val taskPosition = taskList.indexOf(task)
+
                             // Remove the task from the local list if marked complete
-                            taskList.remove(task)
-                            listsAdapter.notifyItemRemoved(taskList.indexOf(task))
+                            taskList.removeAt(taskPosition)
+
+                            // Notify the adapter about the item removal at the correct position
+                            listsAdapter.notifyItemRemoved(taskPosition)
                         } else {
                             // If unchecked, you might want to re-fetch the task and re-add it to the list
                             fetchTasks() // Optional: You can also re-fetch tasks instead of manually adding back
