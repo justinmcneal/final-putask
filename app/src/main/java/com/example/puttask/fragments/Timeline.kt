@@ -140,6 +140,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
+        val dialog = dialogBuilder.create()
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvStartDate)
@@ -150,6 +151,9 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         val addDueIcon = dialogView.findViewById<ImageButton>(R.id.addDueIcon)
         val addTimeIcon = dialogView.findViewById<ImageButton>(R.id.addTimeIcon)
         val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
+        val btnBack = dialogView.findViewById<ImageButton>(R.id.btnBack)
+        val btnRepeat = dialogView.findViewById<AppCompatButton>(R.id.btnRepeat)
+
         tvTaskName.text = task.task_name
         tvTaskDescription.text = task.task_description
         tvDueDate.text = task.end_date
@@ -157,6 +161,9 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         tvCategory.text = task.category
         tvRepeat.text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
 
+        btnBack.setOnClickListener {
+            dialog.dismiss()
+        }
         btnCategory.setOnClickListener {
             showCategoryPopup(btnCategory, tvCategory)
         }
@@ -166,10 +173,18 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         addTimeIcon.setOnClickListener {
             showTimePicker(tvTimeReminder, tvDueDate)
         }
-        dialogView.findViewById<AppCompatButton>(R.id.btnRepeat).setOnClickListener {
+        btnRepeat.setOnClickListener {
             showRepeatDaysDialog { selectedDays ->
                 task.repeat_days = selectedDays // Update the repeat_days in the task
-                tvRepeat.text = selectedDays.joinToString(", ")
+                if (selectedDays.isNullOrEmpty()) {
+                    tvRepeat.text = "No repeat days selected"
+                    btnRepeat.text = "No"
+                } else {
+                    // Display selected days if available
+                    tvRepeat.text = selectedDays.joinToString(", ")
+                    btnRepeat.text = "Yes"
+
+                }
             }
         }
         btnUpdate.setOnClickListener {
@@ -276,6 +291,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                                 Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
                                 fetchTasks() // Refresh task list
                                 Log.d("UpdateTask", "Dismissing dialog after successful update")
+                                dialog.dismiss()
                             }
                         } else {
                             Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")
@@ -298,8 +314,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             }
         }
 
-        dialogBuilder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-        dialogBuilder.create().show()
+        dialog.show()
     }
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
         PopupMenu(requireContext(), anchorView).apply {

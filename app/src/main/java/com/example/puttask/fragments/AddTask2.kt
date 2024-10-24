@@ -145,8 +145,11 @@ class AddTask2 : AppCompatActivity() {
 
             if (selectedDays.isNotEmpty()) {
                 onDaysSelected(selectedDays)
+                btnRepeat.text = "Yes"
             } else {
                 Toast.makeText(this, "No repeat days selected", Toast.LENGTH_SHORT).show()
+                btnRepeat.text = "No"
+
             }
             dialog.dismiss()
         }
