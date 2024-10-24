@@ -117,7 +117,12 @@ class Lists : Fragment(R.layout.fragment_lists) {
             visibilityChecker() // Hide the popup after selection
         }
 
-        // Sort options
+        listsAdapter.onTaskCheckedChangeListener = { task, isChecked ->
+            task.isChecked = isChecked
+            markTaskComplete(task)
+        }
+
+            // Sort options
         ic_sort.setOnClickListener {
             visibilityChecker()
         }

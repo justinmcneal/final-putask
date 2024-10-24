@@ -51,9 +51,12 @@ class ListsAdapter(
         // Set up a listener for when the user checks/unchecks the checkbox
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
             task.isChecked = isChecked
-            // Mark task as complete/incomplete
-            markTaskComplete(task)
+            onTaskCheckedChangeListener?.invoke(task, isChecked) // Trigger the listener
         }
+    }
+
+    private fun onTaskCheckedChangeListener {
+
     }
 
 
