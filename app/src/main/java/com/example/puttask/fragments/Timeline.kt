@@ -108,11 +108,6 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                             taskList.addAll(originalTaskList)
                             taskList.addAll(tasks.filter { !it.isChecked }) // Filter out completed tasks
 
-
-
-
-
-
                             // Check if there's a selected date stored
                             val selectedDate = getSelectedDate()
                             if (selectedDate != null) {
@@ -169,6 +164,10 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             tvRepeat.text = "No repeat days selected"
             btnRepeat.text = "No"
         }
+        repeatDaysSelected = repeatDaysSelected.clone()
+
+        repeatDaysSelected = repeatDays.mapIndexed { _, day -> task.repeat_days?.contains(day) ?: false }.toBooleanArray()
+
 
         btnBack.setOnClickListener {
             dialog.dismiss()

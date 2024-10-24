@@ -263,6 +263,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
         repeatDaysSelected = repeatDaysSelected.clone()
 
+        // Set the initial checked state for the repeat days checkboxes
+        repeatDaysSelected = repeatDays.mapIndexed { _, day -> task.repeat_days?.contains(day) ?: false }.toBooleanArray()
+
         btnBack.setOnClickListener {
             dialog.dismiss()
         }
