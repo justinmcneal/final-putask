@@ -134,8 +134,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     private fun handleTaskClick(task: Task) {
         // Create and show a dialog to display task details
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-            .setView(dialogView)
+        val dialogBuilder = AlertDialog.Builder(requireContext()).setView(dialogView)
         val dialog = dialogBuilder.create()
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
@@ -150,24 +149,24 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         val btnBack = dialogView.findViewById<ImageButton>(R.id.btnBack)
         val btnRepeat = dialogView.findViewById<AppCompatButton>(R.id.btnRepeat)
 
+        // Set the task details in the dialog
         tvTaskName.text = task.task_name
         tvTaskDescription.text = task.task_description
         tvDueDate.text = task.end_date
         tvTimeReminder.text = task.end_time
-        tvCategory.text = task.category
-        tvRepeat.text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
 
-        if (task.repeat_days?.isNotEmpty() == true) {
-            tvRepeat.text = task.repeat_days!!.joinToString(", ")
-            btnRepeat.text = "Yes"
-        } else {
+        tvCategory.text = task.category
+
+        // Initialize repeat days text and button
+        if (task.repeat_days.isNullOrEmpty()) {
             tvRepeat.text = "No repeat days selected"
             btnRepeat.text = "No"
+        } else {
+            tvRepeat.text = "Repeats On: " + task.repeat_days!!.joinToString(", ")
+            btnRepeat.text = "Yes"
         }
-        repeatDaysSelected = repeatDaysSelected.clone()
-
+        // Load the previously selected state into repeatDaysSelected
         repeatDaysSelected = repeatDays.mapIndexed { _, day -> task.repeat_days?.contains(day) ?: false }.toBooleanArray()
-
 
         btnBack.setOnClickListener {
             dialog.dismiss()
@@ -182,19 +181,25 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             showTimePicker(tvTimeReminder, tvDueDate)
         }
         btnRepeat.setOnClickListener {
-            showRepeatDaysDialog { selectedDays ->
+            showRepeatDaysDialog(tvRepeat) { selectedDays ->
                 task.repeat_days = selectedDays // Update the repeat_days in the task
-                if (selectedDays.isNullOrEmpty()) {
+
+                // Update the UI based on selected days
+                if (selectedDays.isEmpty()) {
                     tvRepeat.text = "No repeat days selected"
                     btnRepeat.text = "No"
                 } else {
-                    // Display selected days if available
-                    tvRepeat.text = selectedDays.joinToString(", ")
+                    tvRepeat.text = "Repeats On: " + selectedDays.joinToString(", ")
                     btnRepeat.text = "Yes"
-
                 }
             }
         }
+
+
+
+
+
+
 
         btnUpdate.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
@@ -313,6 +318,9 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         }
         dialog.show()
     }
+
+
+
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
         PopupMenu(requireContext(), anchorView).apply {
             menuInflater.inflate(R.menu.popup_categories, menu)
@@ -357,26 +365,34 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         )
         timePickerDialog.show()
     }
-    private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
-        // Load the previously selected state into repeatDaysSelected
+    private fun showRepeatDaysDialog(tvRepeat: TextView, onDaysSelected: (List<String>) -> Unit) {
+        // Initialize repeatDaysSelected with the current state of the task
         repeatDaysSelected = repeatDaysSelected.clone()
 
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Select Repeat Days")
+
+        // Multi-choice dialog for repeat days
         builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
-            repeatDaysSelected[which] = isChecked
+            repeatDaysSelected[which] = isChecked // Update selection state
         }
 
         builder.setPositiveButton("OK") { dialog, _ ->
+            // Get the selected days based on the checkbox states
             val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
+
+            // Debug log to check selected days
+            Log.d("RepeatDaysDialog", "Selected Days: $selectedDays")
+
+            // Update the TextView and handle the callback
             if (selectedDays.isNotEmpty()) {
-                onDaysSelected(selectedDays) // Pass selected days to the callback
-                Toast.makeText(requireContext(), "Repeats on: ${selectedDays.joinToString(", ")}", Toast.LENGTH_SHORT).show()
-                // Save the selected state so it's remembered next time
-                repeatDaysSelected = repeatDaysSelected.clone()
+                tvRepeat.text = "Repeats On: " + selectedDays.joinToString(", ")
+                onDaysSelected(selectedDays) // Callback with the selected days
             } else {
+                tvRepeat.text = "No repeat days selected"
                 Toast.makeText(requireContext(), "No repeat days selected", Toast.LENGTH_SHORT).show()
             }
+
             dialog.dismiss()
         }
 
@@ -384,9 +400,9 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             dialog.dismiss()
         }
 
+        // Create and show the dialog
         builder.create().show()
-    }
-    private fun showDeleteConfirmationDialog(task: Task) {
+    }private fun showDeleteConfirmationDialog(task: Task) {
         AlertDialog.Builder(requireContext()).apply {
             setTitle("Delete Task")
             setMessage("Are you sure you want to delete this task?")

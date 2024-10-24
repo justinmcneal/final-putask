@@ -235,6 +235,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val dialogBuilder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
         val dialog = dialogBuilder.create()
+
         val tvTaskName = dialogView.findViewById<TextView>(R.id.taskname)
         val tvTaskDescription = dialogView.findViewById<TextView>(R.id.taskdescription)
         val tvDueDate = dialogView.findViewById<TextView>(R.id.tvStartDate)
@@ -247,6 +248,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val btnUpdate = dialogView.findViewById<AppCompatButton>(R.id.btnUpdate)
         val btnBack = dialogView.findViewById<ImageButton>(R.id.btnBack)
         val btnRepeat = dialogView.findViewById<AppCompatButton>(R.id.btnRepeat)
+
         tvTaskName.text = task.task_name
         tvTaskDescription.text = task.task_description
         tvDueDate.text = task.end_date
@@ -255,13 +257,12 @@ class Lists : Fragment(R.layout.fragment_lists) {
         tvRepeat.text = task.repeat_days?.joinToString(", ") ?: "No repeat days selected"
 
         if (task.repeat_days?.isNotEmpty() == true) {
-            tvRepeat.text = task.repeat_days!!.joinToString(", ")
+            tvRepeat.text = "Repeats on: ${task.repeat_days!!.joinToString(", ")}"
             btnRepeat.text = "Yes"
         } else {
             tvRepeat.text = "No repeat days selected"
             btnRepeat.text = "No"
         }
-        repeatDaysSelected = repeatDaysSelected.clone()
 
         // Set the initial checked state for the repeat days checkboxes
         repeatDaysSelected = repeatDays.mapIndexed { _, day -> task.repeat_days?.contains(day) ?: false }.toBooleanArray()
@@ -269,21 +270,37 @@ class Lists : Fragment(R.layout.fragment_lists) {
         btnBack.setOnClickListener {
             dialog.dismiss()
         }
+
         btnCategory.setOnClickListener {
             showCategoryPopup(btnCategory, tvCategory)
         }
+
         addDueIcon.setOnClickListener {
             showDatePicker(tvDueDate)
         }
+
         addTimeIcon.setOnClickListener {
             showTimePicker(tvTimeReminder, tvDueDate)
         }
-        dialogView.findViewById<AppCompatButton>(R.id.btnRepeat).setOnClickListener {
-            showRepeatDaysDialog { selectedDays ->
+
+        // Handling the repeat days selection dialog and updating button text accordingly
+        btnRepeat.setOnClickListener {
+            showRepeatDaysDialog(tvRepeat) { selectedDays ->
                 task.repeat_days = selectedDays // Update the repeat_days in the task
-                tvRepeat.text = selectedDays.joinToString(", ")
+
+                // Update the UI based on selected days
+                if (selectedDays.isEmpty()) {
+                    tvRepeat.text = "No repeat days selected"
+                    btnRepeat.text = "No"
+                } else {
+                    tvRepeat.text = "Repeats On: " + selectedDays.joinToString(", ")
+                    btnRepeat.text = "Yes"
+                }
             }
         }
+
+
+        // Handling the task update logic
         btnUpdate.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
@@ -295,12 +312,10 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         val newTaskName = tvTaskName.text.toString()
                         val newTaskDescription = tvTaskDescription.text.toString()
                         val newEndDate = tvDueDate.text.toString()
-                        Log.d("UpdateTask", "Raw End Date Input: $newEndDate")
 
                         // Parse the selected date
                         val dateFormatInput = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                         val dateFormatAPI = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
                         val selectedDate: Date? = try {
                             dateFormatInput.parse(newEndDate)
                         } catch (e: ParseException) {
@@ -309,13 +324,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         }
                         val formattedEndDate = selectedDate?.let { dateFormatAPI.format(it) }
                         val currentDate = dateFormatAPI.parse(dateFormatAPI.format(Date()))
-                        Log.d("UpdateTask", "Current Date: ${dateFormatAPI.format(currentDate)}")
 
-                        if (formattedEndDate != null) {
-                            Log.d("UpdateTask", "Formatted End Date: $formattedEndDate")
-                        } else {
-                            Log.e("UpdateTask", "Failed to format end date")
-                        }
                         // Parse the end time
                         val newEndTime = tvTimeReminder.text.toString().let {
                             try {
@@ -327,7 +336,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                                 ""
                             }
                         }
-                        Log.d("UpdateTask", "New End Time: $newEndTime")
+
                         // Combine date and time
                         val combinedDateTime = selectedDate?.let {
                             Calendar.getInstance().apply {
@@ -339,6 +348,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                                 }
                             }
                         }
+
                         // Validate combined date-time
                         if (selectedDate != null) {
                             if (selectedDate.after(currentDate)) {
@@ -359,6 +369,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                                 }
                             }
                         }
+
                         val newCategory = tvCategory.text.toString()
                         val newRepeatDays = task.repeat_days
                         val updateRequest = UpdateRequest(
@@ -369,31 +380,26 @@ class Lists : Fragment(R.layout.fragment_lists) {
                             repeat_days = newRepeatDays ?: currentTask?.repeat_days ?: emptyList(),
                             category = newCategory.takeIf { it.isNotBlank() } ?: currentTask?.category ?: ""
                         )
-                        Log.d("UpdateTask", "Update request: $updateRequest")
+
                         // Make the API call
                         val updateResponse: Response<Task> = RetrofitClient.getApiService(requireContext()).updateTask(task.id, updateRequest)
                         if (updateResponse.isSuccessful) {
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(requireContext(), "Task updated successfully", Toast.LENGTH_SHORT).show()
                                 fetchTasks() // Refresh task list
-                                Log.d("UpdateTask", "Dismissing dialog after successful update")
                                 dialog.dismiss()
-
                             }
                         } else {
-                            Log.e("ListsFragment", "Error updating task: ${updateResponse.message()} - Response: ${updateResponse.errorBody()?.string()}")
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(requireContext(), "Error updating task", Toast.LENGTH_SHORT).show()
                             }
                         }
                     } else {
-                        Log.e("ListsFragment", "Error fetching task: ${fetchResponse.message()}")
                         withContext(Dispatchers.Main) {
                             Toast.makeText(requireContext(), "Error fetching task", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("ListsFragment", "Exception updating task", e)
                     withContext(Dispatchers.Main) {
                         Toast.makeText(requireContext(), "Error updating task", Toast.LENGTH_SHORT).show()
                     }
@@ -402,26 +408,34 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
         dialog.show()
     }
-    private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
-        // Load the previously selected state into repeatDaysSelected
+    private fun showRepeatDaysDialog(tvRepeat: TextView, onDaysSelected: (List<String>) -> Unit) {
+        // Initialize repeatDaysSelected with the current state of the task
         repeatDaysSelected = repeatDaysSelected.clone()
 
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Select Repeat Days")
+
+        // Multi-choice dialog for repeat days
         builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
-            repeatDaysSelected[which] = isChecked
+            repeatDaysSelected[which] = isChecked // Update selection state
         }
 
         builder.setPositiveButton("OK") { dialog, _ ->
+            // Get the selected days based on the checkbox states
             val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
+
+            // Debug log to check selected days
+            Log.d("RepeatDaysDialog", "Selected Days: $selectedDays")
+
+            // Update the TextView and handle the callback
             if (selectedDays.isNotEmpty()) {
-                onDaysSelected(selectedDays) // Pass selected days to the callback
-                Toast.makeText(requireContext(), "Repeats on: ${selectedDays.joinToString(", ")}", Toast.LENGTH_SHORT).show()
-                // Save the selected state so it's remembered next time
-                repeatDaysSelected = repeatDaysSelected.clone()
+                tvRepeat.text = "Repeats On: " + selectedDays.joinToString(", ")
+                onDaysSelected(selectedDays) // Callback with the selected days
             } else {
+                tvRepeat.text = "No repeat days selected"
                 Toast.makeText(requireContext(), "No repeat days selected", Toast.LENGTH_SHORT).show()
             }
+
             dialog.dismiss()
         }
 
@@ -429,9 +443,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
             dialog.dismiss()
         }
 
+        // Create and show the dialog
         builder.create().show()
     }
-
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
         PopupMenu(requireContext(), anchorView).apply {
             menuInflater.inflate(R.menu.popup_categories, menu)
