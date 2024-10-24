@@ -22,6 +22,7 @@ import com.arjungupta08.horizontal_calendar_date.HorizontalCalendarAdapter
 import com.arjungupta08.horizontal_calendar_date.HorizontalCalendarSetUp
 import com.example.puttask.ListsAdapter
 import com.example.puttask.R
+import com.example.puttask.api.CompleteTaskRequest
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.example.puttask.api.UpdateRequest
@@ -69,12 +70,17 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         calendarSetUp.setUpCalendarPrevNextClickListener(ivCalendarNext, ivCalendarPrevious, this) {
             tvDateMonth.text = it
         }
+
+        listsAdapter.onTaskCheckedChangeListener = { task, isChecked ->
+            markTaskAsComplete(task, isChecked) // Call the method to mark the task as complete
+        }
     }
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {
             fetchTasks()
         }
     }
+
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
         listsAdapter = ListsAdapter(taskList) { task ->
@@ -99,6 +105,12 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                             originalTaskList.addAll(tasks)
                             taskList.clear()
                             taskList.addAll(originalTaskList)
+                            taskList.addAll(tasks.filter { !it.isChecked }) // Filter out completed tasks
+
+
+
+
+
 
                             // Check if there's a selected date stored
                             val selectedDate = getSelectedDate()
@@ -465,5 +477,36 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         listsAdapter.notifyDataSetChanged()
         updateNoTasksMessage()
     }
+
+    private fun markTaskAsComplete(task: Task, isChecked: Boolean) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response: Response<Task> = RetrofitClient.getApiService(requireContext()).markTaskComplete(task.id, CompleteTaskRequest(id = task.id, isChecked = isChecked))
+                if (response.isSuccessful) {
+                    withContext(Dispatchers.Main) {
+                        if (isChecked) {
+                            // Get the correct position of the task before removing it
+                            val taskPosition = taskList.indexOf(task)
+
+                            // Remove the task from the local list if marked complete
+                            taskList.removeAt(taskPosition)
+
+                            // Notify the adapter about the item removal at the correct position
+                            listsAdapter.notifyItemRemoved(taskPosition)
+                        } else {
+                            // If unchecked, you might want to re-fetch the task and re-add it to the list
+                            fetchTasks() // Optional: You can also re-fetch tasks instead of manually adding back
+                        }
+                        updateNoTasksMessage() // Update the visibility of the no tasks message
+                    }
+                } else {
+                    Log.e("ListsFragment", "Error marking task complete: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception marking task complete", e)
+            }
+        }
+    }
+
 }
 
