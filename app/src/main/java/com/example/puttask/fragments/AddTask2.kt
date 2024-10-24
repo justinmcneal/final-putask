@@ -132,36 +132,47 @@ class AddTask2 : AppCompatActivity() {
     }
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
-        // Load the previously selected state into repeatDaysSelected
+        // Clone the current selected state so it persists across dialog invocations
         repeatDaysSelected = repeatDaysSelected.clone()
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Select Repeat Days")
+
+        // Set the MultiChoiceItems with repeat days and their corresponding checked states
         builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
+            // Update the selected state when a day is checked or unchecked
             repeatDaysSelected[which] = isChecked
         }
 
         builder.setPositiveButton("OK") { dialog, _ ->
+            // Get the list of selected days based on the updated repeatDaysSelected array
             val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
+            val tvRepeat = findViewById<TextView>(R.id.tvRepeat)
 
+            // Update the UI based on whether any days were selected or not
             if (selectedDays.isNotEmpty()) {
-                onDaysSelected(selectedDays)
-                btnRepeat.text = "Yes"
-                // Save the state to selectedDaysState so it persists for future dialogs
-                repeatDaysSelected = repeatDaysSelected.clone()
+                onDaysSelected(selectedDays) // Pass the selected days to the callback
+                btnRepeat.text = "Yes"  // Set button text to "Yes" to indicate days are selected
+                tvRepeat.text = "Repeats on: ${selectedDays.joinToString(", ")}" // Display selected days
             } else {
-                Toast.makeText(this, "No repeat days selected", Toast.LENGTH_SHORT).show()
-                btnRepeat.text = "No"
+                onDaysSelected(emptyList())  // Clear the selection
+                tvRepeat.text = "No repeat days selected"  // Display message indicating no days selected
+                Toast.makeText(this, "No repeat days selected", Toast.LENGTH_SHORT).show()  // Show toast message
+                btnRepeat.text = "No"  // Set button text to "No" to indicate no days are selected
             }
-            dialog.dismiss()
+
+            // Save the selected state so it's remembered next time
+            repeatDaysSelected = repeatDaysSelected.clone()
+            dialog.dismiss()  // Close the dialog
         }
 
         builder.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss()
+            dialog.dismiss()  // Close the dialog without making changes
         }
 
-        builder.create().show()
+        builder.create().show()  // Display the dialog
     }
+
     private fun createTask() {
         if (!validateFields()) return
 
