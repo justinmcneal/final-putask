@@ -121,7 +121,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 dataSet.setDrawValues(false)
 
                 // Set data to the chart
-                val lineData = LineData(dataSet)
+                val lineData = LineData(dataSet) 
                 lineChart.data = lineData
 
                 // Set x-axis value formatter
@@ -178,6 +178,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         return RetrofitClient.getApiService(requireContext()).getAllTasks()
     }
 
+    // Fetch tasks and count pending, overdue, and completed tasks with end time considered
     private fun fetchPendingTasksCount() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -187,30 +188,34 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
                     // Log all tasks to check their data
                     tasks.forEach { task ->
-                        Log.d("TaskData", "Task: ${task.task_name}, EndDate: ${task.end_date}, isChecked: ${task.isChecked}")
+                        Log.d("TaskData", "Task: ${task.task_name}, EndDate: ${task.end_date}, EndTime: ${task.end_time}, isChecked: ${task.isChecked}")
                     }
 
-                    // Current date in the same format as the end_date
-                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                    Log.d("CurrentDate", "Current date: $currentDate")
+                    // Current date-time in the same format as end_date and end_time
+                    val currentDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+                    Log.d("CurrentDateTime", "Current date-time: $currentDateTime")
 
-                    // Count pending tasks: those with end_date >= currentDate
+                    // Count pending tasks: those with end_date and end_time >= current date-time
                     val pendingTasksCount = tasks.count { task ->
-                        val taskEndDate = task.end_date
+                        val taskEndDateTime = "${task.end_date} ${task.end_time}"
                         val taskCompleted = task.isChecked
-                        val isPending = taskEndDate >= currentDate && !taskCompleted
 
-                        Log.d("PendingTaskCheck", "Task: ${task.task_name}, Pending: $isPending, EndDate: $taskEndDate, Completed: $taskCompleted")
+                        // Check if the task is pending (future end date-time and not completed)
+                        val isPending = taskEndDateTime >= currentDateTime && !taskCompleted
+
+                        Log.d("PendingTaskCheck", "Task: ${task.task_name}, Pending: $isPending, EndDateTime: $taskEndDateTime, Completed: $taskCompleted")
                         isPending
                     }
 
-                    // Count overdue tasks: those with end_date < currentDate
+                    // Count overdue tasks: those with end_date and end_time < current date-time
                     val overdueTasksCount = tasks.count { task ->
-                        val taskEndDate = task.end_date
+                        val taskEndDateTime = "${task.end_date} ${task.end_time}"
                         val taskCompleted = task.isChecked
-                        val isOverdue = taskEndDate < currentDate && !taskCompleted
 
-                        Log.d("OverdueTaskCheck", "Task: ${task.task_name}, Overdue: $isOverdue, EndDate: $taskEndDate, Completed: $taskCompleted")
+                        // Check if the task is overdue (past end date-time and not completed)
+                        val isOverdue = taskEndDateTime < currentDateTime && !taskCompleted
+
+                        Log.d("OverdueTaskCheck", "Task: ${task.task_name}, Overdue: $isOverdue, EndDateTime: $taskEndDateTime, Completed: $taskCompleted")
                         isOverdue
                     }
 
@@ -237,7 +242,9 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         }
     }
 
-
 }
+
+
+
 
 
