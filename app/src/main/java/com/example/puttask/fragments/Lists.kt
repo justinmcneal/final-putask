@@ -54,6 +54,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var ic_sort: ImageView
     private lateinit var tvOldesttoNewest: TextView
     private lateinit var tvNewesttoOldest: TextView
+    private var completedTasksCount: Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -554,6 +555,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
                             // Remove the task from the local list if marked complete
                             taskList.removeAt(taskPosition)
+
+                            completedTasksCount++
+
 
                             // Notify the adapter about the item removal at the correct position
                             listsAdapter.notifyItemRemoved(taskPosition)

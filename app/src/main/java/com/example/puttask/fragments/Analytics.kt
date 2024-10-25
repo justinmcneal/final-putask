@@ -39,6 +39,10 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
     private lateinit var tvPendingTasksCount: TextView
     private lateinit var tvOverdueTasksCount: TextView // Add this for overdue tasks
+    private lateinit var tvCompletedTasksCount: TextView
+
+    private var completedTasksCount: Int = 0
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -53,6 +57,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
         tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount)
         tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount) // Initialize overdue TextView
+        tvCompletedTasksCount = view.findViewById(R.id.tvCompletedTasksCount)
 
 
         // Fetch tasks and update pending tasks count
@@ -200,12 +205,18 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                         taskEndDate < currentDate // Tasks with a past end_date
                     }
 
+                    completedTasksCount = tasks.count { task -> task.isChecked } // Assuming isChecked is a property of Task
+                    withContext(Dispatchers.Main) {
+                        tvCompletedTasksCount.text = completedTasksCount.toString() // Update completed tasks count
+                    }
+
                     Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount")
                     Log.d("OverdueTasks", "Overdue tasks count: $overdueTasksCount")
 
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
                         tvOverdueTasksCount.text = overdueTasksCount.toString() // Display overdue count
+                        tvCompletedTasksCount.text = completedTasksCount.toString()
                     }
                 } else {
                 }
