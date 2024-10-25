@@ -62,6 +62,11 @@ class AddTask2 : AppCompatActivity() {
         findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener { showDatePicker() }
         findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener { showTimePicker() }
         btnRepeat.setOnClickListener {
+            // Check if a due date is selected before proceeding
+            if (tvDueDate.text.isEmpty()) {
+                Toast.makeText(this, "Please select a due date before setting repeat days", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             // Check if the selected due date is at least a week from now before allowing repeat days
             if (isDeadlineAtLeastOneWeekAway()) {
                 showRepeatDaysDialog { days ->
