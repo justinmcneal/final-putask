@@ -5,11 +5,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.puttask.R
-import com.example.puttask.api.CompleteTaskRequest
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.github.mikephil.charting.charts.LineChart
@@ -38,7 +36,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     private val entries = ArrayList<Entry>()
 
     private lateinit var tvPendingTasksCount: TextView
-    private lateinit var tvOverdueTasksCount: TextView // Add this for overdue tasks
+    private lateinit var tvOverdueTasksCount: TextView // For overdue tasks
     private lateinit var tvCompletedTasksCount: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -56,32 +54,80 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount) // Initialize overdue TextView
         tvCompletedTasksCount = view.findViewById(R.id.tvCompletedTasksCount)
 
-
         // Fetch tasks and update pending tasks count
-        fetchPendingTasksCount()
-
-
+        fetchTasksCount()
 
         // Set up click listeners for the buttons
         tvsevenDays.setOnClickListener {
-            updateChart(7, "Pending Tasks - Last 7 Days")
+            updateChart(7, "Tasks - Last 7 Days")
             highlightButton(tvsevenDays)
         }
         tvtwentyeightDays.setOnClickListener {
-            updateChart(28, "Pending Tasks - Last 28 Days")
+            updateChart(28, "Tasks - Last 28 Days")
             highlightButton(tvtwentyeightDays)
         }
         tvsixtyDays.setOnClickListener {
-            updateChart(60, "Pending Tasks - Last 60 Days")
+            updateChart(60, "Tasks - Last 60 Days")
             highlightButton(tvsixtyDays)
         }
         tvthreesixtyfiveDays.setOnClickListener {
-            updateChart(365, "Pending Tasks - Last 365 Days")
+            updateChart(365, "Tasks - Last 365 Days")
             highlightButton(tvthreesixtyfiveDays)
         }
     }
 
-    // Fetch tasks and update chart
+    // Fetch tasks and update the count of pending, overdue, and completed tasks
+    private fun fetchTasksCount() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = getTasksFromApi()
+                if (response.isSuccessful) {
+                    val tasks = response.body() ?: emptyList()
+
+                    // Current date and time
+                    val currentDateTime = Calendar.getInstance().time
+
+                    // Count pending, overdue, and completed tasks
+                    val pendingTasksCount = tasks.count { task ->
+                        val taskEndDateTime = parseDateTime(task.end_date, task.end_time)
+                        val taskCompleted = task.isChecked
+                        val isPending = taskEndDateTime?.after(currentDateTime) == true && !taskCompleted
+
+                        Log.d("PendingTaskCheck", "Task: ${task.task_name}, Pending: $isPending")
+                        isPending
+                    }
+
+                    val overdueTasksCount = tasks.count { task ->
+                        val taskEndDateTime = parseDateTime(task.end_date, task.end_time)
+                        val taskCompleted = task.isChecked
+                        val isOverdue = taskEndDateTime?.before(currentDateTime) == true && !taskCompleted
+
+                        Log.d("OverdueTaskCheck", "Task: ${task.task_name}, Overdue: $isOverdue")
+                        isOverdue
+                    }
+
+                    val completedTasksCount = tasks.count { task ->
+                        val isCompleted = task.isChecked
+                        Log.d("CompletedTaskCheck", "Task: ${task.task_name}, Completed: $isCompleted")
+                        isCompleted
+                    }
+
+                    // Update UI on the main thread
+                    withContext(Dispatchers.Main) {
+                        tvPendingTasksCount.text = pendingTasksCount.toString()
+                        tvOverdueTasksCount.text = overdueTasksCount.toString()
+                        tvCompletedTasksCount.text = completedTasksCount.toString()
+                    }
+                } else {
+                    Log.e("TaskCount", "Failed to fetch tasks")
+                }
+            } catch (e: Exception) {
+                Log.e("TaskCount", "Error fetching tasks: ${e.message}")
+            }
+        }
+    }
+
+    // Fetch tasks for chart updates
     private fun updateChart(days: Int, label: String) {
         lineChart.clear()
         entries.clear()
@@ -96,19 +142,18 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         // Set the date range in tvTaskOverviewDate
         tvTaskOverviewDate.text = "$startDate - $currentDate"
 
-        // Fetch tasks using API
         lifecycleScope.launch {
             val response = getTasksFromApi()
             if (response.isSuccessful) {
-                // Filter tasks where the end date is in the future (pending tasks)
-                val pendingTasks = response.body()?.filter { task ->
-                    val taskEndDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)
-                    taskEndDate?.after(Date()) == true
-                } ?: listOf()
+                val tasks = response.body() ?: emptyList()
 
-                val tasksGroupedByDay = groupTasksByDay(pendingTasks, days)
+                // Combine completed and pending tasks based on requirements
+                val allTasks = tasks // If you want both completed and pending tasks
 
-                // Create data entries for the past 'days' days based on pending tasks
+                // Group tasks by day
+                val tasksGroupedByDay = groupTasksByDay(allTasks, days)
+
+                // Create data entries for the past 'days' days based on all tasks
                 for (i in 0 until days) {
                     val taskCountForDay = tasksGroupedByDay[i] ?: 0 // Default to 0 if no tasks for the day
                     entries.add(Entry(i.toFloat(), taskCountForDay.toFloat()))
@@ -128,21 +173,13 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 // Set x-axis value formatter
                 lineChart.xAxis.valueFormatter = object : ValueFormatter() {
                     private val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
-
                     override fun getFormattedValue(value: Float): String {
-                        // Create a calendar instance and set it to the past (days ago) and move towards the current date
                         val calendar = Calendar.getInstance()
-
-                        // Subtract (total days - value) to get dates leading up to today
-                        val totalDays = lineChart.data.xMax.toInt() // Total days in the chart
+                        val totalDays = lineChart.data.xMax.toInt()
                         val daysAgo = totalDays - value.toInt()
-
-                        calendar.add(Calendar.DAY_OF_MONTH, -daysAgo) // Move the calendar back by the calculated number of days
-
-                        // Format the date to "MM/dd" and return
+                        calendar.add(Calendar.DAY_OF_MONTH, -daysAgo)
                         return dateFormat.format(calendar.time)
                     }
-
                 }
 
                 // Customize chart appearance
@@ -154,7 +191,6 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         }
     }
 
-    // Group tasks by day for the given date range
     private fun groupTasksByDay(tasks: List<Task>, days: Int): Map<Int, Int> {
         val calendar = Calendar.getInstance()
         val tasksPerDay = mutableMapOf<Int, Int>()
@@ -175,58 +211,9 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     private fun highlightButton(selectedButton: TextView) {
         selectedButton.setBackgroundColor(Color.parseColor("#FFBB86FC")) // Change color to purple or any desired color
     }
+
     private suspend fun getTasksFromApi(): Response<List<Task>> {
         return RetrofitClient.getApiService(requireContext()).getAllTasks()
-    }
-
-    private fun fetchPendingTasksCount() {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = getTasksFromApi()
-                if (response.isSuccessful) {
-                    val tasks = response.body() ?: emptyList()
-
-                    // Current date and time in the same format as end_date and end_time
-                    val currentDateTime = Calendar.getInstance().time
-
-                    // Count pending, overdue, and completed tasks
-                    val pendingTasksCount = tasks.count { task ->
-                        val taskEndDateTime = parseDateTime(task.end_date, task.end_time)
-                        val taskCompleted = task.isChecked
-                        val isPending = taskEndDateTime?.after(currentDateTime) == true && !taskCompleted
-
-                        Log.d("PendingTaskCheck", "Task: ${task.task_name}, Pending: $isPending, EndDateTime: $taskEndDateTime, Completed: $taskCompleted")
-                        isPending
-                    }
-
-                    val overdueTasksCount = tasks.count { task ->
-                        val taskEndDateTime = parseDateTime(task.end_date, task.end_time)
-                        val taskCompleted = task.isChecked
-                        val isOverdue = taskEndDateTime?.before(currentDateTime) == true && !taskCompleted
-
-                        Log.d("OverdueTaskCheck", "Task: ${task.task_name}, Overdue: $isOverdue, EndDateTime: $taskEndDateTime, Completed: $taskCompleted")
-                        isOverdue
-                    }
-
-                    val completedTasksCount = tasks.count { task ->
-                        val isCompleted = task.isChecked
-                        Log.d("CompletedTaskCheck", "Task: ${task.task_name}, Completed: $isCompleted")
-                        isCompleted
-                    }
-
-                    // Update UI on the main thread
-                    withContext(Dispatchers.Main) {
-                        tvPendingTasksCount.text = pendingTasksCount.toString()
-                        tvOverdueTasksCount.text = overdueTasksCount.toString()
-                        tvCompletedTasksCount.text = completedTasksCount.toString()
-                    }
-                } else {
-                    Log.e("PendingTasks", "Failed to fetch tasks")
-                }
-            } catch (e: Exception) {
-                Log.e("PendingTasks", "Error fetching tasks: ${e.message}")
-            }
-        }
     }
 
     // Helper function to parse end_date and end_time into a single Date object

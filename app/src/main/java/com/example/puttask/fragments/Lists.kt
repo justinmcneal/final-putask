@@ -210,6 +210,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
                         // Clear and update task list on the main thread
                         withContext(Dispatchers.Main) {
+                            //basta dito madami modifications pag may nahanap na bug
                             taskList.clear()
                             taskList.addAll(tasks.filter { !it.isChecked }) // Filter out completed tasks
                             listsAdapter.notifyDataSetChanged()

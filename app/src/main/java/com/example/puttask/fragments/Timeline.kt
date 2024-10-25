@@ -103,6 +103,7 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                         Log.d("ListsFragment", "Fetched tasks: ${tasks.size}")
 
                         withContext(Dispatchers.Main) {
+                            //basta dito madami modifications pag may nahanap na bug
                             originalTaskList.clear()
                             originalTaskList.addAll(tasks)
                             taskList.clear()
