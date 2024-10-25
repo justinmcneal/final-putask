@@ -53,7 +53,7 @@ class AddTask2 : AppCompatActivity() {
         createButton = findViewById(R.id.CreateButton)
         btnRepeat = findViewById(R.id.btnRepeat)
         tvBack = findViewById(R.id.tvBack)
-        tvRepeatDays = findViewById(R.id.tvRepeat)
+        tvRepeatDays = findViewById(R.id.tvRepeat) // Initialize TextView for repeat days
     }
 
     private fun setupListeners() {
@@ -61,11 +61,38 @@ class AddTask2 : AppCompatActivity() {
         addIcon.setOnClickListener { showCategoryPopup() }
         findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener { showDatePicker() }
         findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener { showTimePicker() }
-        btnRepeat.setOnClickListener { showRepeatDaysDialog { days ->
-            selectedRepeatDays = days // Update selected repeat days
-            tvRepeatDays.text = "Repeats on: ${selectedRepeatDays.joinToString(", ")}"
-        }}
+        btnRepeat.setOnClickListener {
+            // Check if a due date is selected before proceeding
+            if (tvDueDate.text.isEmpty()) {
+                Toast.makeText(this, "Please select a due date before setting repeat days", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+            // Check if the selected due date is at least 24 hours from now before allowing repeat days
+            if (isDeadlineAtLeast24HoursAway()) {
+                showRepeatDaysDialog { days ->
+                    selectedRepeatDays = days // Update selected repeat days
+                    tvRepeatDays.text = "Repeats on: ${selectedRepeatDays.joinToString(", ")}" // Display selected days
+                }
+            } else {
+                Toast.makeText(this, "Repeat days are only available if the deadline is at least 24 hours away.", Toast.LENGTH_LONG).show()
+            }
+        }
         createButton.setOnClickListener { createTask() }
+    }
+
+    private fun isDeadlineAtLeast24HoursAway(): Boolean {
+        val selectedDate = tvDueDate.text.toString()
+        if (selectedDate.isEmpty()) return false
+
+        val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+        val parsedDate = dateFormat.parse(selectedDate) ?: return false
+
+        // Calculate 24 hours from now
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.HOUR_OF_DAY, 24)
+
+        // Check if the selected date is at least 24 hours from now
+        return parsedDate.after(calendar.time)
     }
 
     private fun showCategoryPopup() {
@@ -91,6 +118,7 @@ class AddTask2 : AppCompatActivity() {
                 val selectedDateCalendar = Calendar.getInstance().apply {
                     set(year, month, day)
                 }
+
                 if (selectedDateCalendar.before(Calendar.getInstance())) {
                     Toast.makeText(this, "Selected date cannot be in the past", Toast.LENGTH_SHORT).show()
                 } else {
@@ -108,6 +136,7 @@ class AddTask2 : AppCompatActivity() {
                     set(Calendar.MINUTE, minute)
                     set(Calendar.SECOND, 0)
                 }
+
                 val selectedDate = tvDueDate.text.toString()
                 if (selectedDate.isNotEmpty()) {
                     val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
@@ -123,50 +152,51 @@ class AddTask2 : AppCompatActivity() {
                         return@TimePickerDialog
                     }
                 }
+
                 tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
     }
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
-        // Clone the current selected state so it persists across dialog invocations
         repeatDaysSelected = repeatDaysSelected.clone()
+
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Select Repeat Days")
 
-        // Set the MultiChoiceItems with repeat days and their corresponding checked states
         builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
-            // Update the selected state when a day is checked or unchecked
             repeatDaysSelected[which] = isChecked
         }
+
         builder.setPositiveButton("OK") { dialog, _ ->
-            // Get the list of selected days based on the updated repeatDaysSelected array
             val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
             val tvRepeat = findViewById<TextView>(R.id.tvRepeat)
 
-            // Update the UI based on whether any days were selected or not
             if (selectedDays.isNotEmpty()) {
-                onDaysSelected(selectedDays) // Pass the selected days to the callback
-                btnRepeat.text = "Yes"  // Set button text to "Yes" to indicate days are selected
-                tvRepeat.text = "Repeats on: ${selectedDays.joinToString(", ")}" // Display selected days
+                onDaysSelected(selectedDays)
+                btnRepeat.text = "Yes"
+                tvRepeat.text = "Repeats on: ${selectedDays.joinToString(", ")}"
             } else {
-                onDaysSelected(emptyList())  // Clear the selection
-                tvRepeat.text = "No repeat days selected"  // Display message indicating no days selected
-                Toast.makeText(this, "No repeat days selected", Toast.LENGTH_SHORT).show()  // Show toast message
-                btnRepeat.text = "No"  // Set button text to "No" to indicate no days are selected
+                onDaysSelected(emptyList())
+                tvRepeat.text = "No repeat days selected"
+                Toast.makeText(this, "No repeat days selected", Toast.LENGTH_SHORT).show()
+                btnRepeat.text = "No"
             }
-            // Save the selected state so it's remembered next time
+
             repeatDaysSelected = repeatDaysSelected.clone()
-            dialog.dismiss()  // Close the dialog
+            dialog.dismiss()
         }
+
         builder.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss()  // Close the dialog without making changes
+            dialog.dismiss()
         }
-        builder.create().show()  // Display the dialog
+
+        builder.create().show()
     }
 
     private fun createTask() {
         if (!validateFields()) return
+
         val endDateParts = tvDueDate.text.toString().split("/")
         val endTimeParts = tvTimeReminder.text.toString().split(":")
         val selectedEndDateTime = Calendar.getInstance().apply {
@@ -177,10 +207,12 @@ class AddTask2 : AppCompatActivity() {
             set(Calendar.MINUTE, endTimeParts[1].toInt())
             set(Calendar.SECOND, 0)
         }
+
         if (selectedEndDateTime.before(Calendar.getInstance())) {
             Toast.makeText(this, "Selected end date and time cannot be in the past", Toast.LENGTH_SHORT).show()
             return
         }
+
         val createRequest = CreateRequest(
             task_name = etTaskName.text.toString(),
             task_description = etTaskDescription.text.toString(),
@@ -189,6 +221,7 @@ class AddTask2 : AppCompatActivity() {
             repeat_days = selectedRepeatDays, // Pass the list of selected repeat days
             category = tvList.text.toString()
         )
+
         CoroutineScope(Dispatchers.IO).launch {
             val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
             runOnUiThread {
