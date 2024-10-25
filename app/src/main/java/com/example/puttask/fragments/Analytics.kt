@@ -1,5 +1,6 @@
 package com.example.puttask.fragments
 
+import Task
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.puttask.R
 import com.example.puttask.api.RetrofitClient
-import com.example.puttask.api.Task
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -194,14 +194,20 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                     var overdueTasksCount = 0
 
                     for (task in tasks) {
-                        // Parse the end date and time
-                        val taskEndDateTime = dateFormat.parse("${task.end_date} ${task.end_time}")?.time ?: 0
+                        // Safely parse the end date and time
+                        val taskEndDateTime = try {
+                            dateFormat.parse("${task.end_date} ${task.end_time}")?.time
+                        } catch (e: Exception) {
+                            Log.e("Tasks", "Error parsing date for task ID ${task.id}: ${e.message}")
+                            null
+                        } ?: continue
 
-                        // Compare timestamps
-                        if (taskEndDateTime >= currentDateTime) {
-                            pendingTasksCount++
-                        } else {
-                            overdueTasksCount++
+                        if (!task.completed) {
+                            if (taskEndDateTime >= currentDateTime) {
+                                pendingTasksCount++
+                            } else {
+                                overdueTasksCount++
+                            }
                         }
                     }
 
