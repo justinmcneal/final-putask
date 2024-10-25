@@ -185,42 +185,58 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 if (response.isSuccessful) {
                     val tasks = response.body() ?: emptyList()
 
+                    // Log all tasks to check their data
+                    tasks.forEach { task ->
+                        Log.d("TaskData", "Task: ${task.task_name}, EndDate: ${task.end_date}, isChecked: ${task.isChecked}")
+                    }
+
                     // Current date in the same format as the end_date
                     val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                    Log.d("PendingTasks", "Current date: $currentDate")
+                    Log.d("CurrentDate", "Current date: $currentDate")
 
-                    // Count pending tasks: those with end_date >= currentDate (upcoming tasks)
+                    // Count pending tasks: those with end_date >= currentDate
                     val pendingTasksCount = tasks.count { task ->
                         val taskEndDate = task.end_date
-                        taskEndDate >= currentDate // Tasks with future or same-day end_date
+                        val taskCompleted = task.isChecked
+                        val isPending = taskEndDate >= currentDate && !taskCompleted
+
+                        Log.d("PendingTaskCheck", "Task: ${task.task_name}, Pending: $isPending, EndDate: $taskEndDate, Completed: $taskCompleted")
+                        isPending
                     }
 
                     // Count overdue tasks: those with end_date < currentDate
                     val overdueTasksCount = tasks.count { task ->
                         val taskEndDate = task.end_date
-                        taskEndDate < currentDate // Tasks with a past end_date
+                        val taskCompleted = task.isChecked
+                        val isOverdue = taskEndDate < currentDate && !taskCompleted
+
+                        Log.d("OverdueTaskCheck", "Task: ${task.task_name}, Overdue: $isOverdue, EndDate: $taskEndDate, Completed: $taskCompleted")
+                        isOverdue
                     }
 
                     // Count completed tasks: those with isChecked == true
                     val completedTasksCount = tasks.count { task ->
-                        task.isChecked // Tasks that are marked as completed
+                        val isCompleted = task.isChecked
+
+                        Log.d("CompletedTaskCheck", "Task: ${task.task_name}, Completed: $isCompleted")
+                        isCompleted
                     }
 
-                    Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount")
-                    Log.d("OverdueTasks", "Overdue tasks count: $overdueTasksCount")
-
+                    // Update UI on the main thread
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
-                        tvOverdueTasksCount.text = overdueTasksCount.toString() // Display overdue count
-                        tvCompletedTasksCount.text = completedTasksCount.toString()
+                        tvOverdueTasksCount.text = overdueTasksCount.toString()
+                        tvCompletedTasksCount.text = completedTasksCount.toString() // Display completed count
                     }
                 } else {
+                    Log.e("PendingTasks", "Failed to fetch tasks")
                 }
             } catch (e: Exception) {
                 Log.e("PendingTasks", "Error fetching tasks: ${e.message}")
             }
         }
     }
+
 
 }
 
