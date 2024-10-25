@@ -67,31 +67,31 @@ class AddTask2 : AppCompatActivity() {
                 Toast.makeText(this, "Please select a due date before setting repeat days", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
-            // Check if the selected due date is at least a week from now before allowing repeat days
-            if (isDeadlineAtLeastOneWeekAway()) {
+            // Check if the selected due date is at least 24 hours from now before allowing repeat days
+            if (isDeadlineAtLeast24HoursAway()) {
                 showRepeatDaysDialog { days ->
                     selectedRepeatDays = days // Update selected repeat days
                     tvRepeatDays.text = "Repeats on: ${selectedRepeatDays.joinToString(", ")}" // Display selected days
                 }
             } else {
-                Toast.makeText(this, "Repeat days are only available if the deadline is at least one week away.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Repeat days are only available if the deadline is at least 24 hours away.", Toast.LENGTH_LONG).show()
             }
         }
         createButton.setOnClickListener { createTask() }
     }
 
-    private fun isDeadlineAtLeastOneWeekAway(): Boolean {
+    private fun isDeadlineAtLeast24HoursAway(): Boolean {
         val selectedDate = tvDueDate.text.toString()
         if (selectedDate.isEmpty()) return false
 
         val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
         val parsedDate = dateFormat.parse(selectedDate) ?: return false
 
-        // Calculate one week from now
+        // Calculate 24 hours from now
         val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_YEAR, 7)
+        calendar.add(Calendar.HOUR_OF_DAY, 24)
 
-        // Check if the selected date is at least one week from today
+        // Check if the selected date is at least 24 hours from now
         return parsedDate.after(calendar.time)
     }
 
