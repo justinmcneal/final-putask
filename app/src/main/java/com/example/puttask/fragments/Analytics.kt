@@ -39,6 +39,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
     private lateinit var tvPendingTasksCount: TextView
     private lateinit var tvOverdueTasksCount: TextView // Add this for overdue tasks
+    private lateinit var tvCompletedTasksCount: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -53,6 +54,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
         tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount)
         tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount) // Initialize overdue TextView
+        tvCompletedTasksCount = view.findViewById(R.id.tvCompletedTasksCount)
 
 
         // Fetch tasks and update pending tasks count
@@ -184,34 +186,57 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 if (response.isSuccessful) {
                     val tasks = response.body() ?: emptyList()
 
-                    // Current date in the same format as the end_date
-                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                    Log.d("PendingTasks", "Current date: $currentDate")
+                    // Current date and time in the same format as end_date and end_time
+                    val currentDateTime = Calendar.getInstance().time
 
-                    // Count pending tasks: those with end_date >= currentDate (upcoming tasks)
+                    // Count pending, overdue, and completed tasks
                     val pendingTasksCount = tasks.count { task ->
-                        val taskEndDate = task.end_date
-                        taskEndDate >= currentDate // Tasks with future or same-day end_date
+                        val taskEndDateTime = parseDateTime(task.end_date, task.end_time)
+                        val taskCompleted = task.isChecked
+                        val isPending = taskEndDateTime?.after(currentDateTime) == true && !taskCompleted
+
+                        Log.d("PendingTaskCheck", "Task: ${task.task_name}, Pending: $isPending, EndDateTime: $taskEndDateTime, Completed: $taskCompleted")
+                        isPending
                     }
 
-                    // Count overdue tasks: those with end_date < currentDate
                     val overdueTasksCount = tasks.count { task ->
-                        val taskEndDate = task.end_date
-                        taskEndDate < currentDate // Tasks with a past end_date
+                        val taskEndDateTime = parseDateTime(task.end_date, task.end_time)
+                        val taskCompleted = task.isChecked
+                        val isOverdue = taskEndDateTime?.before(currentDateTime) == true && !taskCompleted
+
+                        Log.d("OverdueTaskCheck", "Task: ${task.task_name}, Overdue: $isOverdue, EndDateTime: $taskEndDateTime, Completed: $taskCompleted")
+                        isOverdue
                     }
 
-                    Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount")
-                    Log.d("OverdueTasks", "Overdue tasks count: $overdueTasksCount")
+                    val completedTasksCount = tasks.count { task ->
+                        val isCompleted = task.isChecked
+                        Log.d("CompletedTaskCheck", "Task: ${task.task_name}, Completed: $isCompleted")
+                        isCompleted
+                    }
 
+                    // Update UI on the main thread
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
-                        tvOverdueTasksCount.text = overdueTasksCount.toString() // Display overdue count
+                        tvOverdueTasksCount.text = overdueTasksCount.toString()
+                        tvCompletedTasksCount.text = completedTasksCount.toString()
                     }
                 } else {
+                    Log.e("PendingTasks", "Failed to fetch tasks")
                 }
             } catch (e: Exception) {
                 Log.e("PendingTasks", "Error fetching tasks: ${e.message}")
             }
+        }
+    }
+
+    // Helper function to parse end_date and end_time into a single Date object
+    private fun parseDateTime(date: String, time: String): Date? {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            dateFormat.parse("$date $time")
+        } catch (e: Exception) {
+            Log.e("DateParsing", "Error parsing date and time: ${e.message}")
+            null
         }
     }
 }
