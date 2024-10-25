@@ -38,6 +38,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     private val entries = ArrayList<Entry>()
 
     private lateinit var tvPendingTasksCount: TextView
+    private lateinit var tvCompletedTasksCount: TextView
     private lateinit var tvOverdueTasksCount: TextView // Add this for overdue tasks
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,12 +53,12 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         tvTaskOverviewDate = view.findViewById(R.id.tvTaskOverviewDate)
 
         tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount)
+        tvCompletedTasksCount = view.findViewById(R.id.tvCompletedTasksCount)
         tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount) // Initialize overdue TextView
 
 
         // Fetch tasks and update pending tasks count
         fetchPendingTasksCount()
-
 
 
         // Set up click listeners for the buttons
@@ -200,12 +201,18 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                         taskEndDate < currentDate // Tasks with a past end_date
                     }
 
+                    // Count completed tasks: those with isChecked == true
+                    val completedTasksCount = tasks.count { task ->
+                        task.isChecked // Tasks that are marked as completed
+                    }
+
                     Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount")
                     Log.d("OverdueTasks", "Overdue tasks count: $overdueTasksCount")
 
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
                         tvOverdueTasksCount.text = overdueTasksCount.toString() // Display overdue count
+                        tvCompletedTasksCount.text = completedTasksCount.toString()
                     }
                 } else {
                 }
@@ -214,6 +221,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
             }
         }
     }
+
 }
 
 
