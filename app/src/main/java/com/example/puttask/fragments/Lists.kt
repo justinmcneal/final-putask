@@ -40,7 +40,6 @@ import java.util.Date
 import java.util.Locale
 
 class Lists : Fragment(R.layout.fragment_lists) {
-
     private var _binding: FragmentListsBinding? = null
     private val binding get() = _binding!!
     private lateinit var listsAdapter: ListsAdapter
@@ -48,23 +47,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
     private var repeatDaysSelected = BooleanArray(repeatDays.size)
-
     private lateinit var popupcardviewLists: CardView
     private lateinit var tvDropdownLists: TextView
     private lateinit var ic_sort: ImageView
     private lateinit var tvOldesttoNewest: TextView
     private lateinit var tvNewesttoOldest: TextView
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Register the ActivityResultLauncher
-        addTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == AppCompatActivity.RESULT_OK) {
-                // Refresh the task list after returning from AddTask2 activity
-                fetchTasks()
-            }
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,6 +61,14 @@ class Lists : Fragment(R.layout.fragment_lists) {
         return binding.root
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        addTaskLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                fetchTasks()
+            }
+        }
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ic_sort = binding.icSort
@@ -127,7 +122,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
         binding.tvUsername.text = "Hi $username!"
     }
-
+    private fun updateUsernameDisplay() {
+        val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+        val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
+        binding.tvUsername.text = "Hi $username!"
+    }
     private fun fetchTasks() {
         binding.swipeRefreshLayout.isRefreshing = true
         CoroutineScope(Dispatchers.IO).launch {
@@ -136,8 +135,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 if (response.isSuccessful) {
                     response.body()?.let { tasks ->
                         Log.d("ListsFragment", "Fetched tasks: ${tasks.size}")
-
-                        // Clear and update task list on the main thread
                         withContext(Dispatchers.Main) {
                             taskList.clear()
                             taskList.addAll(tasks.filter { !it.isChecked }) // Filter out completed tasks
@@ -157,7 +154,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
     }
-
     private fun sortTasksByDateDescending() {
         taskList.sortByDescending { parseDate(it.end_date) ?: Date(0) } // Handle null dates
         listsAdapter.notifyDataSetChanged()
@@ -175,19 +171,20 @@ class Lists : Fragment(R.layout.fragment_lists) {
             null
         }
     }
+    private fun visibilityChecker() {
+        popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+    }
     private fun filterTasksByCategory(category: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
                 if (response.isSuccessful) {
                     response.body()?.let { tasks ->
-                        // If "All Items" is selected, show all tasks
                         val filteredTasks = if (category == "All Items") {
-                            tasks // Show all tasks
+                            tasks
                         } else {
-                            tasks.filter { it.category == category } // Filter by selected category
+                            tasks.filter { it.category == category }
                         }
-
                         withContext(Dispatchers.Main) {
                             taskList.clear()
                             taskList.addAll(filteredTasks)
@@ -200,11 +197,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 Log.e("ListsFragment", "Exception fetching tasks", e)
             }
         }
-    }
-    private fun updateUsernameDisplay() {
-        val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
-        val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
-        binding.tvUsername.text = "Hi $username!"
     }
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
@@ -400,44 +392,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
         dialog.show()
     }
-    private fun showRepeatDaysDialog(tvRepeat: TextView, onDaysSelected: (List<String>) -> Unit) {
-        // Initialize repeatDaysSelected with the current state of the task
-        repeatDaysSelected = repeatDaysSelected.clone()
-
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("Select Repeat Days")
-
-        // Multi-choice dialog for repeat days
-        builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
-            repeatDaysSelected[which] = isChecked // Update selection state
-        }
-
-        builder.setPositiveButton("OK") { dialog, _ ->
-            // Get the selected days based on the checkbox states
-            val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
-
-            // Debug log to check selected days
-            Log.d("RepeatDaysDialog", "Selected Days: $selectedDays")
-
-            // Update the TextView and handle the callback
-            if (selectedDays.isNotEmpty()) {
-                tvRepeat.text = "Repeats On: " + selectedDays.joinToString(", ")
-                onDaysSelected(selectedDays) // Callback with the selected days
-            } else {
-                tvRepeat.text = "No repeat days selected"
-                Toast.makeText(requireContext(), "No repeat days selected", Toast.LENGTH_SHORT).show()
-            }
-
-            dialog.dismiss()
-        }
-
-        builder.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss()
-        }
-
-        // Create and show the dialog
-        builder.create().show()
-    }
     private fun showCategoryPopup(anchorView: View, categoryTextView: TextView) {
         PopupMenu(requireContext(), anchorView).apply {
             menuInflater.inflate(R.menu.popup_categories, menu)
@@ -482,6 +436,42 @@ class Lists : Fragment(R.layout.fragment_lists) {
         )
         timePickerDialog.show()
     }
+    private fun showRepeatDaysDialog(tvRepeat: TextView, onDaysSelected: (List<String>) -> Unit) {
+        // Initialize repeatDaysSelected with the current state of the task
+        repeatDaysSelected = repeatDaysSelected.clone()
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Select Repeat Days")
+        // Multi-choice dialog for repeat days
+        builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
+            repeatDaysSelected[which] = isChecked
+        }
+
+        builder.setPositiveButton("OK") { dialog, _ ->
+            // Get the selected days based on the checkbox states
+            val selectedDays = repeatDays.filterIndexed { index, _ -> repeatDaysSelected[index] }
+
+            // Debug log to check selected days
+            Log.d("RepeatDaysDialog", "Selected Days: $selectedDays")
+
+            // Update the TextView and handle the callback
+            if (selectedDays.isNotEmpty()) {
+                tvRepeat.text = "Repeats On: " + selectedDays.joinToString(", ")
+                onDaysSelected(selectedDays) // Callback with the selected days
+            } else {
+                tvRepeat.text = "No repeat days selected"
+                Toast.makeText(requireContext(), "No repeat days selected", Toast.LENGTH_SHORT).show()
+            }
+
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        // Create and show the dialog
+        builder.create().show()
+    }
     private fun showDeleteConfirmationDialog(task: Task) {
         AlertDialog.Builder(requireContext()).apply {
             setTitle("Delete Task")
@@ -490,15 +480,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
             create()
             show()
-        }
-    }
-    private fun updateNoTasksMessage() {
-        if (taskList.isEmpty()) {
-            binding.tvNotask.visibility = View.VISIBLE
-            binding.listsrecyclerView.visibility = View.GONE
-        } else {
-            binding.tvNotask.visibility = View.GONE
-            binding.listsrecyclerView.visibility = View.VISIBLE
         }
     }
     private fun deleteTask(task: Task) {
@@ -526,9 +507,14 @@ class Lists : Fragment(R.layout.fragment_lists) {
         super.onDestroyView()
         _binding = null
     }
-    private fun visibilityChecker() {
-        popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-
+    private fun updateNoTasksMessage() {
+        if (taskList.isEmpty()) {
+            binding.tvNotask.visibility = View.VISIBLE
+            binding.listsrecyclerView.visibility = View.GONE
+        } else {
+            binding.tvNotask.visibility = View.GONE
+            binding.listsrecyclerView.visibility = View.VISIBLE
+        }
     }
     private fun markTaskAsComplete(task: Task, isChecked: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -537,19 +523,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 if (response.isSuccessful) {
                     withContext(Dispatchers.Main) {
                         if (isChecked) {
-                            // Get the correct position of the task before removing it
                             val taskPosition = taskList.indexOf(task)
-
-                            // Remove the task from the local list if marked complete
                             taskList.removeAt(taskPosition)
-
-                            // Notify the adapter about the item removal at the correct position
                             listsAdapter.notifyItemRemoved(taskPosition)
                         } else {
-                            // If unchecked, you might want to re-fetch the task and re-add it to the list
-                            fetchTasks() // Optional: You can also re-fetch tasks instead of manually adding back
+                            fetchTasks() //optional idk
                         }
-                        updateNoTasksMessage() // Update the visibility of the no tasks message
+                        updateNoTasksMessage()
                     }
                 } else {
                     Log.e("ListsFragment", "Error marking task complete: ${response.message()}")
@@ -559,6 +539,4 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
     }
-
-
 }

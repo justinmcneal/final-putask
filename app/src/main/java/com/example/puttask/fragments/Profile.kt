@@ -19,7 +19,6 @@ import com.example.puttask.api.UpdateUsernameRequest
 import kotlinx.coroutines.launch
 
 class Profile : Fragment() {
-
     private lateinit var dataManager: DataManager
     private lateinit var apiService: APIService
     private lateinit var usernameTextView: TextView
@@ -27,29 +26,23 @@ class Profile : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
-
         dataManager = DataManager(requireContext())
         apiService = RetrofitClient.getApiService(requireContext())
         usernameTextView = view.findViewById(R.id.etUsername)
         emailTextView = view.findViewById(R.id.tvEmail)
-
         view.findViewById<TextView>(R.id.tvChangePassword).setOnClickListener {
             startActivity(Intent(requireContext(), ForgotPassword::class.java))
         }
-
         view.findViewById<TextView>(R.id.btnSave).setOnClickListener {
             updateUsername(usernameTextView.text.toString())
         }
-
         loadUserProfile()
         return view
     }
-
     override fun onResume() {
         super.onResume()
-        loadUserProfile()  // Refresh user info when fragment is resumed
+        loadUserProfile()
     }
-
     private fun loadUserProfile() {
         lifecycleScope.launch {
             val token = "Bearer ${dataManager.getAuthToken()}"
@@ -59,7 +52,6 @@ class Profile : Fragment() {
             }
         }
     }
-
     private fun updateUsername(newUsername: String) {
         if (newUsername.isNotBlank() && newUsername.length <= 50) {
             lifecycleScope.launch {
@@ -68,7 +60,7 @@ class Profile : Fragment() {
                     Toast.makeText(requireContext(), "Username changed.", Toast.LENGTH_SHORT).show()
                     requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
                         .edit().putString("username", newUsername).apply()
-                    loadUserProfile()  // Refresh user info after update
+                    loadUserProfile()
                 }
             }
         }

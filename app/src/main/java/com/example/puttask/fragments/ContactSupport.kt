@@ -24,11 +24,9 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         etMessage = view.findViewById(R.id.etMessage)
         btnSubmit = view.findViewById(R.id.btnSubmit)
         contactApiService = RetrofitClient.getApiService(requireContext())
-
         btnSubmit.setOnClickListener {
             val message = etMessage.text.toString().trim()
             if (message.isNotEmpty()) {
@@ -41,21 +39,16 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
 
     private fun submitContactForm(message: String) {
         val progressBar = requireView().findViewById<ProgressBar>(R.id.progressBar)
-        progressBar.visibility = View.VISIBLE // Show the progress bar
-
+        progressBar.visibility = View.VISIBLE
         lifecycleScope.launch {
             val token = DataManager(requireContext()).getAuthToken()
-
             if (token != null) {
                 val userResponse = contactApiService.getUser("Bearer $token")
                 val user = userResponse.body()
-
                 if (user != null) {
                     sendContactForm(message, user.username, user.email, progressBar)
                 }
             }
-
-            // Hide progress bar in sendContactForm
         }
     }
 
@@ -74,7 +67,7 @@ class ContactSupport : Fragment(R.layout.fragment_contact_support) {
                 Toast.makeText(requireContext(), "Empty response from server", Toast.LENGTH_SHORT).show()
             }
 
-            delay(1000) // Show the progress bar for 1 second
+            delay(1000)
             progressBar.visibility = View.GONE
         }
     }
