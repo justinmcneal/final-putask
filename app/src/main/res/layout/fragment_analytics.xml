@@ -153,7 +153,7 @@
                             android:layout_marginTop="10dp"
                             android:text="Completed Tasks"
                             android:textAlignment="center"
-                            android:textColor="@color/black"
+                            android:textColor="#a4bd60"
                             android:textSize="12dp" />
 
                         <TextView
@@ -164,7 +164,7 @@
                             android:layout_marginTop="10dp"
                             android:text="0"
                             android:textAlignment="center"
-                            android:textColor="@color/black"
+                            android:textColor="#a4bd60"
                             android:textSize="20dp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -189,7 +189,7 @@
                             android:layout_marginTop="10dp"
                             android:text="Pending Tasks"
                             android:textAlignment="center"
-                            android:textColor="@color/black"
+                            android:textColor="#57b1c2"
                             android:textSize="12dp" />
 
                         <TextView
@@ -200,7 +200,7 @@
                             android:layout_marginTop="10dp"
                             android:text="0"
                             android:textAlignment="center"
-                            android:textColor="@color/black"
+                            android:textColor="#57b1c2"
                             android:textSize="20dp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -225,7 +225,7 @@
                             android:layout_marginTop="10dp"
                             android:text="Overdue Tasks"
                             android:textAlignment="center"
-                            android:textColor="@color/black"
+                            android:textColor="#dd3737"
                             android:textSize="12dp" />
 
                         <TextView
@@ -236,7 +236,7 @@
                             android:layout_marginTop="10dp"
                             android:text="0"
                             android:textAlignment="center"
-                            android:textColor="@color/black"
+                            android:textColor="#dd3737"
                             android:textSize="20dp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>

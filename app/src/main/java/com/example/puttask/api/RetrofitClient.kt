@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 import android.content.Context
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.68.107:8000"
+    private const val BASE_URL = "http://192.168.0.35:8000/"
 
     // Logging interceptor for seeing request/response in logcat
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
@@ -29,9 +29,9 @@ object RetrofitClient {
                 chain.proceed(requestBuilder.build())
             }
             .addInterceptor(loggingInterceptor) // Logging interceptor for debugging
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(100, TimeUnit.SECONDS)
+            .readTimeout(100, TimeUnit.SECONDS)
+            .writeTimeout(100, TimeUnit.SECONDS)
             .build()
     }
 
