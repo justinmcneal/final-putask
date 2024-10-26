@@ -184,14 +184,20 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
-        listsAdapter = ListsAdapter(taskList) { task ->
+        listsAdapter = ListsAdapter(taskList, { task ->
             handleTaskClick(task)
-        }
+        }, { task, isChecked ->
+            markTaskAsComplete(task, isChecked)
+        })
+
         listsAdapter.setOnDeleteClickListener { task ->
             showDeleteConfirmationDialog(task)
         }
+
         binding.listsrecyclerView.adapter = listsAdapter
     }
+
+
 
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {

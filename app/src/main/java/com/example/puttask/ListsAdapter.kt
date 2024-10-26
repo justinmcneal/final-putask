@@ -11,7 +11,8 @@ import com.example.puttask.api.Task
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,
-    private val onItemClick: (Task) -> Unit
+    private val onItemClick: (Task) -> Unit,
+    private val onTaskChecked: (Task, Boolean) -> Unit // Callback for task completion
 ) : RecyclerView.Adapter<ListsAdapter.TaskViewHolder>() {
 
     private var onDeleteClick: ((Task) -> Unit)? = null
@@ -43,16 +44,22 @@ class ListsAdapter(
         // Set the checkbox state based on the task's isChecked status
         holder.checkBox.isChecked = task.isChecked
 
+        // Disable the checkbox if the task is marked as complete
+        holder.checkBox.isEnabled = !task.isChecked
+
         // Clear previous listener to avoid triggering the listener on initialization
         holder.checkBox.setOnCheckedChangeListener(null)
 
         // Set a listener on the checkbox
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-            // Update the task's isChecked property
-            task.isChecked = isChecked
+            // Only allow if the task isn't already marked complete
+            if (!task.isChecked) {
+                // Update the task's isChecked property
+                task.isChecked = isChecked
 
-            // Notify the listener for the change
-            onTaskCheckedChangeListener?.invoke(task, isChecked) // Notify parent fragment
+                // Notify the listener for the change
+                onTaskCheckedChangeListener?.invoke(task, isChecked) // Notify parent fragment
+            }
         }
     }
 
@@ -70,4 +77,3 @@ class ListsAdapter(
         val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
     }
 }
-

@@ -85,39 +85,49 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
     }
     private fun setupRecyclerView() {
         binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
-        listsAdapter = ListsAdapter(taskList) { task ->
+        listsAdapter = ListsAdapter(taskList, { task ->
             handleTaskClick(task)
-        }
+        }, { task, isChecked ->
+            markTaskAsComplete(task, isChecked)
+        })
+
         listsAdapter.setOnDeleteClickListener { task ->
             showDeleteConfirmationDialog(task)
         }
+
         binding.listsrecyclerView.adapter = listsAdapter
     }
+
+
     private fun fetchTasks() {
         binding.swipeRefreshLayout.isRefreshing = true
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                // Fetch all tasks from the API
                 val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
                 if (response.isSuccessful) {
                     response.body()?.let { tasks ->
                         Log.d("ListsFragment", "Fetched tasks: ${tasks.size}")
 
                         withContext(Dispatchers.Main) {
-                            //basta dito madami modifications pag may nahanap na bug
+                            // Clear existing task lists and update with fetched tasks
                             originalTaskList.clear()
                             originalTaskList.addAll(tasks)
                             taskList.clear()
+
+                            // Add all tasks to taskList
                             taskList.addAll(originalTaskList)
-                            taskList.addAll(tasks.filter { !it.isChecked }) // Filter out completed tasks
+                            // Optionally filter out completed tasks, if needed
+                            taskList.addAll(originalTaskList.filter { !it.isChecked })
 
                             // Check if there's a selected date stored
                             val selectedDate = getSelectedDate()
                             if (selectedDate != null) {
-                                filterTasksByDate(selectedDate)
+                                filterTasksByDate(selectedDate) // You might want to filter tasks by the selected date
                             }
 
-                            listsAdapter.notifyDataSetChanged()
-                            updateNoTasksMessage()
+                            listsAdapter.notifyDataSetChanged() // Notify the adapter to update UI
+                            updateNoTasksMessage() // Update the visibility of the no tasks message
                         }
                     }
                 } else {
@@ -127,11 +137,12 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
                 Log.e("ListsFragment", "Exception fetching tasks", e)
             } finally {
                 withContext(Dispatchers.Main) {
-                    binding.swipeRefreshLayout.isRefreshing = false
+                    binding.swipeRefreshLayout.isRefreshing = false // Stop the refresh animation
                 }
             }
         }
     }
+
     private fun handleTaskClick(task: Task) {
         // Create and show a dialog to display task details
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
@@ -503,25 +514,37 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
         updateNoTasksMessage()
     }
     private fun markTaskAsComplete(task: Task, isChecked: Boolean) {
+        // Update the task's completion status
+        task.isChecked = isChecked
+
+        // Coroutine for API call
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response: Response<Task> = RetrofitClient.getApiService(requireContext()).markTaskComplete(task.id, CompleteTaskRequest(id = task.id, isChecked = isChecked))
+                // API call to mark task as complete
+                val response: Response<Task> = RetrofitClient.getApiService(requireContext())
+                    .markTaskComplete(task.id, CompleteTaskRequest(id = task.id, isChecked = isChecked))
+
                 if (response.isSuccessful) {
                     withContext(Dispatchers.Main) {
+                        // If the task is checked as complete
                         if (isChecked) {
-                            // Get the correct position of the task before removing it
+                            // Get the correct position of the task
                             val taskPosition = taskList.indexOf(task)
 
-                            // Remove the task from the local list if marked complete
+                            // Remove the task from the list
                             taskList.removeAt(taskPosition)
 
-                            // Notify the adapter about the item removal at the correct position
+                            // Notify the adapter of the item removal
                             listsAdapter.notifyItemRemoved(taskPosition)
+
+                            // Disable the checkbox to make it unclickable
+                            updateTaskCheckboxState(task, isChecked)
                         } else {
-                            // If unchecked, you might want to re-fetch the task and re-add it to the list
-                            fetchTasks() // Optional: You can also re-fetch tasks instead of manually adding back
+                            // Handle unchecking (optional)
+                            fetchTasks() // Optionally, re-fetch tasks from the server
                         }
-                        updateNoTasksMessage() // Update the visibility of the no tasks message
+
+                        updateNoTasksMessage() // Update message if no tasks are left
                     }
                 } else {
                     Log.e("ListsFragment", "Error marking task complete: ${response.message()}")
@@ -531,6 +554,13 @@ class Timeline : Fragment(R.layout.fragment_timeline), HorizontalCalendarAdapter
             }
         }
     }
+
+    private fun updateTaskCheckboxState(task: Task, isChecked: Boolean) {
+        // Find the task in the adapter and disable the checkbox if marked complete
+        task.isChecked = isChecked
+        listsAdapter.notifyDataSetChanged() // Rebind all views to reflect changes
+    }
+
 
 }
 
