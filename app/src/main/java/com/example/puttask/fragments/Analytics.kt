@@ -99,29 +99,55 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         lifecycleScope.launch {
             val response = getTasksFromApi()
             if (response.isSuccessful) {
-                // Filter tasks where the end date is in the future (pending tasks)
-                val pendingTasks = response.body()?.filter { task ->
+                val tasks = response.body() ?: listOf()
+
+                // Filter and group tasks by day for each category
+                val pendingTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
                     val taskEndDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)
-                    taskEndDate?.after(Date()) == true
-                } ?: listOf()
+                    taskEndDate?.after(Date()) == true && !task.isChecked
+                }, days)
 
-                val tasksGroupedByDay = groupTasksByDay(pendingTasks, days)
+                val completedTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
+                    task.isChecked
+                }, days)
 
-                // Create data entries for the past 'days' days based on pending tasks
+                val overdueTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
+                    val taskEndDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)
+                    taskEndDate?.before(Date()) == true && !task.isChecked
+                }, days)
+
+                // Create entries for each category
+                val pendingEntries = mutableListOf<Entry>()
+                val completedEntries = mutableListOf<Entry>()
+                val overdueEntries = mutableListOf<Entry>()
+
                 for (i in 0 until days) {
-                    val taskCountForDay = tasksGroupedByDay[i] ?: 0 // Default to 0 if no tasks for the day
-                    entries.add(Entry(i.toFloat(), taskCountForDay.toFloat()))
+                    pendingEntries.add(Entry(i.toFloat(), (pendingTasksGroupedByDay[i] ?: 0).toFloat()))
+                    completedEntries.add(Entry(i.toFloat(), (completedTasksGroupedByDay[i] ?: 0).toFloat()))
+                    overdueEntries.add(Entry(i.toFloat(), (overdueTasksGroupedByDay[i] ?: 0).toFloat()))
                 }
 
-                // Create and customize dataset
-                val dataSet = LineDataSet(entries, label)
-                dataSet.color = resources.getColor(android.R.color.holo_blue_light)
-                dataSet.lineWidth = 2f
-                dataSet.setDrawCircles(true)
-                dataSet.setDrawValues(false)
+                // Create datasets for each category with custom colors and labels
+                val pendingDataSet = LineDataSet(pendingEntries, "$label - Pending")
+                pendingDataSet.color = resources.getColor(android.R.color.holo_blue_light)
+                pendingDataSet.lineWidth = 2f
+                pendingDataSet.setDrawCircles(true)
+                pendingDataSet.setDrawValues(false)
 
-                // Set data to the chart
-                val lineData = LineData(dataSet)
+                val completedDataSet = LineDataSet(completedEntries, "$label - Completed")
+                completedDataSet.color = resources.getColor(android.R.color.holo_green_light)
+                completedDataSet.lineWidth = 2f
+                completedDataSet.setDrawCircles(true)
+                completedDataSet.setDrawValues(false)
+
+                val overdueDataSet = LineDataSet(overdueEntries, "$label - Overdue")
+                overdueDataSet.color = resources.getColor(android.R.color.holo_red_light)
+                overdueDataSet.lineWidth = 2f
+                overdueDataSet.setDrawCircles(true)
+                overdueDataSet.setDrawValues(false)
+
+                // Combine datasets and set to chart
+                val lineData = LineData(pendingDataSet, completedDataSet, overdueDataSet)
                 lineChart.data = lineData
 
                 // Set x-axis value formatter
@@ -129,19 +155,12 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                     private val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
 
                     override fun getFormattedValue(value: Float): String {
-                        // Create a calendar instance and set it to the past (days ago) and move towards the current date
                         val calendar = Calendar.getInstance()
-
-                        // Subtract (total days - value) to get dates leading up to today
-                        val totalDays = lineChart.data.xMax.toInt() // Total days in the chart
+                        val totalDays = lineChart.data.xMax.toInt()
                         val daysAgo = totalDays - value.toInt()
-
-                        calendar.add(Calendar.DAY_OF_MONTH, -daysAgo) // Move the calendar back by the calculated number of days
-
-                        // Format the date to "MM/dd" and return
+                        calendar.add(Calendar.DAY_OF_MONTH, -daysAgo)
                         return dateFormat.format(calendar.time)
                     }
-
                 }
 
                 // Customize chart appearance
