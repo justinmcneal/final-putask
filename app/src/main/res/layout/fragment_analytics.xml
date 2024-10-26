@@ -92,7 +92,7 @@
         android:id="@+id/cardView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
+        android:layout_margin="14dp"
         android:backgroundTint="@color/superskyblue"
         app:cardCornerRadius="25dp"
         app:cardElevation="0dp"
@@ -189,7 +189,7 @@
                             android:layout_marginTop="10dp"
                             android:text="Pending Tasks"
                             android:textAlignment="center"
-                            android:textColor="#57b1c2"
+                            android:textColor="@color/yellow"
                             android:textSize="12dp" />
 
                         <TextView
@@ -200,7 +200,7 @@
                             android:layout_marginTop="10dp"
                             android:text="0"
                             android:textAlignment="center"
-                            android:textColor="#57b1c2"
+                            android:textColor="@color/yellow"
                             android:textSize="20dp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>

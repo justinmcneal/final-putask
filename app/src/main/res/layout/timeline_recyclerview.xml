@@ -3,11 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="86dp"
-    android:orientation="vertical"
     android:layout_marginTop="15dp"
-    app:cardElevation="0dp"
-    app:cardBackgroundColor="@color/superskyblue"
-    app:cardCornerRadius="20dp">
+    app:cardBackgroundColor="#d7e6ad"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -26,40 +25,42 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/tvTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Time"
-                        android:autoSizeMaxTextSize="14sp"
-                        android:autoSizeMinTextSize="12sp"
-                        android:autoSizeTextType="uniform"
-                        android:textColor="@color/gray"
-                        android:layout_gravity="end"
-                        android:layout_marginEnd="10dp"
-                        android:textSize="14sp"/>
+                    android:layout_marginStart="10dp"
+                    android:layout_gravity="start"
+                    android:text="TASKS TITLE"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:ellipsize="end"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMaxTextSize="16sp"
+                    android:autoSizeMinTextSize="14sp" />
 
-                    <TextView
-                        android:id="@+id/tvTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TASKS TITLE"
-                        android:textColor="@color/black"
-                        android:textSize="16dp"
-                        android:autoSizeMaxTextSize="16sp"
-                        android:autoSizeMinTextSize="14sp"
-                        android:autoSizeTextType="uniform"
-                        android:layout_marginStart="10dp"
-                        android:layout_gravity="start"/>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
 
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/tvTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="10dp"
+                    android:text="Time"
+                    android:textColor="@color/darkgray"
+                    android:textSize="14sp"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMaxTextSize="14sp"
+                    android:autoSizeMinTextSize="12sp" />
 
             </LinearLayout>
+
         </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

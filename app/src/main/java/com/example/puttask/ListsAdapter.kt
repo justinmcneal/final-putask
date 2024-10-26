@@ -1,5 +1,6 @@
 package com.example.puttask
 
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,8 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.puttask.api.Task
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ListsAdapter(
     private val taskList: MutableList<Task>,
@@ -26,9 +29,27 @@ class ListsAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = taskList[position]
 
-        // Set the task name and end date
-        holder.tvTitle.text = task.task_name
+        // Set the task name and end date, truncating to 10 characters
+        holder.tvTitle.text = if (task.task_name.length > 10) {
+            "${task.task_name.take(15)}..."
+        } else {
+            task.task_name
+        }
+
         holder.tvTime.text = task.end_date
+
+        // Determine task status based on due date and create a background with corner radius
+        val backgroundDrawable = holder.itemView.background as? GradientDrawable ?: GradientDrawable()
+
+        backgroundDrawable.cornerRadius = 50f // Set your desired corner radius
+
+        if (isTaskOverdue(task.end_date)) {
+            backgroundDrawable.setColor(holder.itemView.context.getColor(R.color.very_light_red)) // Change to red
+        } else {
+            backgroundDrawable.setColor(holder.itemView.context.getColor(R.color.very_light_yellow)) // Change to yellow
+        }
+
+        holder.itemView.background = backgroundDrawable
 
         // Handle click to edit the task
         holder.itemView.setOnClickListener {
@@ -56,7 +77,7 @@ class ListsAdapter(
         }
     }
 
-    override fun getItemCount(): Int = taskList.size
+    override fun getItemCount(): Int = taskList.size // Ensure this is correctly placed inside the class
 
     // Set the delete listener to handle task deletion
     fun setOnDeleteClickListener(listener: (Task) -> Unit) {
@@ -69,5 +90,16 @@ class ListsAdapter(
         val deleteOption: ImageButton = itemView.findViewById(R.id.ic_delete)
         val checkBox: CheckBox = itemView.findViewById(R.id.checkbox)
     }
-}
 
+    // Function to check if the task is overdue
+    private fun isTaskOverdue(endDate: String): Boolean {
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) // Adjust format as needed
+        return try {
+            val dueDate = formatter.parse(endDate) ?: return false
+            val currentDate = Date()
+            dueDate.before(currentDate) // Returns true if the due date is before the current date
+        } catch (e: Exception) {
+            false // Return false if parsing fails
+        }
+    }
+}

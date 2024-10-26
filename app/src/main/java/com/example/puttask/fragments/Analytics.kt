@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.puttask.R
@@ -129,7 +130,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
                 // Create datasets for each category with custom colors and labels
                 val pendingDataSet = LineDataSet(pendingEntries, "$label - Pending")
-                pendingDataSet.color = resources.getColor(android.R.color.holo_blue_light)
+                pendingDataSet.color = ContextCompat.getColor(requireContext(), R.color.yellow)
                 pendingDataSet.lineWidth = 2f
                 pendingDataSet.setDrawCircles(true)
                 pendingDataSet.setDrawValues(false)
@@ -190,8 +191,13 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         return tasksPerDay
     }
 
-    private fun highlightButton(selectedButton: TextView) {
-        selectedButton.setBackgroundColor(Color.parseColor("#FFBB86FC")) // Change color to purple or any desired color
+    private fun highlightButton(button: TextView) {
+        // Reset the background tint for all buttons first
+        tvsevenDays.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.superlightgray)
+        tvtwentyeightDays.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.superlightgray)
+        tvsixtyDays.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.superlightgray)
+        tvthreesixtyfiveDays.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.superlightgray)
+
     }
     private suspend fun getTasksFromApi(): Response<List<Task>> {
         return RetrofitClient.getApiService(requireContext()).getAllTasks()
