@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.puttask.R
+import com.example.puttask.api.CompleteTaskRequest
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.github.mikephil.charting.charts.LineChart
@@ -37,7 +39,6 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
     private lateinit var tvPendingTasksCount: TextView
     private lateinit var tvOverdueTasksCount: TextView // Add this for overdue tasks
-    private lateinit var tvCompletdTasksCount: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -52,9 +53,10 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
         tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount)
         tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount) // Initialize overdue TextView
-        tvCompletdTasksCount = view.findViewById(R.id.tvCompletedTasksCount)
 
-        fetchTasksCount()
+
+        // Fetch tasks and update pending tasks count
+        fetchPendingTasksCount()
 
 
 
@@ -175,48 +177,40 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         return RetrofitClient.getApiService(requireContext()).getAllTasks()
     }
 
-    private fun fetchTasksCount() {
+    private fun fetchPendingTasksCount() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = getTasksFromApi()
                 if (response.isSuccessful) {
                     val tasks = response.body() ?: emptyList()
 
-                    // Current date and time
-                    val currentDateTime = System.currentTimeMillis() // Get current time in milliseconds
-                    Log.d("Tasks", "Current date/time: $currentDateTime")
+                    // Current date in the same format as the end_date
+                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                    Log.d("PendingTasks", "Current date: $currentDate")
 
-                    // SimpleDateFormat to parse task end dates
-                    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-
-                    // Count pending and overdue tasks
-                    var pendingTasksCount = 0
-                    var overdueTasksCount = 0
-
-                    for (task in tasks) {
-                        // Parse the end date and time
-                        val taskEndDateTime = dateFormat.parse("${task.end_date} ${task.end_time}")?.time ?: 0
-
-                        // Compare timestamps
-                        if (taskEndDateTime >= currentDateTime) {
-                            pendingTasksCount++
-                        } else {
-                            overdueTasksCount++
-                        }
+                    // Count pending tasks: those with end_date >= currentDate (upcoming tasks)
+                    val pendingTasksCount = tasks.count { task ->
+                        val taskEndDate = task.end_date
+                        taskEndDate >= currentDate // Tasks with future or same-day end_date
                     }
 
-                    Log.d("Tasks", "Pending tasks count: $pendingTasksCount")
-                    Log.d("Tasks", "Overdue tasks count: $overdueTasksCount")
+                    // Count overdue tasks: those with end_date < currentDate
+                    val overdueTasksCount = tasks.count { task ->
+                        val taskEndDate = task.end_date
+                        taskEndDate < currentDate // Tasks with a past end_date
+                    }
+
+                    Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount")
+                    Log.d("OverdueTasks", "Overdue tasks count: $overdueTasksCount")
 
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
-                        tvOverdueTasksCount.text = overdueTasksCount.toString()
+                        tvOverdueTasksCount.text = overdueTasksCount.toString() // Display overdue count
                     }
                 } else {
-                    Log.e("Tasks", "Failed to fetch tasks: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
-                Log.e("Tasks", "Error fetching tasks: ${e.message}")
+                Log.e("PendingTasks", "Error fetching tasks: ${e.message}")
             }
         }
     }
