@@ -185,19 +185,25 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 if (response.isSuccessful) {
                     val tasks = response.body() ?: emptyList()
 
-                    // Current date in the same format as the end_date
-                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                    // Current date and time in the same format as the task's end_date and end_time
+                    val currentDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).parse(
+                        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+                    )
 
                     // Count pending tasks: those with end_date >= currentDate (upcoming tasks)
                     val pendingTasksCount = tasks.count { task ->
-                        val taskEndDate = task.end_date
-                        taskEndDate >= currentDate && !task.isChecked // Tasks with future or same-day end_date and not completed
+                        val taskEndDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).parse(
+                            "${task.end_date} ${task.end_time}"
+                        )
+                        taskEndDateTime >= currentDateTime && !task.isChecked // Future or same-day end_date and not completed
                     }
 
                     // Count overdue tasks: those with end_date < currentDate
                     val overdueTasksCount = tasks.count { task ->
-                        val taskEndDate = task.end_date
-                        taskEndDate < currentDate && !task.isChecked // Tasks with a past end_date and not completed
+                        val taskEndDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).parse(
+                            "${task.end_date} ${task.end_time}"
+                        )
+                        taskEndDateTime < currentDateTime && !task.isChecked // Past end_date and not completed
                     }
 
                     // Count completed tasks: those marked as checked
@@ -208,7 +214,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
                         tvOverdueTasksCount.text = overdueTasksCount.toString()
-                        tvCompletedTasksCount.text = completedTasksCount.toString() // Update the completed tasks count
+                        tvCompletedTasksCount.text = completedTasksCount.toString()
                     }
                 } else {
                     // Handle error response
