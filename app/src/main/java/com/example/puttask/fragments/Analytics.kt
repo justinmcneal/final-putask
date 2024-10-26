@@ -184,20 +184,27 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 if (response.isSuccessful) {
                     val tasks = response.body() ?: emptyList()
 
-                    // Current date in the same format as the end_date
-                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                    Log.d("PendingTasks", "Current date: $currentDate")
+                    // Current date and time
+                    val currentDateTime = System.currentTimeMillis() // Get current time in milliseconds
+                    Log.d("PendingTasks", "Current date/time: $currentDateTime")
 
-                    // Count pending tasks: those with end_date >= currentDate (upcoming tasks)
-                    val pendingTasksCount = tasks.count { task ->
-                        val taskEndDate = task.end_date
-                        taskEndDate >= currentDate // Tasks with future or same-day end_date
-                    }
+                    // SimpleDateFormat to parse task end dates
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
-                    // Count overdue tasks: those with end_date < currentDate
-                    val overdueTasksCount = tasks.count { task ->
-                        val taskEndDate = task.end_date
-                        taskEndDate < currentDate // Tasks with a past end_date
+                    // Count pending and overdue tasks
+                    var pendingTasksCount = 0
+                    var overdueTasksCount = 0
+
+                    for (task in tasks) {
+                        // Parse the end date and time
+                        val taskEndDateTime = dateFormat.parse("${task.end_date} ${task.end_time}")?.time ?: 0
+
+                        // Compare timestamps
+                        if (taskEndDateTime >= currentDateTime) {
+                            pendingTasksCount++
+                        } else {
+                            overdueTasksCount++
+                        }
                     }
 
                     Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount")
@@ -208,6 +215,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                         tvOverdueTasksCount.text = overdueTasksCount.toString() // Display overdue count
                     }
                 } else {
+                    Log.e("PendingTasks", "Failed to fetch tasks: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
                 Log.e("PendingTasks", "Error fetching tasks: ${e.message}")
