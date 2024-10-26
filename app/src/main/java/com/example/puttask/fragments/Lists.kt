@@ -208,9 +208,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
                     response.body()?.let { tasks ->
                         Log.d("ListsFragment", "Fetched tasks: ${tasks.size}")
 
+                        // Log each task's completion status to verify
+                        tasks.forEach { task ->
+                            Log.d("ListsFragment", "Task ID: ${task.id}, isChecked: ${task.isChecked}, endDate: ${task.end_date}")
+                        }
+
                         // Clear and update task list on the main thread
                         withContext(Dispatchers.Main) {
-                            //basta dito madami modifications pag may nahanap na bug
                             taskList.clear()
                             taskList.addAll(tasks.filter { !it.isChecked }) // Filter out completed tasks
                             listsAdapter.notifyDataSetChanged()

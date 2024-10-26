@@ -84,45 +84,35 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 if (response.isSuccessful) {
                     val tasks = response.body() ?: emptyList()
 
-                    // Current date and time
-                    val currentDateTime = Calendar.getInstance().time
+                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                    Log.d("PendingTasks", "Current date: $currentDate")
 
-                    // Count pending, overdue, and completed tasks
                     val pendingTasksCount = tasks.count { task ->
-                        val taskEndDateTime = parseDateTime(task.end_date, task.end_time)
-                        val taskCompleted = task.isChecked
-                        val isPending = taskEndDateTime?.after(currentDateTime) == true && !taskCompleted
-
-                        Log.d("PendingTaskCheck", "Task: ${task.task_name}, Pending: $isPending")
-                        isPending
+                        !task.isChecked && task.end_date >= currentDate
                     }
 
                     val overdueTasksCount = tasks.count { task ->
-                        val taskEndDateTime = parseDateTime(task.end_date, task.end_time)
-                        val taskCompleted = task.isChecked
-                        val isOverdue = taskEndDateTime?.before(currentDateTime) == true && !taskCompleted
-
-                        Log.d("OverdueTaskCheck", "Task: ${task.task_name}, Overdue: $isOverdue")
-                        isOverdue
+                        !task.isChecked && task.end_date < currentDate
                     }
 
                     val completedTasksCount = tasks.count { task ->
-                        val isCompleted = task.isChecked
-                        Log.d("CompletedTaskCheck", "Task: ${task.task_name}, Completed: $isCompleted")
-                        isCompleted
+                        task.isChecked
                     }
 
-                    // Update UI on the main thread
+                    Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount")
+                    Log.d("OverdueTasks", "Overdue tasks count: $overdueTasksCount")
+                    Log.d("CompletedTasks", "Completed tasks count: $completedTasksCount")
+
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
                         tvOverdueTasksCount.text = overdueTasksCount.toString()
-                        tvCompletedTasksCount.text = completedTasksCount.toString()
+                        tvCompletedTasksCount.text = completedTasksCount.toString() // Display completed count
                     }
                 } else {
-                    Log.e("TaskCount", "Failed to fetch tasks")
+                    Log.e("PendingTasks", "Failed to fetch tasks: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
-                Log.e("TaskCount", "Error fetching tasks: ${e.message}")
+                Log.e("PendingTasks", "Error fetching tasks: ${e.message}")
             }
         }
     }
