@@ -5,11 +5,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.puttask.R
-import com.example.puttask.api.CompleteTaskRequest
 import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.github.mikephil.charting.charts.LineChart
@@ -39,6 +37,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
     private lateinit var tvPendingTasksCount: TextView
     private lateinit var tvOverdueTasksCount: TextView // Add this for overdue tasks
+    private lateinit var tvCompletdTasksCount: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -53,10 +52,9 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
         tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount)
         tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount) // Initialize overdue TextView
+        tvCompletdTasksCount = view.findViewById(R.id.tvCompletedTasksCount)
 
-
-        // Fetch tasks and update pending tasks count
-        fetchPendingTasksCount()
+        fetchTasksCount()
 
 
 
@@ -177,7 +175,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         return RetrofitClient.getApiService(requireContext()).getAllTasks()
     }
 
-    private fun fetchPendingTasksCount() {
+    private fun fetchTasksCount() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = getTasksFromApi()
@@ -186,7 +184,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
                     // Current date and time
                     val currentDateTime = System.currentTimeMillis() // Get current time in milliseconds
-                    Log.d("PendingTasks", "Current date/time: $currentDateTime")
+                    Log.d("Tasks", "Current date/time: $currentDateTime")
 
                     // SimpleDateFormat to parse task end dates
                     val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -207,18 +205,18 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                         }
                     }
 
-                    Log.d("PendingTasks", "Pending tasks count: $pendingTasksCount")
-                    Log.d("OverdueTasks", "Overdue tasks count: $overdueTasksCount")
+                    Log.d("Tasks", "Pending tasks count: $pendingTasksCount")
+                    Log.d("Tasks", "Overdue tasks count: $overdueTasksCount")
 
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
-                        tvOverdueTasksCount.text = overdueTasksCount.toString() // Display overdue count
+                        tvOverdueTasksCount.text = overdueTasksCount.toString()
                     }
                 } else {
-                    Log.e("PendingTasks", "Failed to fetch tasks: ${response.errorBody()?.string()}")
+                    Log.e("Tasks", "Failed to fetch tasks: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
-                Log.e("PendingTasks", "Error fetching tasks: ${e.message}")
+                Log.e("Tasks", "Error fetching tasks: ${e.message}")
             }
         }
     }

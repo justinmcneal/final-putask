@@ -127,77 +127,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
         binding.tvUsername.text = "Hi $username!"
     }
-    private fun sortTasksByDateDescending() {
-        taskList.sortByDescending { parseDate(it.end_date) ?: Date(0) } // Handle null dates
-        listsAdapter.notifyDataSetChanged()
-    }
-
-    private fun sortTasksByDateAscending() {
-        taskList.sortBy { parseDate(it.end_date) ?: Date(Long.MAX_VALUE) }
-        listsAdapter.notifyDataSetChanged()
-    }
-
-    private fun parseDate(dateString: String): Date? {
-        return try {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            dateFormat.parse(dateString)
-        } catch (e: ParseException) {
-            Log.e("ListsFragment", "Error parsing date: $dateString", e)
-            null
-        }
-    }
-
-
-    private fun filterTasksByCategory(category: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
-                if (response.isSuccessful) {
-                    response.body()?.let { tasks ->
-                        // If "All Items" is selected, show all tasks
-                        val filteredTasks = if (category == "All Items") {
-                            tasks // Show all tasks
-                        } else {
-                            tasks.filter { it.category == category } // Filter by selected category
-                        }
-
-                        withContext(Dispatchers.Main) {
-                            taskList.clear()
-                            taskList.addAll(filteredTasks)
-                            listsAdapter.notifyDataSetChanged()
-                            updateNoTasksMessage()
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("ListsFragment", "Exception fetching tasks", e)
-            }
-        }
-    }
-
-
-    private fun updateUsernameDisplay() {
-        val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
-        val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
-        binding.tvUsername.text = "Hi $username!"
-    }
-
-    private fun setupRecyclerView() {
-        binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
-        listsAdapter = ListsAdapter(taskList) { task ->
-            handleTaskClick(task)
-        }
-        listsAdapter.setOnDeleteClickListener { task ->
-            showDeleteConfirmationDialog(task)
-        }
-        binding.listsrecyclerView.adapter = listsAdapter
-    }
-
-    private fun setupSwipeRefresh() {
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            fetchTasks()
-        }
-    }
 
     private fun fetchTasks() {
         binding.swipeRefreshLayout.isRefreshing = true
@@ -229,6 +158,69 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
 
+    private fun sortTasksByDateDescending() {
+        taskList.sortByDescending { parseDate(it.end_date) ?: Date(0) } // Handle null dates
+        listsAdapter.notifyDataSetChanged()
+    }
+    private fun sortTasksByDateAscending() {
+        taskList.sortBy { parseDate(it.end_date) ?: Date(Long.MAX_VALUE) }
+        listsAdapter.notifyDataSetChanged()
+    }
+    private fun parseDate(dateString: String): Date? {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            dateFormat.parse(dateString)
+        } catch (e: ParseException) {
+            Log.e("ListsFragment", "Error parsing date: $dateString", e)
+            null
+        }
+    }
+    private fun filterTasksByCategory(category: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
+                if (response.isSuccessful) {
+                    response.body()?.let { tasks ->
+                        // If "All Items" is selected, show all tasks
+                        val filteredTasks = if (category == "All Items") {
+                            tasks // Show all tasks
+                        } else {
+                            tasks.filter { it.category == category } // Filter by selected category
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            taskList.clear()
+                            taskList.addAll(filteredTasks)
+                            listsAdapter.notifyDataSetChanged()
+                            updateNoTasksMessage()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception fetching tasks", e)
+            }
+        }
+    }
+    private fun updateUsernameDisplay() {
+        val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+        val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
+        binding.tvUsername.text = "Hi $username!"
+    }
+    private fun setupRecyclerView() {
+        binding.listsrecyclerView.layoutManager = LinearLayoutManager(context)
+        listsAdapter = ListsAdapter(taskList) { task ->
+            handleTaskClick(task)
+        }
+        listsAdapter.setOnDeleteClickListener { task ->
+            showDeleteConfirmationDialog(task)
+        }
+        binding.listsrecyclerView.adapter = listsAdapter
+    }
+    private fun setupSwipeRefresh() {
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            fetchTasks()
+        }
+    }
     private fun handleTaskClick(task: Task) {
         // Create and show a dialog to display task details
         val dialogView = layoutInflater.inflate(R.layout.activity_task_view_recycler, null)
@@ -500,8 +492,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             show()
         }
     }
-
-    // Update the UI to reflect no tasks available
     private fun updateNoTasksMessage() {
         if (taskList.isEmpty()) {
             binding.tvNotask.visibility = View.VISIBLE
@@ -511,7 +501,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             binding.listsrecyclerView.visibility = View.VISIBLE
         }
     }
-
     private fun deleteTask(task: Task) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -541,7 +530,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
 
     }
-
     private fun markTaskAsComplete(task: Task, isChecked: Boolean) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
