@@ -172,7 +172,8 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     }
 
     private fun highlightButton(selectedButton: TextView) {
-        selectedButton.setBackgroundColor(Color.parseColor("#FFBB86FC")) // Change color to purple or any desired color
+        selectedButton.setBackgroundColor(Color.parseColor("#FFBB86FC")) // Change color to purple or any desired
+
     }
     private suspend fun getTasksFromApi(): Response<List<Task>> {
         return RetrofitClient.getApiService(requireContext()).getAllTasks()
