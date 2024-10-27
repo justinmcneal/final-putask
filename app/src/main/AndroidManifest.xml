@@ -24,6 +24,9 @@
             android:name=".ForgotPassword"
             android:exported="false" />
         <activity
+            android:name=".ChangePassword"
+            android:exported="false" />
+        <activity
             android:name=".fragments.AddTask2"
             android:exported="false" />
         <activity

@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.example.puttask.ForgotPassword
+import com.example.puttask.ChangePassword
 import com.example.puttask.R
 import com.example.puttask.api.APIService
 import com.example.puttask.api.DataManager
@@ -31,7 +31,7 @@ class Profile : Fragment() {
         usernameTextView = view.findViewById(R.id.etUsername)
         emailTextView = view.findViewById(R.id.tvEmail)
         view.findViewById<TextView>(R.id.tvChangePassword).setOnClickListener {
-            startActivity(Intent(requireContext(), ForgotPassword::class.java))
+            startActivity(Intent(requireContext(), ChangePassword::class.java))
         }
         view.findViewById<TextView>(R.id.btnSave).setOnClickListener {
             updateUsername(usernameTextView.text.toString())
