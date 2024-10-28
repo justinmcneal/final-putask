@@ -70,4 +70,6 @@ dependencies {
 
     // Horizontal Calendar Date Picker with Click Listener
     implementation("com.github.ArjunGupta08:Horizontal-CalendarDate-With-Click-listener:1.1.0")
+
+    implementation ("com.airbnb.android:lottie:5.2.0")//lottie animation
 }

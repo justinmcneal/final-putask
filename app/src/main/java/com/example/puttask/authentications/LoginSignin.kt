@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.airbnb.lottie.LottieAnimationView
 import com.example.puttask.MainActivity
 import com.example.puttask.R
 
@@ -25,13 +26,13 @@ class LoginSignin : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
-        }
 
+        }
         btnSignUp = findViewById(R.id.btnSignIn)
         btnLogIn = findViewById(R.id.btnLogIn)
 
         btnSignUp.setOnClickListener {
-            val intent = Intent(this, SignUp::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
 
@@ -39,6 +40,9 @@ class LoginSignin : AppCompatActivity() {
             val intent = Intent(this, LogIn::class.java)
             startActivity(intent)
         }
+
+        val animationView = findViewById<LottieAnimationView>(R.id.landingpage_animation)
+        animationView.playAnimation() // Ensures the animation starts immediately
     }
 }
 
