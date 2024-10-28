@@ -87,46 +87,89 @@ class AddTask2 : AppCompatActivity() {
 
     private fun showDatePicker() {
         Calendar.getInstance().let { calendar ->
-            DatePickerDialog(this, { _, year, month, day ->
-                val selectedDateCalendar = Calendar.getInstance().apply {
-                    set(year, month, day)
-                }
-                if (selectedDateCalendar.before(Calendar.getInstance())) {
-                    Toast.makeText(this, "Selected date cannot be in the past", Toast.LENGTH_SHORT).show()
-                } else {
-                    tvDueDate.text = String.format("%04d/%02d/%02d", year, month + 1, day)
-                }
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+            // Create the DatePickerDialog with the custom theme
+            val datePickerDialog = DatePickerDialog(
+                this, // Using 'this' for the Activity context
+                R.style.DialogTheme, // Applying the custom theme
+                { _, year, month, day ->
+                    val selectedDateCalendar = Calendar.getInstance().apply {
+                        set(year, month, day)
+                    }
+                    if (selectedDateCalendar.before(Calendar.getInstance())) {
+                        Toast.makeText(this, "Selected date cannot be in the past", Toast.LENGTH_SHORT).show()
+                    } else {
+                        tvDueDate.text = String.format("%04d/%02d/%02d", year, month + 1, day)
+                    }
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+
+            // Set on show listener to customize text colors
+            datePickerDialog.setOnShowListener {
+                // Change the header text color
+                val titleTextView = datePickerDialog.findViewById<TextView>(android.R.id.title)
+                titleTextView?.setTextColor(resources.getColor(R.color.very_blue))
+
+                // Change the button text color
+                datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+                datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+            }
+
+            // Show the dialog
+            datePickerDialog.show()
         }
     }
 
     private fun showTimePicker() {
         Calendar.getInstance().let { calendar ->
-            TimePickerDialog(this, { _, hourOfDay, minute ->
-                val selectedTimeCalendar = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, hourOfDay)
-                    set(Calendar.MINUTE, minute)
-                    set(Calendar.SECOND, 0)
-                }
-                val selectedDate = tvDueDate.text.toString()
-                if (selectedDate.isNotEmpty()) {
-                    val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                    val parsedDate = dateFormat.parse(selectedDate)
-                    val selectedDateCalendar = Calendar.getInstance().apply { time = parsedDate!! }
-
-                    // If the selected date is today and the selected time is in the past, show a warning
-                    if (selectedDateCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) &&
-                        selectedDateCalendar.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR) &&
-                        selectedTimeCalendar.before(Calendar.getInstance())
-                    ) {
-                        Toast.makeText(this, "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
-                        return@TimePickerDialog
+            // Create the TimePickerDialog
+            val timePickerDialog = TimePickerDialog(
+                this,
+                R.style.DialogTheme,
+                { _, hourOfDay, minute ->
+                    val selectedTimeCalendar = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, hourOfDay)
+                        set(Calendar.MINUTE, minute)
+                        set(Calendar.SECOND, 0)
                     }
-                }
-                tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
+                    val selectedDate = tvDueDate.text.toString()
+                    if (selectedDate.isNotEmpty()) {
+                        val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+                        val parsedDate = dateFormat.parse(selectedDate)
+                        val selectedDateCalendar = Calendar.getInstance().apply { time = parsedDate!! }
+
+                        // If the selected date is today and the selected time is in the past, show a warning
+                        if (selectedDateCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) &&
+                            selectedDateCalendar.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR) &&
+                            selectedTimeCalendar.before(Calendar.getInstance())
+                        ) {
+                            Toast.makeText(this, "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
+                            return@TimePickerDialog
+                        }
+                    }
+                    // Determine AM/PM and format the time
+                    val amPm = if (hourOfDay >= 12) "PM" else "AM"
+                    val hour12Format = if (hourOfDay % 12 == 0) 12 else hourOfDay % 12
+                    tvTimeReminder.text = String.format("%02d:%02d %s", hour12Format, minute, amPm)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                false
+            )
+
+            // Set on show listener to customize button colors
+            timePickerDialog.setOnShowListener {
+                timePickerDialog.getButton(TimePickerDialog.BUTTON_POSITIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+                timePickerDialog.getButton(TimePickerDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+            }
+
+            // Show the dialog
+            timePickerDialog.show()
         }
     }
+
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
         // Clone the current selected state so it persists across dialog invocations
