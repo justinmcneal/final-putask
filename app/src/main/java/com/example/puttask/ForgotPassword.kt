@@ -118,7 +118,7 @@ class ForgotPassword : AppCompatActivity() {
                     }
                 } else {
                     val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                    Toast.makeText(this@ForgotPassword, "Error: ${response.message()}\n$errorBody", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ForgotPassword, "Error: Email not found in the system", Toast.LENGTH_SHORT).show()
                     Log.d("Error", "Error: ${response.message()}\n$errorBody")
                 }
             } catch (e: Exception) {

@@ -82,6 +82,7 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     }
 
     // Fetch tasks and update chart
+// Update the chart with specified days and label
     private fun updateChart(days: Int, label: String) {
         lineChart.clear()
         entries.clear()
@@ -102,33 +103,22 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
             if (response.isSuccessful) {
                 val tasks = response.body() ?: listOf()
 
-                // Filter and group tasks by day for each category
-                val pendingTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
+                // Group tasks and create entries with whole numbers only
+                val pendingEntries = createWholeNumberEntries(groupTasksByDay(tasks.filter { task ->
                     val taskEndDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)
                     taskEndDate?.after(Date()) == true && !task.isChecked
-                }, days)
+                }, days), days)
 
-                val completedTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
+                val completedEntries = createWholeNumberEntries(groupTasksByDay(tasks.filter { task ->
                     task.isChecked
-                }, days)
+                }, days), days)
 
-                val overdueTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
+                val overdueEntries = createWholeNumberEntries(groupTasksByDay(tasks.filter { task ->
                     val taskEndDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)
                     taskEndDate?.before(Date()) == true && !task.isChecked
-                }, days)
+                }, days), days)
 
-                // Create entries for each category
-                val pendingEntries = mutableListOf<Entry>()
-                val completedEntries = mutableListOf<Entry>()
-                val overdueEntries = mutableListOf<Entry>()
-
-                for (i in 0 until days) {
-                    pendingEntries.add(Entry(i.toFloat(), (pendingTasksGroupedByDay[i] ?: 0).toFloat()))
-                    completedEntries.add(Entry(i.toFloat(), (completedTasksGroupedByDay[i] ?: 0).toFloat()))
-                    overdueEntries.add(Entry(i.toFloat(), (overdueTasksGroupedByDay[i] ?: 0).toFloat()))
-                }
-
-                // Create datasets for each category with custom colors and labels
+                // Create datasets with colors
                 val pendingDataSet = LineDataSet(pendingEntries, "$label - Pending")
                 pendingDataSet.color = ContextCompat.getColor(requireContext(), R.color.yellow)
                 pendingDataSet.lineWidth = 2f
@@ -151,26 +141,46 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 val lineData = LineData(pendingDataSet, completedDataSet, overdueDataSet)
                 lineChart.data = lineData
 
-                // Set x-axis value formatter
-                lineChart.xAxis.valueFormatter = object : ValueFormatter() {
-                    private val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
-
-                    override fun getFormattedValue(value: Float): String {
-                        val calendar = Calendar.getInstance()
-                        val totalDays = lineChart.data.xMax.toInt()
-                        val daysAgo = totalDays - value.toInt()
-                        calendar.add(Calendar.DAY_OF_MONTH, -daysAgo)
-                        return dateFormat.format(calendar.time)
+                // Configure x-axis formatter
+                lineChart.xAxis.apply {
+                    labelRotationAngle = -45f
+                    position = XAxis.XAxisPosition.BOTTOM
+                    valueFormatter = object : ValueFormatter() {
+                        private val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
+                        override fun getFormattedValue(value: Float): String {
+                            val calendar = Calendar.getInstance()
+                            val totalDays = lineChart.data.xMax.toInt()
+                            val daysAgo = totalDays - value.toInt()
+                            calendar.add(Calendar.DAY_OF_MONTH, -daysAgo)
+                            return dateFormat.format(calendar.time)
+                        }
                     }
                 }
 
-                // Customize chart appearance
-                lineChart.xAxis.labelRotationAngle = -45f
-                lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+                // Configure y-axis for whole numbers
+                lineChart.axisLeft.apply {
+                    axisMinimum = 0f // Avoid negative values
+                    granularity = 1f  // Show whole numbers only
+                    valueFormatter = object : ValueFormatter() {
+                        override fun getFormattedValue(value: Float): String {
+                            return value.toInt().toString() // Display whole numbers only
+                        }
+                    }
+                }
+
                 lineChart.axisRight.isEnabled = false
-                lineChart.invalidate() // Refresh the chart with new data
+                lineChart.invalidate() // Refresh chart
             }
         }
+    }
+
+    // Helper function to create entries with whole numbers only
+    private fun createWholeNumberEntries(tasksGroupedByDay: Map<Int, Int>, days: Int): List<Entry> {
+        val entries = mutableListOf<Entry>()
+        for (i in 0 until days) {
+            entries.add(Entry(i.toFloat(), (tasksGroupedByDay[i] ?: 0).toFloat()))
+        }
+        return entries
     }
 
     // Group tasks by day for the given date range
