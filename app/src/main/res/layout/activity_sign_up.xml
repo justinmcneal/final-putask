@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".authentications.SignUp"
-    android:background="@drawable/loginbg">
+    android:background="@drawable/loginsigninbg">
 
 
     <TextView
@@ -15,10 +15,10 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/opensans"
         android:text="Sign Up"
-        android:textColor="@color/skyblue"
+        android:textColor="@color/very_blue"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginTop="160dp"
+        android:layout_marginTop="180dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -52,7 +52,7 @@
                 android:maxLines="1"
                 android:padding="15dp"
                 android:textColor="@color/black"
-                android:textColorHint="@color/gray"
+                android:textColorHint="@color/darkgray"
                 android:textSize="14sp" />
 
             <EditText
@@ -66,7 +66,7 @@
                 android:fontFamily="@font/opensans"
                 android:hint="Email"
                 android:inputType="textEmailAddress"
-                android:textColorHint="@color/gray"
+                android:textColorHint="@color/darkgray"
                 android:textColor="@color/black"                android:maxLines="1"
                 android:padding="15dp"
                 android:textSize="14sp" />
@@ -87,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Enter Password"
-                    android:textColorHint="@color/gray"
+                    android:textColorHint="@color/darkgray"
                     android:inputType="textPassword"
                     android:background="@null"
                     android:textColor="@color/black"
@@ -126,7 +126,7 @@
                     android:background="@null"
                     android:textSize="14dp"
                     android:fontFamily="@font/opensans"
-                    android:textColorHint="@color/gray"
+                    android:textColorHint="@color/darkgray"
                     android:textColor="@color/black"
                     android:layout_marginStart="10dp"
                     android:paddingEnd="8dp" />
@@ -152,11 +152,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:fontFamily="@font/opensans"
-                android:backgroundTint="@color/skyblue"
+                android:fontFamily="@font/robotolight"
+                android:backgroundTint="@color/very_blue"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
                 android:text="Sign Up"
                 android:textColor="@color/white"
-                android:padding="10dp"
                 app:cornerRadius="10dp"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -172,6 +173,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/opensans"
                     android:text="Already have an account?"
+                    android:textColor="@color/darkgray"
                     android:textSize="12sp" />
 
                 <TextView
@@ -183,6 +185,7 @@
                     android:focusable="true"
                     android:fontFamily="@font/opensans"
                     android:text="Log In"
+                    android:textColor="@color/black"
                     android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>

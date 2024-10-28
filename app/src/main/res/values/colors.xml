@@ -4,7 +4,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="skyblue">#3ABDF4</color>
     <color name="red">#F53226</color>
-    <color name="superskyblue">#EBF6FF</color>
+    <color name="superskyblue">#dbe5fa</color>
     <color name="lightskyblue">#83daff</color>
     <color name="gray">#808080</color>
     <color name="lightgray">#dfdfdf</color>
@@ -14,6 +14,8 @@
     <color name="green">#a4bd60</color>
     <color name="very_light_red">#ffe4e4</color>
     <color name="very_light_yellow">#fff8ba</color>
+    <color name="very_blue">  #4e84ff</color>
+
 
 
 

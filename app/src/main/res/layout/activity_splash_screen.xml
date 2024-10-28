@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splashscreen_bg"
+    android:background="@color/very_blue"
     android:gravity="center"
     tools:context=".SplashScreen">
 
@@ -32,6 +32,7 @@
         android:autoSizeTextType="uniform"
         android:text="PUTASK"
         android:textColor="@color/black"
+        android:fontFamily="@font/blanka"
         android:textSize="28sp"
         android:textStyle="bold"
         android:visibility="invisible"

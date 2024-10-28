@@ -91,6 +91,7 @@
                     android:layout_height="wrap_content"
                     android:autofillHints="Add a task name"
                     android:background="@drawable/addtaskbg"
+                    android:backgroundTint="@color/white"
                     android:fontFamily="@font/opensans"
                     android:hint="Add a task name"
                     android:inputType="text"
@@ -117,6 +118,7 @@
                     android:layout_height="wrap_content"
                     android:autofillHints="Add a Task Description"
                     android:background="@drawable/addtaskbg"
+                    android:backgroundTint="@color/white"
                     android:fontFamily="@font/opensans"
                     android:hint="Add a task description"
                     android:inputType="textMultiLine"
@@ -176,7 +178,7 @@
                 android:layout_gravity="center"
                 android:layout_marginEnd="12dp"
                 android:background="@drawable/addtaskbg"
-                android:backgroundTint="@color/skyblue"
+                android:backgroundTint="@color/very_blue"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_add" />
         </LinearLayout>
@@ -230,7 +232,7 @@
                     android:layout_gravity="center"
                     android:layout_marginEnd="12dp"
                     android:background="@drawable/addtaskbg"
-                    android:backgroundTint="@color/skyblue"
+                    android:backgroundTint="@color/very_blue"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_add" />
             </LinearLayout>
@@ -264,7 +266,7 @@
                     android:layout_gravity="center"
                     android:layout_marginEnd="12dp"
                     android:background="@drawable/addtaskbg"
-                    android:backgroundTint="@color/skyblue"
+                    android:backgroundTint="@color/very_blue"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_add" />
             </LinearLayout>
@@ -311,7 +313,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="10dp"
                 android:background="@drawable/rounded_button"
-                android:backgroundTint="@color/skyblue"
+                android:backgroundTint="@color/very_blue"
                 android:clickable="true"
                 android:text="No"
                 android:textColor="@color/white"
@@ -360,7 +362,7 @@
             android:layout_gravity="center"
             android:textSize="16dp"
             android:textColor="@color/white"
-            android:backgroundTint="@color/skyblue"
+            android:backgroundTint="@color/very_blue"
             android:background="@drawable/corners_for_greeting"/>
 
     </LinearLayout>

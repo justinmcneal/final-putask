@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="150dp"
     android:gravity="top"
-    android:background="@color/skyblue"
+    android:background="@color/very_blue"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
 </LinearLayout>
