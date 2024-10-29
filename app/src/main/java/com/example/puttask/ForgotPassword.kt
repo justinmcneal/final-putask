@@ -1,5 +1,6 @@
 package com.example.puttask
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,6 +15,7 @@ import com.example.puttask.api.EmailRequest
 import com.example.puttask.api.ForgotPasswordRequest
 import com.example.puttask.api.OTPRequest
 import com.example.puttask.api.ResetPasswordRequest
+import com.example.puttask.authentications.LogIn
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
@@ -220,7 +222,9 @@ class ForgotPassword : AppCompatActivity() {
                 val response = RetrofitClient.getApiService(this@ForgotPassword).resetPassword(resetPasswordRequest)
                 if (response.isSuccessful) {
                     Toast.makeText(this@ForgotPassword, "Password reset successfully", Toast.LENGTH_SHORT).show()
-                    finish() // Close activity after successful reset
+                val intent = Intent(this@ForgotPassword, LogIn::class.java)
+                    startActivity(intent)
+                    finish()
                 } else {
                     Log.e("ResetPasswordError", "Error Code: ${response.code()}, Error Message: ${response.message()}")
                     Toast.makeText(this@ForgotPassword, "Failed to reset password: ${response.message()}", Toast.LENGTH_SHORT).show()

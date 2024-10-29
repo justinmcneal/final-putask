@@ -16,6 +16,7 @@ import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.OTPRequest
 import com.example.puttask.api.ResetPasswordRequest
 import com.example.puttask.api.EmailRequest
+import com.example.puttask.authentications.LogIn
 import kotlinx.coroutines.launch
 
 class ChangePassword : AppCompatActivity() {
@@ -203,7 +204,7 @@ class ChangePassword : AppCompatActivity() {
                         Toast.makeText(this@ChangePassword, "Password reset successfully.", Toast.LENGTH_SHORT).show()
 
                         // Navigate back to Profile activity
-                        val intent = Intent(this@ChangePassword, com.example.puttask.fragments.Profile::class.java)
+                        val intent = Intent(this@ChangePassword, LogIn::class.java)
                         startActivity(intent)
                         finish() // Finish ChangePassword activity
                     } else {

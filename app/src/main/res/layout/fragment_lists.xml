@@ -106,13 +106,12 @@
                         android:layout_height="0dp"
                         android:layout_weight="98"/>
 
-
-
                     <ImageView
                         android:id="@+id/ic_sort"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
                         android:layout_weight="1"
+                        android:layout_gravity="center"
                         android:src="@drawable/ic_sort" />
                 </LinearLayout>
 
@@ -159,80 +158,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent">
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/popupcardviewLists"
-            android:layout_width="270dp"
-            android:layout_height="116dp"
-            android:background="@color/white"
-            android:visibility="gone"
-            app:cardCornerRadius="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@color/superskyblue">
-
-                    <ImageButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_close"
-                        android:backgroundTint="@color/superskyblue"/>
-
-                    <TextView
-                        android:id="@+id/tvSortBy"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="8dp"
-                        android:text="Sort By"
-                        android:textAlignment="center"
-                        android:layout_marginEnd="50dp"
-                        android:fontFamily="@font/opensans"
-                        android:textColor="@color/black"
-                        android:textSize="18dp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvNewesttoOldest"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-
-                    android:text="Ascending"
-                    android:textAlignment="center"
-                    android:textColor="@color/gray"
-                    android:textSize="14dp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:background="@color/gray" />
-
-                <TextView
-                    android:id="@+id/tvOldesttoNewest"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-
-                    android:text="Descending"
-                    android:textAlignment="center"
-                    android:textColor="@color/gray"
-                    android:textSize="14dp" />
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
 
 
         <androidx.constraintlayout.widget.ConstraintLayout

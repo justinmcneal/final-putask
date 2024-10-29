@@ -6,6 +6,7 @@ import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +19,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
-import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
@@ -47,11 +47,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private lateinit var addTaskLauncher: ActivityResultLauncher<Intent>
     private val repeatDays = arrayOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
     private var repeatDaysSelected = BooleanArray(repeatDays.size)
-    private lateinit var popupcardviewLists: CardView
     private lateinit var tvDropdownLists: TextView
     private lateinit var ic_sort: ImageView
-    private lateinit var tvOldesttoNewest: TextView
-    private lateinit var tvNewesttoOldest: TextView
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -73,14 +71,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
         super.onViewCreated(view, savedInstanceState)
         ic_sort = binding.icSort
         tvDropdownLists = binding.tvDropdownLists
-        popupcardviewLists = binding.popupcardviewLists
-        tvOldesttoNewest =binding.tvOldesttoNewest
-        tvNewesttoOldest = binding.tvNewesttoOldest
         setupRecyclerView()
         setupSwipeRefresh()
         fetchTasks()
         updateNoTasksMessage()
         updateUsernameDisplay()
+        // Initialize UI elements
+        setupUIElements()
 
         val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
         val menuMap = mapOf(
@@ -101,20 +98,13 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
             dropdownLists.show()
         }
-        binding.tvNewesttoOldest.setOnClickListener {
-            sortTasksByDateDescending() // Sort from newest to oldest
-            visibilityChecker() // Hide the popup after selection
-        }
-        binding.tvOldesttoNewest.setOnClickListener {
-            sortTasksByDateAscending() // Sort from oldest to newest
-            visibilityChecker() // Hide the popup after selection
-        }
         ic_sort.setOnClickListener {
-            visibilityChecker()
+            showSortOptionsDialog()
+
         }
 
         listsAdapter.onTaskCheckedChangeListener = { task, isChecked ->
-            markTaskAsComplete(task, isChecked) // Call the method to mark the task as complete
+            markTaskAsComplete(task, isChecked) // Call the method Fto mark the task as complete
         }
 
 
@@ -122,6 +112,49 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
         binding.tvUsername.text = "Hi $username!"
     }
+    private fun setupUIElements() {
+        // Set up the sort button click listener
+        binding.icSort.setOnClickListener {
+            showSortOptionsDialog()
+        }
+    }
+    private fun showSortOptionsDialog() {
+        // Create a dialog builder
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+
+        // Set the title for the dialog
+        dialogBuilder.setTitle("Sort By")
+
+        // Set the options for sorting
+        dialogBuilder.setItems(arrayOf("Ascending Order", "Descending Order")) { _, which ->
+            when (which) {
+                0 -> {
+                    sortTasksByDateAscending() // Sort from oldest to newest
+                    Toast.makeText(requireContext(), "Sorted in Ascending Order", Toast.LENGTH_SHORT).show()
+                }
+                1 -> {
+                    sortTasksByDateDescending() // Sort from newest to oldest
+                    Toast.makeText(requireContext(), "Sorted in Descending Order", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        // Set the negative button to close the dialog
+        dialogBuilder.setNegativeButton("Close") { dialog, _ -> dialog.dismiss() }
+
+        // Create and show the dialog
+        val dialog = dialogBuilder.create()
+        dialog.setOnShowListener {
+            // Center the dialog options if needed
+            val textView = dialog.findViewById<TextView>(android.R.id.title)
+            textView?.gravity = Gravity.CENTER
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+        }
+        dialog.show()
+    }
+
+
+
     private fun updateUsernameDisplay() {
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
         val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
@@ -171,9 +204,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
             null
         }
     }
-    private fun visibilityChecker() {
-        popupcardviewLists.visibility = if (popupcardviewLists.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-    }
+
     private fun filterTasksByCategory(category: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -181,9 +212,9 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 if (response.isSuccessful) {
                     response.body()?.let { tasks ->
                         val filteredTasks = if (category == "All Items") {
-                            tasks
+                            tasks.filter { !it.isChecked }
                         } else {
-                            tasks.filter { it.category == category }
+                            tasks.filter { it.category == category && !it.isChecked }
                         }
                         withContext(Dispatchers.Main) {
                             taskList.clear()
@@ -254,6 +285,8 @@ class Lists : Fragment(R.layout.fragment_lists) {
         btnBack.setOnClickListener {
             dialog.dismiss()
         }
+
+
 
         btnCategory.setOnClickListener {
             showCategoryPopup(btnCategory, tvCategory)
@@ -412,6 +445,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val calendar = Calendar.getInstance()
         val datePickerDialog = DatePickerDialog(
             requireContext(),
+            R.style.DialogTheme, // Apply your custom theme here
             { _, year, month, dayOfMonth ->
                 val date = "$dayOfMonth/${month + 1}/$year"
                 tvDueDate.text = date
@@ -420,27 +454,51 @@ class Lists : Fragment(R.layout.fragment_lists) {
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
         )
+
+        // Customize button colors
+        datePickerDialog.setOnShowListener {
+            datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+            datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+        }
+
+        // Show the dialog
         datePickerDialog.show()
     }
+
     private fun showTimePicker(tvTimeReminder: TextView, tvDueDate: TextView) {
         val calendar = Calendar.getInstance()
         val timePickerDialog = TimePickerDialog(
-            requireContext(),
+            requireContext(), // Use requireContext() for the fragment
+            R.style.DialogTheme, // Apply your custom theme here
             { _, hourOfDay, minute ->
-                val time = String.format("%02d:%02d", hourOfDay, minute)
+                // Format the time in 12-hour format with AM/PM
+                val hourIn12Format = if (hourOfDay > 12) hourOfDay - 12 else hourOfDay
+                val amPm = if (hourOfDay >= 12) "PM" else "AM"
+                val time = String.format("%02d:%02d %s", hourIn12Format, minute, amPm)
                 tvTimeReminder.text = time
             },
             calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE),
-            true
+            false // Set to false to display AM/PM
         )
+
+        // Customize button colors
+        timePickerDialog.setOnShowListener {
+            timePickerDialog.getButton(TimePickerDialog.BUTTON_POSITIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+            timePickerDialog.getButton(TimePickerDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+        }
+
         timePickerDialog.show()
     }
+
+
+
     private fun showRepeatDaysDialog(tvRepeat: TextView, onDaysSelected: (List<String>) -> Unit) {
         // Initialize repeatDaysSelected with the current state of the task
         repeatDaysSelected = repeatDaysSelected.clone()
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Select Repeat Days")
+
         // Multi-choice dialog for repeat days
         builder.setMultiChoiceItems(repeatDays, repeatDaysSelected) { _, which, isChecked ->
             repeatDaysSelected[which] = isChecked
@@ -469,9 +527,18 @@ class Lists : Fragment(R.layout.fragment_lists) {
             dialog.dismiss()
         }
 
-        // Create and show the dialog
-        builder.create().show()
+        // Create the dialog
+        val dialog = builder.create()
+        dialog.setOnShowListener {
+            // Set the text color of the buttons to blue
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+        }
+
+        // Show the dialog
+        dialog.show()
     }
+
     private fun showDeleteConfirmationDialog(task: Task) {
         AlertDialog.Builder(requireContext()).apply {
             setTitle("Delete Task")

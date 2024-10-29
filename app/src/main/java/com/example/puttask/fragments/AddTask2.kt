@@ -87,46 +87,89 @@ class AddTask2 : AppCompatActivity() {
 
     private fun showDatePicker() {
         Calendar.getInstance().let { calendar ->
-            DatePickerDialog(this, { _, year, month, day ->
-                val selectedDateCalendar = Calendar.getInstance().apply {
-                    set(year, month, day)
-                }
-                if (selectedDateCalendar.before(Calendar.getInstance())) {
-                    Toast.makeText(this, "Selected date cannot be in the past", Toast.LENGTH_SHORT).show()
-                } else {
-                    tvDueDate.text = String.format("%04d/%02d/%02d", year, month + 1, day)
-                }
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+            // Create the DatePickerDialog with the custom theme
+            val datePickerDialog = DatePickerDialog(
+                this, // Using 'this' for the Activity context
+                R.style.DialogTheme, // Applying the custom theme
+                { _, year, month, day ->
+                    val selectedDateCalendar = Calendar.getInstance().apply {
+                        set(year, month, day)
+                    }
+                    if (selectedDateCalendar.before(Calendar.getInstance())) {
+                        Toast.makeText(this, "Selected date cannot be in the past", Toast.LENGTH_SHORT).show()
+                    } else {
+                        tvDueDate.text = String.format("%04d/%02d/%02d", year, month + 1, day)
+                    }
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+
+            // Set on show listener to customize text colors
+            datePickerDialog.setOnShowListener {
+                // Change the header text color
+                val titleTextView = datePickerDialog.findViewById<TextView>(android.R.id.title)
+                titleTextView?.setTextColor(resources.getColor(R.color.very_blue))
+
+                // Change the button text color
+                datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+                datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+            }
+
+            // Show the dialog
+            datePickerDialog.show()
         }
     }
 
     private fun showTimePicker() {
         Calendar.getInstance().let { calendar ->
-            TimePickerDialog(this, { _, hourOfDay, minute ->
-                val selectedTimeCalendar = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, hourOfDay)
-                    set(Calendar.MINUTE, minute)
-                    set(Calendar.SECOND, 0)
-                }
-                val selectedDate = tvDueDate.text.toString()
-                if (selectedDate.isNotEmpty()) {
-                    val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                    val parsedDate = dateFormat.parse(selectedDate)
-                    val selectedDateCalendar = Calendar.getInstance().apply { time = parsedDate!! }
-
-                    // If the selected date is today and the selected time is in the past, show a warning
-                    if (selectedDateCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) &&
-                        selectedDateCalendar.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR) &&
-                        selectedTimeCalendar.before(Calendar.getInstance())
-                    ) {
-                        Toast.makeText(this, "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
-                        return@TimePickerDialog
+            // Create the TimePickerDialog
+            val timePickerDialog = TimePickerDialog(
+                this,
+                R.style.DialogTheme,
+                { _, hourOfDay, minute ->
+                    val selectedTimeCalendar = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, hourOfDay)
+                        set(Calendar.MINUTE, minute)
+                        set(Calendar.SECOND, 0)
                     }
-                }
-                tvTimeReminder.text = String.format("%02d:%02d", hourOfDay, minute)
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
+                    val selectedDate = tvDueDate.text.toString()
+                    if (selectedDate.isNotEmpty()) {
+                        val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+                        val parsedDate = dateFormat.parse(selectedDate)
+                        val selectedDateCalendar = Calendar.getInstance().apply { time = parsedDate!! }
+
+                        // If the selected date is today and the selected time is in the past, show a warning
+                        if (selectedDateCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) &&
+                            selectedDateCalendar.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR) &&
+                            selectedTimeCalendar.before(Calendar.getInstance())
+                        ) {
+                            Toast.makeText(this, "Selected time cannot be in the past", Toast.LENGTH_SHORT).show()
+                            return@TimePickerDialog
+                        }
+                    }
+                    // Determine AM/PM and format the time
+                    val amPm = if (hourOfDay >= 12) "PM" else "AM"
+                    val hour12Format = if (hourOfDay % 12 == 0) 12 else hourOfDay % 12
+                    tvTimeReminder.text = String.format("%02d:%02d %s", hour12Format, minute, amPm)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                false
+            )
+
+            // Set on show listener to customize button colors
+            timePickerDialog.setOnShowListener {
+                timePickerDialog.getButton(TimePickerDialog.BUTTON_POSITIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+                timePickerDialog.getButton(TimePickerDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+            }
+
+            // Show the dialog
+            timePickerDialog.show()
         }
     }
+
 
     private fun showRepeatDaysDialog(onDaysSelected: (List<String>) -> Unit) {
         // Clone the current selected state so it persists across dialog invocations
@@ -167,42 +210,68 @@ class AddTask2 : AppCompatActivity() {
 
     private fun createTask() {
         if (!validateFields()) return
+
+        // Parse the end date
         val endDateParts = tvDueDate.text.toString().split("/")
-        val endTimeParts = tvTimeReminder.text.toString().split(":")
-        val selectedEndDateTime = Calendar.getInstance().apply {
-            set(Calendar.YEAR, endDateParts[0].toInt())
-            set(Calendar.MONTH, endDateParts[1].toInt() - 1)
-            set(Calendar.DAY_OF_MONTH, endDateParts[2].toInt())
-            set(Calendar.HOUR_OF_DAY, endTimeParts[0].toInt())
-            set(Calendar.MINUTE, endTimeParts[1].toInt())
-            set(Calendar.SECOND, 0)
-        }
-        if (selectedEndDateTime.before(Calendar.getInstance())) {
-            Toast.makeText(this, "Selected end date and time cannot be in the past", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val createRequest = CreateRequest(
-            task_name = etTaskName.text.toString(),
-            task_description = etTaskDescription.text.toString(),
-            end_date = String.format("%04d-%02d-%02d", selectedEndDateTime.get(Calendar.YEAR), selectedEndDateTime.get(Calendar.MONTH) + 1, selectedEndDateTime.get(Calendar.DAY_OF_MONTH)),
-            end_time = String.format("%02d:%02d", selectedEndDateTime.get(Calendar.HOUR_OF_DAY), selectedEndDateTime.get(Calendar.MINUTE)),
-            repeat_days = selectedRepeatDays, // Pass the list of selected repeat days
-            category = tvList.text.toString()
-        )
-        CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
-            runOnUiThread {
-                if (response.isSuccessful) {
-                    val createdTask = response.body()
-                    val intent = Intent().apply {
-                        putExtra("new_task", createdTask) // Pass the created task object
+
+        // Parse the end time in 12-hour format
+        val timeString = tvTimeReminder.text.toString().trim()
+        val sdf12Hour = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        val sdf24Hour = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+        val selectedEndDateTime = Calendar.getInstance()
+
+        try {
+            selectedEndDateTime.apply {
+                set(Calendar.YEAR, endDateParts[0].toInt())
+                set(Calendar.MONTH, endDateParts[1].toInt() - 1)
+                set(Calendar.DAY_OF_MONTH, endDateParts[2].toInt())
+
+                // Convert 12-hour time format to 24-hour format
+                val date = sdf12Hour.parse(timeString) // Parse as 12-hour format with AM/PM
+                if (date != null) {
+                    val formattedTime = sdf24Hour.format(date) // Format as 24-hour
+                    val endTimeParts = formattedTime.split(":")
+                    set(Calendar.HOUR_OF_DAY, endTimeParts[0].toInt())
+                    set(Calendar.MINUTE, endTimeParts[1].toInt())
+                }
+
+                set(Calendar.SECOND, 0)
+            }
+
+            // Check if the selected date and time are in the past
+            if (selectedEndDateTime.before(Calendar.getInstance())) {
+                Toast.makeText(this, "Selected end date and time cannot be in the past", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val createRequest = CreateRequest(
+                task_name = etTaskName.text.toString(),
+                task_description = etTaskDescription.text.toString(),
+                end_date = String.format("%04d-%02d-%02d", selectedEndDateTime.get(Calendar.YEAR), selectedEndDateTime.get(Calendar.MONTH) + 1, selectedEndDateTime.get(Calendar.DAY_OF_MONTH)),
+                end_time = String.format("%02d:%02d", selectedEndDateTime.get(Calendar.HOUR_OF_DAY), selectedEndDateTime.get(Calendar.MINUTE)),
+                repeat_days = selectedRepeatDays, // Pass the list of selected repeat days
+                category = tvList.text.toString()
+            )
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        val createdTask = response.body()
+                        val intent = Intent().apply {
+                            putExtra("new_task", createdTask) // Pass the created task object
+                        }
+                        setResult(RESULT_OK, intent) // Set result code and intent containing the new task
+                        finish()
+                    } else {
+                        Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                     }
-                    setResult(RESULT_OK, intent) // Set result code and intent containing the new task
-                    finish()
-                } else {
-                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed to parse date/time", Toast.LENGTH_SHORT).show()
         }
     }
 

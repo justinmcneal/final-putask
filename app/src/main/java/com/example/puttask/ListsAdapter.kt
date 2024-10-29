@@ -31,51 +31,50 @@ class ListsAdapter(
 
         // Set the task name and end date, truncating to 10 characters
         holder.tvTitle.text = if (task.task_name.length > 10) {
-            "${task.task_name.take(15)}..."
+            "${task.task_name.take(20)}..."
         } else {
             task.task_name
         }
 
-        holder.tvTime.text = task.end_date
+        // Convert end_time to 12-hour format with AM/PM
+        val endDate = task.end_date
+        val endTime24 = task.end_time
+        val timeFormat24 = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val timeFormat12 = SimpleDateFormat("hh:mm a", Locale.getDefault()) // 12-hour format with AM/PM
 
-        // Determine task status based on due date and create a background with corner radius
+        val formattedTime = try {
+            val date = timeFormat24.parse(endTime24)
+            timeFormat12.format(date!!).uppercase(Locale.getDefault())
+        } catch (e: Exception) {
+            endTime24 // Fallback to original if parsing fails
+        }
+
+        // Set the date and formatted time with AM/PM in tvTime
+        holder.tvTime.text = "$endDate $formattedTime"
+
+        // Determine task status based on due date and set background color
         val backgroundDrawable = holder.itemView.background as? GradientDrawable ?: GradientDrawable()
+        backgroundDrawable.cornerRadius = 50f
 
-        backgroundDrawable.cornerRadius = 50f // Set your desired corner radius
-
-        if (isTaskOverdue(task.end_date)) {
-            backgroundDrawable.setColor(holder.itemView.context.getColor(R.color.very_light_red)) // Change to red
+        if (isTaskOverdue(task.end_date, task.end_time)) {
+            backgroundDrawable.setColor(holder.itemView.context.getColor(R.color.very_light_red))
         } else {
-            backgroundDrawable.setColor(holder.itemView.context.getColor(R.color.very_light_yellow)) // Change to yellow
+            backgroundDrawable.setColor(holder.itemView.context.getColor(R.color.very_light_yellow))
         }
 
         holder.itemView.background = backgroundDrawable
 
-        // Handle click to edit the task
-        holder.itemView.setOnClickListener {
-            onItemClick(task)
-        }
-
-        // Handle delete task option
-        holder.deleteOption.setOnClickListener {
-            onDeleteClick?.invoke(task)
-        }
-
-        // Set the checkbox state based on the task's isChecked status
+        // Handle item click, delete option, and checkbox state
+        holder.itemView.setOnClickListener { onItemClick(task) }
+        holder.deleteOption.setOnClickListener { onDeleteClick?.invoke(task) }
         holder.checkBox.isChecked = task.isChecked
-
-        // Clear previous listener to avoid triggering the listener on initialization
         holder.checkBox.setOnCheckedChangeListener(null)
-
-        // Set a listener on the checkbox
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-            // Update the task's isChecked property
             task.isChecked = isChecked
-
-            // Notify the listener for the change
-            onTaskCheckedChangeListener?.invoke(task, isChecked) // Notify parent fragment
+            onTaskCheckedChangeListener?.invoke(task, isChecked)
         }
     }
+
 
     override fun getItemCount(): Int = taskList.size // Ensure this is correctly placed inside the class
 
@@ -92,12 +91,26 @@ class ListsAdapter(
     }
 
     // Function to check if the task is overdue
-    private fun isTaskOverdue(endDate: String): Boolean {
-        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) // Adjust format as needed
+    private fun isTaskOverdue(endDate: String, endTime: String): Boolean {
+        val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) // Date format
+        val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault()) // Time format
+
         return try {
-            val dueDate = formatter.parse(endDate) ?: return false
-            val currentDate = Date()
-            dueDate.before(currentDate) // Returns true if the due date is before the current date
+            // Parse end date and end time
+            val dueDate = dateFormatter.parse(endDate) ?: return false
+            val dueTime = timeFormatter.parse(endTime) ?: return false
+
+            // Combine the date and time into a single Date object
+            val dueDateTime = Calendar.getInstance().apply {
+                time = dueDate
+                set(Calendar.HOUR_OF_DAY, dueTime.hours)
+                set(Calendar.MINUTE, dueTime.minutes)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.time
+
+            val currentDateTime = Date() // Get current date and time
+            dueDateTime.before(currentDateTime) // Returns true if the due date-time is before the current date-time
         } catch (e: Exception) {
             false // Return false if parsing fails
         }
