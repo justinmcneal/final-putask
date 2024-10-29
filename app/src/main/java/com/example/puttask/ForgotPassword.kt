@@ -222,7 +222,7 @@ class ForgotPassword : AppCompatActivity() {
                 val response = RetrofitClient.getApiService(this@ForgotPassword).resetPassword(resetPasswordRequest)
                 if (response.isSuccessful) {
                     Toast.makeText(this@ForgotPassword, "Password reset successfully", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this@ForgotPassword, LogIn::class.java)
+                    val intent = Intent(this@ForgotPassword, LogIn::class.java)
                     startActivity(intent)
                     finish()
                 } else {
