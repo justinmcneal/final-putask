@@ -7,102 +7,19 @@
     tools:context=".fragments.Analytics">
 
 
-    <LinearLayout
-        android:id="@+id/linearLayout3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingTop="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.09">
-
-        <TextView
-            android:id="@+id/tvsevenDays"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/corners_for_greeting"
-            android:backgroundTint="@color/superlightgray"
-            android:paddingStart="14dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="8dp"
-            android:text="7 days"
-            android:textColor="@color/black"
-            android:textSize="14dp"
-            app:cornerRadius="10dp" />
-
-        <TextView
-            android:id="@+id/tvtwentyeightDays"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/corners_for_greeting"
-            android:backgroundTint="@color/superlightgray"
-            android:paddingStart="14dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="8dp"
-            android:text="28 days"
-            android:textColor="@color/black"
-            android:textSize="14dp"
-            app:cornerRadius="10dp" />
-
-        <TextView
-            android:id="@+id/tvsixtyDays"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/corners_for_greeting"
-            android:backgroundTint="@color/superlightgray"
-            android:paddingStart="14dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="8dp"
-            android:text="60 days"
-            android:textColor="@color/black"
-            android:textSize="14dp"
-            app:cornerRadius="10dp" />
-
-        <TextView
-            android:id="@+id/tvthreesixtyfiveDays"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/corners_for_greeting"
-            android:backgroundTint="@color/superlightgray"
-            android:paddingStart="14dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="8dp"
-            android:text="365 days"
-            android:textColor="@color/black"
-            android:textSize="14dp"
-            app:cornerRadius="10dp" />
-
-
-    </LinearLayout>
-
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:layout_marginStart="14dp"
         android:layout_marginEnd="14dp"
         android:backgroundTint="@color/superskyblue"
         app:cardCornerRadius="25dp"
         app:cardElevation="0dp"
-        android:layout_marginBottom="?attr/actionBarSize"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayout3">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -119,17 +36,7 @@
                 android:textColor="@color/black"
                 android:textSize="18dp"
                 android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvTaskOverviewDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="5dp"
-                android:text="Date"
-                android:textColor="@color/black"
-                android:textSize="14dp" />
-
+            
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
