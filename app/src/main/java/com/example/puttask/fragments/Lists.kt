@@ -69,7 +69,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ic_sort = binding.icSort
@@ -114,13 +113,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val username = sharedPreferences.getString("username", "User")
         binding.tvUsername.text = "Hi $username!"
     }
-
     private fun setupUIElements() {
         binding.icSort.setOnClickListener {
             showSortOptionsDialog()
         }
     }
-
     private fun showSortOptionsDialog() {
         val dialogBuilder = AlertDialog.Builder(requireContext())
         dialogBuilder.setTitle("Sort By")
@@ -140,7 +137,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
         dialog.show()
     }
-
     private fun applyCategoryAndSort() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -172,7 +168,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
     }
-
     private fun parseDate(dateString: String): Date? {
         return try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -182,8 +177,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
             null
         }
     }
-
-
     private fun filterTasksByCategory(category: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -419,7 +412,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                             }
                         } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(requireContext(), "Error updating task", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireContext(), "Selected Date and Time cannot be in the past", Toast.LENGTH_SHORT).show()
                             }
                         }
                     } else {
