@@ -19,17 +19,15 @@ data class LoginRequest(
 data class LoginResponse(
     val message: String,
     val token: String,
-    val user: UserInfo  // Initialize user here
+    val user: UserInfo
 )
 
-//change username
 data class UpdateUsernameRequest(
     val username: String)
 data class UpdateUsernameResponse(
     val message: String,
     val user: UserInfo)
 
-//all user data
 data class UserInfo (
     val id: Int,
     val username: String,
@@ -40,8 +38,6 @@ data class UserInfo (
     val password: String,
     val password_confirmation: String)
 
-
-// this is for forgot password and shit
 data class EmailRequest(
     val email: String)
 data class EmailResponse(
@@ -66,7 +62,6 @@ data class ResetPasswordResponse(
     val success: Boolean,
     val message: String)
 
-//contact
 data class ContactRequest(
     val message: String,
     val username: String,

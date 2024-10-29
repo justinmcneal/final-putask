@@ -16,7 +16,6 @@ class SplashScreen : AppCompatActivity() {
     private lateinit var dataManager: DataManager
     private lateinit var putasklogo: ImageView
     private lateinit var title: TextView
-
     private val delayDuration: Long = 8000 // 8 seconds delay
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,8 +25,6 @@ class SplashScreen : AppCompatActivity() {
         dataManager = DataManager(this)
         putasklogo = findViewById(R.id.putasklogo)
         title = findViewById(R.id.tvTitle)
-
-        // Load animations
         val spinToRightAnimation = AnimationUtils.loadAnimation(this, R.anim.spin_to_right)
         val spinToLeftAnimation = AnimationUtils.loadAnimation(this, R.anim.spin_to_left)
         val fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in)

@@ -44,23 +44,19 @@ class LogIn : AppCompatActivity() {
     private fun handleLogin() {
         val email = etEmail.text.toString().trim()
         val password = etPassword.text.toString().trim()
-
         if (validateInputs(email, password)) {
             loginUser(email, password)
         }
     }
-
     private fun navigateToForgotPassword() {
         val intent = Intent(this, ForgotPassword::class.java)
         startActivity(intent)
         finish()
     }
-
     private fun navigateToSignUp() {
         startActivity(Intent(this, SignUp::class.java))
         finish()
     }
-
     private fun togglePasswordVisibility() {
         val currentInputType = etPassword.inputType
         if (currentInputType == InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
@@ -72,7 +68,6 @@ class LogIn : AppCompatActivity() {
         }
         etPassword.setSelection(etPassword.text.length)
     }
-
     private fun validateInputs(email: String, password: String): Boolean {
         return when {
             email.isEmpty() -> showError("Please enter your email")
@@ -81,19 +76,15 @@ class LogIn : AppCompatActivity() {
             else -> true
         }
     }
-
     private fun showError(message: String): Boolean {
         showToast(message)
         return false
     }
-
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
-
     private fun loginUser(email: String, password: String) {
         val loginRequest = LoginRequest(email, password)
-
         lifecycleScope.launch {
             val response = RetrofitClient.getApiService(this@LogIn).login(loginRequest)
             if (response.isSuccessful) {
@@ -106,26 +97,20 @@ class LogIn : AppCompatActivity() {
 
     private fun handleLoginSuccess(loginResponse: LoginResponse?) {
         val message = loginResponse?.message ?: "Login successful"
-
-        // Save the authentication token using DataManager
         loginResponse?.token?.let {
             DataManager(this).saveAuthToken(it)
-
-            // Save username and token in SharedPreferences
             val sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
             sharedPreferences.edit().apply {
                 clear() // Clear old data
-                putString("username", loginResponse.user?.username) // Save username
-                putString("token", it) // Save token
-                apply() // Apply changes
+                putString("username", loginResponse.user?.username)
+                putString("token", it)
+                apply()
             }
         }
-
         showToast(message)
         startActivity(Intent(this, MainActivity::class.java))
         finish() // Close the LogIn screen
     }
-
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
