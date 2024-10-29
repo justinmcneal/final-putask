@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
@@ -53,8 +54,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setupBottomNavigation()
         openFragment(Lists(), "Tasks")
 
+        // Initialize the ActivityResultLauncher
+        var addTaskLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    // Check if the current fragment is Lists and refresh it
+                    val currentFragment = supportFragmentManager.findFragmentById(R.id.flfragment)
+                    if (currentFragment is Lists) {
+                        currentFragment.fetchTasks() // Call fetchTasks() directly
+                    }
+                }
+            }
+
         binding.btnAdd.setOnClickListener {
-            startActivity(Intent(this, AddTask2::class.java))
+            // Use the launcher to start AddTask2
+            val intent = Intent(this, AddTask2::class.java)
+            addTaskLauncher.launch(intent)
         }
 
         // Add the back press callback

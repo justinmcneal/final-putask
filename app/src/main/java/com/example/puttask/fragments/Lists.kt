@@ -206,7 +206,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
         binding.tvUsername.text = "Hi $username!"
     }
-    private fun fetchTasks() {
+    fun fetchTasks() {
         binding.swipeRefreshLayout.isRefreshing = true
         CoroutineScope(Dispatchers.IO).launch {
             try {
