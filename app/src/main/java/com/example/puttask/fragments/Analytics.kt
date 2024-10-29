@@ -13,6 +13,7 @@ import com.example.puttask.api.RetrofitClient
 import com.example.puttask.api.Task
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -41,7 +42,6 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
     private fun initializeViews(view: View) {
         lineChart = view.findViewById(R.id.lineChart)
-        tvTaskOverviewDate = view.findViewById(R.id.tvTaskOverviewDate)
         tvCompletedTasksCount = view.findViewById(R.id.tvCompletedTasksCount)
         tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount)
         tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount)
@@ -94,6 +94,9 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         // Log counts for debugging
         Log.d("Analytics", "Counts -> Created: $createdCount, Completed: $completedCount, Pending: $pendingCount, Overdue: $overdueCount")
 
+        // Clear previous data
+        lineChart.clear()
+
         // Set up entries for the chart
         val entries = mutableListOf<Entry>().apply {
             add(Entry(0f, createdCount.toFloat())) // Created tasks
@@ -105,14 +108,14 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         // Create dataset
         val lineDataSet = LineDataSet(entries, "Task Overview").apply {
             color = ContextCompat.getColor(requireContext(), R.color.very_blue)
-            valueTextColor = Color.BLACK
-            valueTextSize = 12f
+            valueTextColor = Color.TRANSPARENT // Hide value labels
+            valueTextSize = 0f // Set value text size to 0
             setDrawFilled(true)  // Enable fill under the line
             fillColor = ContextCompat.getColor(requireContext(), R.color.very_blue) // Fill color
             lineWidth = 2f // Set line width
             circleRadius = 5f // Set circle radius for data points
             setDrawCircles(true) // Enable circles
-            setDrawValues(true)   // Ensure values are displayed
+            setDrawValues(false) // Disable displaying values at points
         }
 
         // Set data for the chart
@@ -132,10 +135,17 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
             }
         }
 
+        // Configure X-axis
+        lineChart.xAxis.granularity = 1f // Set granularity to 1 to ensure labels are unique
+        lineChart.xAxis.axisMinimum = -0.1f  // Slightly shift minimum value left
+        lineChart.xAxis.axisMaximum = 3.1f   // Slightly shift maximum value right
+        lineChart.xAxis.labelCount = 4 // Number of labels
+        lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM // Set labels at the bottom
+        lineChart.xAxis.setDrawGridLines(false) // Disable grid lines
+
         // Customize chart appearance
         lineChart.description.isEnabled = false // Hide the description
         lineChart.legend.isEnabled = false // Hide legend for simplicity
-        lineChart.xAxis.setDrawGridLines(false) // Disable grid lines
         lineChart.axisLeft.setDrawGridLines(false) // Disable grid lines
         lineChart.axisRight.isEnabled = false // Hide right Y-axis
         lineChart.animateXY(1000, 1000) // Animate chart
