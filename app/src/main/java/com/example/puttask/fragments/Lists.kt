@@ -49,6 +49,8 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private var repeatDaysSelected = BooleanArray(repeatDays.size)
     private lateinit var tvDropdownLists: TextView
     private lateinit var ic_sort: ImageView
+    private var selectedCategory = "All Items"
+    private var isAscendingOrder = true // Default sorting order
 
 
     override fun onCreateView(
@@ -67,6 +69,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
         }
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ic_sort = binding.icSort
@@ -76,7 +79,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         fetchTasks()
         updateNoTasksMessage()
         updateUsernameDisplay()
-        // Initialize UI elements
         setupUIElements()
 
         val dropdownLists = PopupMenu(requireContext(), tvDropdownLists)
@@ -90,62 +92,48 @@ class Lists : Fragment(R.layout.fragment_lists) {
         dropdownLists.menuInflater.inflate(R.menu.dropdown_lists, dropdownLists.menu)
         binding.tvDropdownLists.setOnClickListener {
             dropdownLists.setOnMenuItemClickListener { menuItem ->
-                menuMap[menuItem.itemId]?.let { selectedCategory ->
+                menuMap[menuItem.itemId]?.let { selected ->
+                    selectedCategory = selected
                     tvDropdownLists.text = selectedCategory
-                    filterTasksByCategory(selectedCategory) // Pass the correct category
+                    applyCategoryAndSort() // Apply both filter and sorting
                     true
                 } ?: false
             }
             dropdownLists.show()
         }
+
         ic_sort.setOnClickListener {
             showSortOptionsDialog()
-
         }
 
         listsAdapter.onTaskCheckedChangeListener = { task, isChecked ->
-            markTaskAsComplete(task, isChecked) // Call the method Fto mark the task as complete
+            markTaskAsComplete(task, isChecked)
         }
 
-
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
-        val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
+        val username = sharedPreferences.getString("username", "User")
         binding.tvUsername.text = "Hi $username!"
     }
+
     private fun setupUIElements() {
-        // Set up the sort button click listener
         binding.icSort.setOnClickListener {
             showSortOptionsDialog()
         }
     }
+
     private fun showSortOptionsDialog() {
-        // Create a dialog builder
         val dialogBuilder = AlertDialog.Builder(requireContext())
-
-        // Set the title for the dialog
         dialogBuilder.setTitle("Sort By")
-
-        // Set the options for sorting
         dialogBuilder.setItems(arrayOf("Ascending Order", "Descending Order")) { _, which ->
-            when (which) {
-                0 -> {
-                    sortTasksByDateAscending() // Sort from oldest to newest
-                    Toast.makeText(requireContext(), "Sorted in Ascending Order", Toast.LENGTH_SHORT).show()
-                }
-                1 -> {
-                    sortTasksByDateDescending() // Sort from newest to oldest
-                    Toast.makeText(requireContext(), "Sorted in Descending Order", Toast.LENGTH_SHORT).show()
-                }
-            }
+            isAscendingOrder = which == 0
+            applyCategoryAndSort() // Apply sorting after selecting order
+            val order = if (isAscendingOrder) "Ascending" else "Descending"
+            Toast.makeText(requireContext(), "Sorted in $order Order", Toast.LENGTH_SHORT).show()
         }
-
-        // Set the negative button to close the dialog
         dialogBuilder.setNegativeButton("Close") { dialog, _ -> dialog.dismiss() }
 
-        // Create and show the dialog
         val dialog = dialogBuilder.create()
         dialog.setOnShowListener {
-            // Center the dialog options if needed
             val textView = dialog.findViewById<TextView>(android.R.id.title)
             textView?.gravity = Gravity.CENTER
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
@@ -153,8 +141,73 @@ class Lists : Fragment(R.layout.fragment_lists) {
         dialog.show()
     }
 
+    private fun applyCategoryAndSort() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.getApiService(requireContext()).getAllTasks()
+                if (response.isSuccessful) {
+                    response.body()?.let { tasks ->
+                        val filteredTasks = if (selectedCategory == "All Items") {
+                            tasks.filter { !it.isChecked }
+                        } else {
+                            tasks.filter { it.category == selectedCategory && !it.isChecked }
+                        }
+
+                        val sortedTasks = if (isAscendingOrder) {
+                            filteredTasks.sortedBy { parseDate(it.end_date) ?: Date(Long.MAX_VALUE) }
+                        } else {
+                            filteredTasks.sortedByDescending { parseDate(it.end_date) ?: Date(0) }
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            taskList.clear()
+                            taskList.addAll(sortedTasks)
+                            listsAdapter.notifyDataSetChanged()
+                            updateNoTasksMessage()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception fetching tasks", e)
+            }
+        }
+    }
+
+    private fun parseDate(dateString: String): Date? {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            dateFormat.parse(dateString)
+        } catch (e: ParseException) {
+            Log.e("ListsFragment", "Error parsing date: $dateString", e)
+            null
+        }
+    }
 
 
+    private fun filterTasksByCategory(category: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
+                if (response.isSuccessful) {
+                    response.body()?.let { tasks ->
+                        val filteredTasks = if (category == "All Items") {
+                            tasks.filter { !it.isChecked }
+                        } else {
+                            tasks.filter { it.category == category && !it.isChecked }
+                        }
+                        withContext(Dispatchers.Main) {
+                            taskList.clear()
+                            taskList.addAll(filteredTasks)
+                            listsAdapter.notifyDataSetChanged()
+                            updateNoTasksMessage()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ListsFragment", "Exception fetching tasks", e)
+            }
+        }
+    }
     private fun updateUsernameDisplay() {
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
         val username = sharedPreferences.getString("username", "User")  // Default is "User" if not found
@@ -184,48 +237,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
                 withContext(Dispatchers.Main) {
                     binding.swipeRefreshLayout.isRefreshing = false
                 }
-            }
-        }
-    }
-    private fun sortTasksByDateDescending() {
-        taskList.sortByDescending { parseDate(it.end_date) ?: Date(0) } // Handle null dates
-        listsAdapter.notifyDataSetChanged()
-    }
-    private fun sortTasksByDateAscending() {
-        taskList.sortBy { parseDate(it.end_date) ?: Date(Long.MAX_VALUE) }
-        listsAdapter.notifyDataSetChanged()
-    }
-    private fun parseDate(dateString: String): Date? {
-        return try {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            dateFormat.parse(dateString)
-        } catch (e: ParseException) {
-            Log.e("ListsFragment", "Error parsing date: $dateString", e)
-            null
-        }
-    }
-
-    private fun filterTasksByCategory(category: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response: Response<List<Task>> = RetrofitClient.getApiService(requireContext()).getAllTasks()
-                if (response.isSuccessful) {
-                    response.body()?.let { tasks ->
-                        val filteredTasks = if (category == "All Items") {
-                            tasks.filter { !it.isChecked }
-                        } else {
-                            tasks.filter { it.category == category && !it.isChecked }
-                        }
-                        withContext(Dispatchers.Main) {
-                            taskList.clear()
-                            taskList.addAll(filteredTasks)
-                            listsAdapter.notifyDataSetChanged()
-                            updateNoTasksMessage()
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("ListsFragment", "Exception fetching tasks", e)
             }
         }
     }
@@ -464,7 +475,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         // Show the dialog
         datePickerDialog.show()
     }
-
     private fun showTimePicker(tvTimeReminder: TextView, tvDueDate: TextView) {
         val calendar = Calendar.getInstance()
         val timePickerDialog = TimePickerDialog(
@@ -490,9 +500,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
 
         timePickerDialog.show()
     }
-
-
-
     private fun showRepeatDaysDialog(tvRepeat: TextView, onDaysSelected: (List<String>) -> Unit) {
         // Initialize repeatDaysSelected with the current state of the task
         repeatDaysSelected = repeatDaysSelected.clone()
@@ -538,7 +545,6 @@ class Lists : Fragment(R.layout.fragment_lists) {
         // Show the dialog
         dialog.show()
     }
-
     private fun showDeleteConfirmationDialog(task: Task) {
         AlertDialog.Builder(requireContext()).apply {
             setTitle("Delete Task")
