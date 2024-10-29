@@ -92,14 +92,17 @@
         android:id="@+id/cardView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="14dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="14dp"
         android:backgroundTint="@color/superskyblue"
         app:cardCornerRadius="25dp"
         app:cardElevation="0dp"
+        android:layout_marginBottom="?attr/actionBarSize"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/linearLayout3">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -131,115 +134,164 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="20dp"
-                android:orientation="horizontal">
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
 
-                <androidx.cardview.widget.CardView
-                    android:layout_width="100dp"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardElevation="0dp"> <!-- Makes CardView transparent so the inner layout shows the border -->
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="140dp"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/cardview_border"
-                        android:orientation="vertical"
-                        android:paddingBottom="10dp"> <!-- You can adjust padding as needed -->
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardElevation="0dp"> <!-- Makes CardView transparent so the inner layout shows the border -->
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="Completed Tasks"
-                            android:textAlignment="center"
-                            android:textColor="@color/black"
-                            android:textSize="12dp" />
+                            android:background="@drawable/cardview_border"
+                            android:orientation="vertical"
+                            android:paddingBottom="10dp"> <!-- You can adjust padding as needed -->
 
-                        <TextView
-                            android:id="@+id/tvCompletedTasksCount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="10dp"
-                            android:text="0"
-                            android:textAlignment="center"
-                            android:textColor="#4caf50"
-                            android:textSize="20dp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="Completed Tasks"
+                                android:textAlignment="center"
+                                android:textColor="@color/black"
+                                android:textSize="12dp" />
 
-                <androidx.cardview.widget.CardView
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardElevation="0dp"> <!-- Makes CardView transparent so the inner layout shows the border -->
+                            <TextView
+                                android:id="@+id/tvCompletedTasksCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="10dp"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="#4caf50"
+                                android:textSize="20dp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="140dp"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/cardview_border"
-                        android:orientation="vertical"
-                        android:paddingBottom="10dp"> <!-- You can adjust padding as needed -->
+                        android:layout_marginStart="10dp"
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardElevation="0dp"> <!-- Makes CardView transparent so the inner layout shows the border -->
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="Pending Tasks"
-                            android:textAlignment="center"
-                            android:textColor="@color/black"
-                            android:textSize="12dp" />
+                            android:background="@drawable/cardview_border"
+                            android:orientation="vertical"
+                            android:paddingBottom="10dp"> <!-- You can adjust padding as needed -->
 
-                        <TextView
-                            android:id="@+id/tvPendingTasksCount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="10dp"
-                            android:text="0"
-                            android:textAlignment="center"
-                            android:textColor="#ffb300"
-                            android:textSize="20dp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="Pending Tasks"
+                                android:textAlignment="center"
+                                android:textColor="@color/black"
+                                android:textSize="12dp" />
 
-                <androidx.cardview.widget.CardView
-                    android:layout_width="100dp"
+                            <TextView
+                                android:id="@+id/tvPendingTasksCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="10dp"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="#ffb300"
+                                android:textSize="20dp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardElevation="0dp"> <!-- Makes CardView transparent so the inner layout shows the border -->
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="140dp"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/cardview_border"
-                        android:orientation="vertical"
-                        android:paddingBottom="10dp"> <!-- You can adjust padding as needed -->
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardElevation="0dp"> <!-- Makes CardView transparent so the inner layout shows the border -->
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="Overdue Tasks"
-                            android:textAlignment="center"
-                            android:textColor="@color/black"
-                            android:textSize="12dp" />
+                            android:background="@drawable/cardview_border"
+                            android:orientation="vertical"
+                            android:paddingBottom="10dp"> <!-- You can adjust padding as needed -->
 
-                        <TextView
-                            android:id="@+id/tvOverdueTasksCount"
-                            android:layout_width="wrap_content"
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="Created Task"
+                                android:textAlignment="center"
+                                android:textColor="@color/black"
+                                android:textSize="12dp" />
+
+                            <TextView
+                                android:id="@+id/tvCreatedTasksCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="10dp"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="@color/very_blue"
+                                android:textSize="20dp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="140dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardElevation="0dp"> <!-- Makes CardView transparent so the inner layout shows the border -->
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="10dp"
-                            android:text="0"
-                            android:textAlignment="center"
-                            android:textColor="#dd3737"
-                            android:textSize="20dp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                            android:background="@drawable/cardview_border"
+                            android:orientation="vertical"
+                            android:paddingBottom="10dp"> <!-- You can adjust padding as needed -->
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="Overdue Tasks"
+                                android:textAlignment="center"
+                                android:textColor="@color/black"
+                                android:textSize="12dp" />
+
+                            <TextView
+                                android:id="@+id/tvOverdueTasksCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="10dp"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="#dd3737"
+                                android:textSize="20dp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
             </LinearLayout>
 
             <com.github.mikephil.charting.charts.LineChart

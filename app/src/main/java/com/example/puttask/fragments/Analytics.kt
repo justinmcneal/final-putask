@@ -40,6 +40,8 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
     private lateinit var  tvCompletedTasksCount: TextView
     private lateinit var tvPendingTasksCount: TextView
     private lateinit var tvOverdueTasksCount: TextView // Add this for overdue tasks
+    private lateinit var tvCreatedTasksCount: TextView // Add this for overdue tasks
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -55,6 +57,8 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         tvCompletedTasksCount = view.findViewById(R.id.tvCompletedTasksCount)
         tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount)
         tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount) // Initialize overdue TextView
+        tvCreatedTasksCount = view.findViewById(R.id.tvCreatedTasksCount) // Initialize overdue TextView
+
 
 
         // Fetch tasks and update pending tasks count
@@ -117,15 +121,25 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                     taskEndDate?.before(Date()) == true && !task.isChecked
                 }, days)
 
+                val createdTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
+                    val taskEndDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)
+                    taskEndDate?.before(Date()) == true && !task.isChecked
+                }, days)
+
+
                 // Create entries for each category
                 val pendingEntries = mutableListOf<Entry>()
                 val completedEntries = mutableListOf<Entry>()
                 val overdueEntries = mutableListOf<Entry>()
+                val createdEntries = mutableListOf<Entry>()
+
 
                 for (i in 0 until days) {
                     pendingEntries.add(Entry(i.toFloat(), (pendingTasksGroupedByDay[i] ?: 0).toFloat()))
                     completedEntries.add(Entry(i.toFloat(), (completedTasksGroupedByDay[i] ?: 0).toFloat()))
                     overdueEntries.add(Entry(i.toFloat(), (overdueTasksGroupedByDay[i] ?: 0).toFloat()))
+                    createdEntries.add(Entry(i.toFloat(), (createdTasksGroupedByDay[i] ?: 0).toFloat()))
+
                 }
 
                 // Create datasets for each category with custom colors and labels
@@ -146,6 +160,12 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 overdueDataSet.lineWidth = 2f
                 overdueDataSet.setDrawCircles(true)
                 overdueDataSet.setDrawValues(false)
+
+                val createdDataSet = LineDataSet(overdueEntries, "$label - Created")
+                createdDataSet.color = ContextCompat.getColor(requireContext(), R.color.very_blue)
+                createdDataSet.lineWidth = 2f
+                createdDataSet.setDrawCircles(true)
+                createdDataSet.setDrawValues(false)
 
                 // Combine datasets and set to chart
                 val lineData = LineData(pendingDataSet, completedDataSet, overdueDataSet)
@@ -236,10 +256,14 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                         task.isChecked // Tasks that are marked as completed
                     }
 
+                    // Count created tasks: all tasks
+                    val createdTasksCount = tasks.size // Total number of tasks
+
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
                         tvOverdueTasksCount.text = overdueTasksCount.toString()
                         tvCompletedTasksCount.text = completedTasksCount.toString()
+                        tvCreatedTasksCount.text = createdTasksCount.toString()
                     }
                 } else {
                     // Handle error response
@@ -249,7 +273,6 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
             }
         }
     }
-
 }
 
 
