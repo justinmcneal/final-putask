@@ -265,7 +265,7 @@ class AddTask2 : AppCompatActivity() {
                         setResult(RESULT_OK, intent) // Set result code and intent containing the new task
                         finish()
                     } else {
-                        Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@AddTask2, "Failed to create task: Task name already existits!", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
