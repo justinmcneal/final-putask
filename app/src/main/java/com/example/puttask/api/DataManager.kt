@@ -33,8 +33,4 @@ class DataManager(context: Context) {
         preferences.edit().remove(KEY_IS_LOGGED_IN).apply()
     }
 
-    // Clear all saved data (delete account)
-    fun clear() {
-        preferences.edit().clear().apply()
-    }
 }
