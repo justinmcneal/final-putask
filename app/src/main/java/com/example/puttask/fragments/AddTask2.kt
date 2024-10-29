@@ -210,42 +210,68 @@ class AddTask2 : AppCompatActivity() {
 
     private fun createTask() {
         if (!validateFields()) return
+
+        // Parse the end date
         val endDateParts = tvDueDate.text.toString().split("/")
-        val endTimeParts = tvTimeReminder.text.toString().split(":")
-        val selectedEndDateTime = Calendar.getInstance().apply {
-            set(Calendar.YEAR, endDateParts[0].toInt())
-            set(Calendar.MONTH, endDateParts[1].toInt() - 1)
-            set(Calendar.DAY_OF_MONTH, endDateParts[2].toInt())
-            set(Calendar.HOUR_OF_DAY, endTimeParts[0].toInt())
-            set(Calendar.MINUTE, endTimeParts[1].toInt())
-            set(Calendar.SECOND, 0)
-        }
-        if (selectedEndDateTime.before(Calendar.getInstance())) {
-            Toast.makeText(this, "Selected end date and time cannot be in the past", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val createRequest = CreateRequest(
-            task_name = etTaskName.text.toString(),
-            task_description = etTaskDescription.text.toString(),
-            end_date = String.format("%04d-%02d-%02d", selectedEndDateTime.get(Calendar.YEAR), selectedEndDateTime.get(Calendar.MONTH) + 1, selectedEndDateTime.get(Calendar.DAY_OF_MONTH)),
-            end_time = String.format("%02d:%02d", selectedEndDateTime.get(Calendar.HOUR_OF_DAY), selectedEndDateTime.get(Calendar.MINUTE)),
-            repeat_days = selectedRepeatDays, // Pass the list of selected repeat days
-            category = tvList.text.toString()
-        )
-        CoroutineScope(Dispatchers.IO).launch {
-            val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
-            runOnUiThread {
-                if (response.isSuccessful) {
-                    val createdTask = response.body()
-                    val intent = Intent().apply {
-                        putExtra("new_task", createdTask) // Pass the created task object
+
+        // Parse the end time in 12-hour format
+        val timeString = tvTimeReminder.text.toString().trim()
+        val sdf12Hour = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        val sdf24Hour = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+        val selectedEndDateTime = Calendar.getInstance()
+
+        try {
+            selectedEndDateTime.apply {
+                set(Calendar.YEAR, endDateParts[0].toInt())
+                set(Calendar.MONTH, endDateParts[1].toInt() - 1)
+                set(Calendar.DAY_OF_MONTH, endDateParts[2].toInt())
+
+                // Convert 12-hour time format to 24-hour format
+                val date = sdf12Hour.parse(timeString) // Parse as 12-hour format with AM/PM
+                if (date != null) {
+                    val formattedTime = sdf24Hour.format(date) // Format as 24-hour
+                    val endTimeParts = formattedTime.split(":")
+                    set(Calendar.HOUR_OF_DAY, endTimeParts[0].toInt())
+                    set(Calendar.MINUTE, endTimeParts[1].toInt())
+                }
+
+                set(Calendar.SECOND, 0)
+            }
+
+            // Check if the selected date and time are in the past
+            if (selectedEndDateTime.before(Calendar.getInstance())) {
+                Toast.makeText(this, "Selected end date and time cannot be in the past", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val createRequest = CreateRequest(
+                task_name = etTaskName.text.toString(),
+                task_description = etTaskDescription.text.toString(),
+                end_date = String.format("%04d-%02d-%02d", selectedEndDateTime.get(Calendar.YEAR), selectedEndDateTime.get(Calendar.MONTH) + 1, selectedEndDateTime.get(Calendar.DAY_OF_MONTH)),
+                end_time = String.format("%02d:%02d", selectedEndDateTime.get(Calendar.HOUR_OF_DAY), selectedEndDateTime.get(Calendar.MINUTE)),
+                repeat_days = selectedRepeatDays, // Pass the list of selected repeat days
+                category = tvList.text.toString()
+            )
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val response: Response<Task> = RetrofitClient.getApiService(this@AddTask2).createTask(createRequest)
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        val createdTask = response.body()
+                        val intent = Intent().apply {
+                            putExtra("new_task", createdTask) // Pass the created task object
+                        }
+                        setResult(RESULT_OK, intent) // Set result code and intent containing the new task
+                        finish()
+                    } else {
+                        Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                     }
-                    setResult(RESULT_OK, intent) // Set result code and intent containing the new task
-                    finish()
-                } else {
-                    Toast.makeText(this@AddTask2, "Failed to create task: ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed to parse date/time", Toast.LENGTH_SHORT).show()
         }
     }
 
