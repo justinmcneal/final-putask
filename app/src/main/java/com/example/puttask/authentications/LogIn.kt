@@ -58,6 +58,7 @@ class LogIn : AppCompatActivity() {
 
     private fun navigateToSignUp() {
         startActivity(Intent(this, SignUp::class.java))
+        finish()
     }
 
     private fun togglePasswordVisibility() {

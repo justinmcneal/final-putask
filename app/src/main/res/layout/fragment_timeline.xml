@@ -128,7 +128,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="No task created."
+                android:text="No task completed."
                 android:textColor="@color/gray"
                 android:textSize="15sp"
                 android:visibility="gone"

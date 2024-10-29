@@ -48,6 +48,7 @@ class SignUp : AppCompatActivity() {
         }
         findViewById<TextView>(R.id.othersLog).setOnClickListener {
             startActivity(Intent(this, LogIn::class.java))
+            finish()
         }
         ivTogglePasswordVisibility.setOnClickListener {
             togglePasswordVisibility(etPassword, ivTogglePasswordVisibility)
