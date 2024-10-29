@@ -45,28 +45,18 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Initialize UI components
         lineChart = view.findViewById(R.id.lineChart)
         tvsevenDays = view.findViewById(R.id.tvsevenDays)
         tvtwentyeightDays = view.findViewById(R.id.tvtwentyeightDays)
         tvsixtyDays = view.findViewById(R.id.tvsixtyDays)
         tvthreesixtyfiveDays = view.findViewById(R.id.tvthreesixtyfiveDays)
         tvTaskOverviewDate = view.findViewById(R.id.tvTaskOverviewDate)
-
         tvCompletedTasksCount = view.findViewById(R.id.tvCompletedTasksCount)
         tvPendingTasksCount = view.findViewById(R.id.tvPendingTasksCount)
-        tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount) // Initialize overdue TextView
-        tvCreatedTasksCount = view.findViewById(R.id.tvCreatedTasksCount) // Initialize overdue TextView
-
-
-
-        // Fetch tasks and update pending tasks count
+        tvOverdueTasksCount = view.findViewById(R.id.tvOverdueTasksCount)
+        tvCreatedTasksCount = view.findViewById(R.id.tvCreatedTasksCount)
         fetchPendingTasksCount()
 
-
-
-        // Set up click listeners for the buttons
         tvsevenDays.setOnClickListener {
             updateChart(7, "Pending Tasks - Last 7 Days")
             highlightButton(tvsevenDays)
@@ -106,10 +96,9 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
             if (response.isSuccessful) {
                 val tasks = response.body() ?: listOf()
 
-                // Filter and group tasks by day for each category
+                // Group tasks based on their status
                 val pendingTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
-                    val taskEndDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)
-                    taskEndDate?.after(Date()) == true && !task.isChecked
+                    isTaskPending(task)
                 }, days)
 
                 val completedTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
@@ -117,15 +106,11 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 }, days)
 
                 val overdueTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
-                    val taskEndDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)
-                    taskEndDate?.before(Date()) == true && !task.isChecked
+                    isTaskOverdue(task)
                 }, days)
 
-                val createdTasksGroupedByDay = groupTasksByDay(tasks.filter { task ->
-                    val taskEndDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)
-                    taskEndDate?.before(Date()) == true && !task.isChecked
-                }, days)
-
+                // Group all created tasks
+                val createdTasksGroupedByDay = groupTasksByDay(tasks, days) // All created tasks
 
                 // Create entries for each category
                 val pendingEntries = mutableListOf<Entry>()
@@ -133,13 +118,11 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 val overdueEntries = mutableListOf<Entry>()
                 val createdEntries = mutableListOf<Entry>()
 
-
                 for (i in 0 until days) {
                     pendingEntries.add(Entry(i.toFloat(), (pendingTasksGroupedByDay[i] ?: 0).toFloat()))
                     completedEntries.add(Entry(i.toFloat(), (completedTasksGroupedByDay[i] ?: 0).toFloat()))
                     overdueEntries.add(Entry(i.toFloat(), (overdueTasksGroupedByDay[i] ?: 0).toFloat()))
-                    createdEntries.add(Entry(i.toFloat(), (createdTasksGroupedByDay[i] ?: 0).toFloat()))
-
+                    createdEntries.add(Entry(i.toFloat(), (createdTasksGroupedByDay[i] ?: 0).toFloat())); // Total created tasks
                 }
 
                 // Create datasets for each category with custom colors and labels
@@ -161,14 +144,14 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                 overdueDataSet.setDrawCircles(true)
                 overdueDataSet.setDrawValues(false)
 
-                val createdDataSet = LineDataSet(overdueEntries, "$label - Created")
+                val createdDataSet = LineDataSet(createdEntries, "$label - Created")
                 createdDataSet.color = ContextCompat.getColor(requireContext(), R.color.very_blue)
                 createdDataSet.lineWidth = 2f
                 createdDataSet.setDrawCircles(true)
                 createdDataSet.setDrawValues(false)
 
                 // Combine datasets and set to chart
-                val lineData = LineData(pendingDataSet, completedDataSet, overdueDataSet)
+                val lineData = LineData(pendingDataSet, completedDataSet, overdueDataSet, createdDataSet)
                 lineChart.data = lineData
 
                 // Set x-axis value formatter
@@ -193,24 +176,46 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         }
     }
 
-    // Group tasks by day for the given date range
-    private fun groupTasksByDay(tasks: List<Task>, days: Int): Map<Int, Int> {
-        val calendar = Calendar.getInstance()
-        val tasksPerDay = mutableMapOf<Int, Int>()
-        val currentDate = calendar.timeInMillis
-
-        for (task in tasks) {
-            val taskDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)?.time ?: continue
-            val dayDifference = ((currentDate - taskDate) / (1000 * 60 * 60 * 24)).toInt()
-
-            // Only include tasks within the specified date range
-            if (dayDifference in 0 until days) {
-                tasksPerDay[dayDifference] = tasksPerDay.getOrDefault(dayDifference, 0) + 1
-            }
-        }
-        return tasksPerDay
+    private fun isTaskPending(task: Task): Boolean {
+        val currentDateTime = Date()
+        val taskEndDateTime = getTaskEndDateTime(task)
+        return taskEndDateTime != null && taskEndDateTime >= currentDateTime && !task.isChecked
     }
 
+    private fun isTaskOverdue(task: Task): Boolean {
+        val currentDateTime = Date()
+        val taskEndDateTime = getTaskEndDateTime(task)
+        return taskEndDateTime != null && taskEndDateTime < currentDateTime && !task.isChecked
+    }
+
+    private fun getTaskEndDateTime(task: Task): Date? {
+        return SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            .parse("${task.end_date} ${task.end_time}")
+    }
+
+
+    private fun groupTasksByDay(tasks: List<Task>, days: Int): Map<Int, Int> {
+        val currentDateMillis = System.currentTimeMillis()
+        val tasksPerDay = mutableMapOf<Int, Int>()
+
+        // Helper function to parse the task's end date
+        fun parseTaskEndDate(task: Task): Long? {
+            return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.end_date)?.time
+        }
+
+        tasks.forEach { task ->
+            parseTaskEndDate(task)?.let { taskDateMillis ->
+                val dayDifference = ((currentDateMillis - taskDateMillis) / (1000 * 60 * 60 * 24)).toInt()
+
+                // Only include tasks within the specified date range
+                if (dayDifference in 0 until days) {
+                    tasksPerDay[dayDifference] = tasksPerDay.getOrDefault(dayDifference, 0) + 1
+                }
+            }
+        }
+
+        return tasksPerDay
+    }
     private fun highlightButton(button: TextView) {
         // Reset the background tint for all buttons first
         tvsevenDays.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.superlightgray)
@@ -218,47 +223,39 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
         tvsixtyDays.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.superlightgray)
         tvthreesixtyfiveDays.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.superlightgray)
 
+        // Highlight the selected button
+        button.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.very_blue)
     }
     private suspend fun getTasksFromApi(): Response<List<Task>> {
         return RetrofitClient.getApiService(requireContext()).getAllTasks()
     }
-
     private fun fetchPendingTasksCount() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = getTasksFromApi()
                 if (response.isSuccessful) {
                     val tasks = response.body() ?: emptyList()
-
-                    // Current date and time in the same format as the task's end_date and end_time
-                    val currentDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).parse(
-                        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
-                    )
-
-                    // Count pending tasks: those with end_date >= currentDate (upcoming tasks)
-                    val pendingTasksCount = tasks.count { task ->
-                        val taskEndDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).parse(
-                            "${task.end_date} ${task.end_time}"
-                        )
-                        taskEndDateTime >= currentDateTime && !task.isChecked // Future or same-day end_date and not completed
+                    val currentDateTime = Date() // Current date and time
+                    fun getTaskEndDateTime(task: Task): Date? {
+                        return SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                            .parse("${task.end_date} ${task.end_time}")
                     }
-
-                    // Count overdue tasks: those with end_date < currentDate
-                    val overdueTasksCount = tasks.count { task ->
-                        val taskEndDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).parse(
-                            "${task.end_date} ${task.end_time}"
-                        )
-                        taskEndDateTime < currentDateTime && !task.isChecked // Past end_date and not completed
+                    val (pendingTasksCount, overdueTasksCount, completedTasksCount) = tasks.fold(
+                        Triple(0, 0, 0)
+                    ) { acc, task ->
+                        val taskEndDateTime = getTaskEndDateTime(task)
+                        when {
+                            taskEndDateTime == null -> acc
+                            taskEndDateTime >= currentDateTime && !task.isChecked ->
+                                acc.copy(first = acc.first + 1) // Pending
+                            taskEndDateTime < currentDateTime && !task.isChecked ->
+                                acc.copy(second = acc.second + 1)
+                            task.isChecked ->
+                                acc.copy(third = acc.third + 1)
+                            else -> acc
+                        }
                     }
-
-                    // Count completed tasks: those marked as checked
-                    val completedTasksCount = tasks.count { task ->
-                        task.isChecked // Tasks that are marked as completed
-                    }
-
-                    // Count created tasks: all tasks
-                    val createdTasksCount = tasks.size // Total number of tasks
-
+                    val createdTasksCount = tasks.size
                     withContext(Dispatchers.Main) {
                         tvPendingTasksCount.text = pendingTasksCount.toString()
                         tvOverdueTasksCount.text = overdueTasksCount.toString()
@@ -266,7 +263,6 @@ class Analytics : Fragment(R.layout.fragment_analytics) {
                         tvCreatedTasksCount.text = createdTasksCount.toString()
                     }
                 } else {
-                    // Handle error response
                 }
             } catch (e: Exception) {
                 Log.e("PendingTasks", "Error fetching tasks: ${e.message}")
