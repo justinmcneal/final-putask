@@ -61,12 +61,39 @@ class AddTask2 : AppCompatActivity() {
         addIcon.setOnClickListener { showCategoryPopup() }
         findViewById<ImageButton>(R.id.addDueIcon).setOnClickListener { showDatePicker() }
         findViewById<ImageButton>(R.id.addTimeIcon).setOnClickListener { showTimePicker() }
-        btnRepeat.setOnClickListener { showRepeatDaysDialog { days ->
-            selectedRepeatDays = days // Update selected repeat days
-            tvRepeatDays.text = "Repeats on: ${selectedRepeatDays.joinToString(", ")}"
-        }}
+        btnRepeat.setOnClickListener {
+            // Check if a due date is selected before proceeding
+            if (tvDueDate.text.isEmpty()) {
+                Toast.makeText(this, "Please select a due date before setting repeat days", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+            // Check if the selected due date is at least a week from now before allowing repeat days
+            if (isDeadlineAtLeastOneWeekAway()) {
+                showRepeatDaysDialog { days ->
+                    selectedRepeatDays = days // Update selected repeat days
+                    tvRepeatDays.text = "Repeats on: ${selectedRepeatDays.joinToString(", ")}" // Display selected days
+                }
+            } else {
+                Toast.makeText(this, "Repeat days are available only if the deadline is at least one week from today.", Toast.LENGTH_LONG).show()
+            }
+        }
         createButton.setOnClickListener { createTask() }
     }
+    private fun isDeadlineAtLeastOneWeekAway(): Boolean {
+        val selectedDate = tvDueDate.text.toString()
+        if (selectedDate.isEmpty()) return false
+
+        val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+        val parsedDate = dateFormat.parse(selectedDate) ?: return false
+
+        // Calculate one week from now
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, 7)
+
+        // Check if the selected date is at least one week from today
+        return parsedDate.after(calendar.time)
+    }
+
 
     private fun showCategoryPopup() {
         PopupMenu(this, addIcon).apply {
