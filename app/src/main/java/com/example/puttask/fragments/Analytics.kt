@@ -28,7 +28,6 @@ import java.util.*
 class Analytics : Fragment(R.layout.fragment_analytics) {
 
     private lateinit var lineChart: LineChart
-    private lateinit var tvTaskOverviewDate: TextView
     private lateinit var tvCompletedTasksCount: TextView
     private lateinit var tvPendingTasksCount: TextView
     private lateinit var tvOverdueTasksCount: TextView

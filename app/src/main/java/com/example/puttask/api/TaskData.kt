@@ -5,13 +5,11 @@ import android.os.Parcelable
 data class CreateRequest(
     val task_name: String,
     val task_description: String,
-    val end_date: String?,
+    val end_date: String,
     val end_time: String?,
     val repeat_days: List<String>?,
     val category: String
 )
-
-// Recycler View Shit
 data class Task(
     val id: String,
     val task_name: String,
@@ -20,7 +18,7 @@ data class Task(
     val end_time: String,
     var repeat_days: List<String>?,
     val category: String,
-    var isChecked: Boolean = false // Default value is false
+    var isChecked: Boolean = false
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(

@@ -8,7 +8,7 @@ data class RegistrationRequest(
 data class RegistrationResponse(
     val message: String,
     val token: String,
-    val user: UserInfo  // Initialize user here
+    val user: UserInfo
 )
 
 
@@ -19,7 +19,7 @@ data class LoginRequest(
 data class LoginResponse(
     val message: String,
     val token: String,
-    val user: UserInfo  // Initialize user here
+    val user: UserInfo
 )
 
 //change username
@@ -40,8 +40,6 @@ data class UserInfo (
     val password: String,
     val password_confirmation: String)
 
-
-// this is for forgot password and shit
 data class EmailRequest(
     val email: String)
 data class EmailResponse(
@@ -65,8 +63,6 @@ data class ResetPasswordRequest(
 data class ResetPasswordResponse(
     val success: Boolean,
     val message: String)
-
-//contact
 data class ContactRequest(
     val message: String,
     val username: String,
