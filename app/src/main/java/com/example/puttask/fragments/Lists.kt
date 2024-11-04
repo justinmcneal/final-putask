@@ -19,6 +19,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.puttask.ListsAdapter
@@ -52,11 +53,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
     private var selectedCategory = "All Items"
     private var isAscendingOrder = true // Default sorting order
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentListsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -100,15 +97,12 @@ class Lists : Fragment(R.layout.fragment_lists) {
             }
             dropdownLists.show()
         }
-
         ic_sort.setOnClickListener {
             showSortOptionsDialog()
         }
-
         listsAdapter.onTaskCheckedChangeListener = { task, isChecked ->
             markTaskAsComplete(task, isChecked)
         }
-
         val sharedPreferences = requireContext().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
         val username = sharedPreferences.getString("username", "User")
         binding.tvUsername.text = "Hi $username!"
@@ -128,12 +122,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
             Toast.makeText(requireContext(), "Sorted in $order Order", Toast.LENGTH_SHORT).show()
         }
         dialogBuilder.setNegativeButton("Close") { dialog, _ -> dialog.dismiss() }
-
         val dialog = dialogBuilder.create()
         dialog.setOnShowListener {
             val textView = dialog.findViewById<TextView>(android.R.id.title)
             textView?.gravity = Gravity.CENTER
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(ContextCompat.getColor(requireContext(), R.color.very_blue))
         }
         dialog.show()
     }
@@ -148,13 +141,11 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         } else {
                             tasks.filter { it.category == selectedCategory && !it.isChecked }
                         }
-
                         val sortedTasks = if (isAscendingOrder) {
                             filteredTasks.sortedBy { parseDate(it.end_date) ?: Date(Long.MAX_VALUE) }
                         } else {
                             filteredTasks.sortedByDescending { parseDate(it.end_date) ?: Date(0) }
                         }
-
                         withContext(Dispatchers.Main) {
                             taskList.clear()
                             taskList.addAll(sortedTasks)
@@ -287,7 +278,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
                         }
                     } else {
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(requireContext(), "Error updating task", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Selected date and time cannot be in the past", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } catch (e: Exception) {
@@ -320,9 +311,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val datePickerDialog = DatePickerDialog(
             requireContext(),
             R.style.DialogTheme,
-            { _, year, month, dayOfMonth ->
-                tvDueDate.text = "$dayOfMonth/${month + 1}/$year"
-            },
+            { _, year, month, dayOfMonth -> tvDueDate.text = "$dayOfMonth/${month + 1}/$year" },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
@@ -335,8 +324,7 @@ class Lists : Fragment(R.layout.fragment_lists) {
         val timePickerDialog = TimePickerDialog(
             requireContext(),
             R.style.DialogTheme,
-            { _, hourOfDay, minute ->
-                val hourIn12Format = if (hourOfDay > 12) hourOfDay - 12 else hourOfDay
+            { _, hourOfDay, minute -> val hourIn12Format = if (hourOfDay > 12) hourOfDay - 12 else hourOfDay
                 val amPm = if (hourOfDay >= 12) "PM" else "AM"
                 tvTimeReminder.text = String.format("%02d:%02d %s", hourIn12Format, minute, amPm)
             },
@@ -374,16 +362,18 @@ class Lists : Fragment(R.layout.fragment_lists) {
     }
     private fun customizeDialogButtons(dialog: AlertDialog) {
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(resources.getColor(R.color.very_blue))
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(resources.getColor(R.color.very_blue))
+            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+            val color = ContextCompat.getColor(requireContext(), R.color.very_blue)
+            positiveButton?.setTextColor(color)
+            negativeButton?.setTextColor(color)
         }
     }
     private fun showDeleteConfirmationDialog(task: Task) {
         AlertDialog.Builder(requireContext()).apply {
             setTitle("Delete Task")
             setMessage("Are you sure you want to delete this task?")
-            setPositiveButton("Delete") { _, _ ->
-                deleteTask(task)
+            setPositiveButton("Delete") { _, _ -> deleteTask(task)
                 Toast.makeText(requireContext(), "Task deleted successfully", Toast.LENGTH_SHORT).show()
             }
             setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
@@ -392,60 +382,50 @@ class Lists : Fragment(R.layout.fragment_lists) {
         }
     }
     private fun deleteTask(task: Task) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = RetrofitClient.getApiService(requireContext()).deleteTask(task.id)
-                if (response.isSuccessful) {
-                    withContext(Dispatchers.Main) {
-                        val index = taskList.indexOf(task)
-                        if (index != -1) {
-                            taskList.removeAt(index)
-                            listsAdapter.notifyItemRemoved(index)
-                            updateNoTasksMessage()
-                        }
-                    }
-                } else {
-                    Log.e("ListsFragment", "Error deleting task: ${response.message()}")
-                }
-            } catch (e: Exception) {
-                Log.e("ListsFragment", "Exception deleting task", e)
+        executeTask {
+            val response = RetrofitClient.getApiService(requireContext()).deleteTask(task.id)
+            if (response.isSuccessful) {
+                updateTaskList(task)
+            } else {
+                Log.e("ListsFragment", "Error deleting task: ${response.message()}")
             }
         }
+    }
+    private fun markTaskAsComplete(task: Task, isChecked: Boolean) {
+        executeTask {
+            val response = RetrofitClient.getApiService(requireContext()).markTaskComplete(task.id, CompleteTaskRequest(id = task.id, isChecked = isChecked))
+            if (response.isSuccessful) {
+                if (isChecked) {
+                    updateTaskList(task)
+                } else {
+                    fetchTasks()
+                }
+            } else {
+                Log.e("ListsFragment", "Error marking task complete: ${response.message()}")
+            }
+        }
+    }
+    private fun executeTask(action: suspend () -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try { action() } catch (e: Exception) { Log.e("ListsFragment", "Exception during task execution", e) }
+        }
+    }
+    private suspend fun updateTaskList(task: Task) {
+        withContext(Dispatchers.Main) {
+            val index = taskList.indexOf(task)
+            if (index != -1) {
+                taskList.removeAt(index)
+                listsAdapter.notifyItemRemoved(index)
+                updateNoTasksMessage()
+            }
+        }
+    }
+    private fun updateNoTasksMessage() {
+        binding.tvNotask.visibility = if (taskList.isEmpty()) View.VISIBLE else View.GONE
+        binding.listsrecyclerView.visibility = if (taskList.isEmpty()) View.GONE else View.VISIBLE
     }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-    private fun updateNoTasksMessage() {
-        if (taskList.isEmpty()) {
-            binding.tvNotask.visibility = View.VISIBLE
-            binding.listsrecyclerView.visibility = View.GONE
-        } else {
-            binding.tvNotask.visibility = View.GONE
-            binding.listsrecyclerView.visibility = View.VISIBLE
-        }
-    }
-    private fun markTaskAsComplete(task: Task, isChecked: Boolean) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response: Response<Task> = RetrofitClient.getApiService(requireContext()).markTaskComplete(task.id, CompleteTaskRequest(id = task.id, isChecked = isChecked))
-                if (response.isSuccessful) {
-                    withContext(Dispatchers.Main) {
-                        if (isChecked) {
-                            val taskPosition = taskList.indexOf(task)
-                            taskList.removeAt(taskPosition)
-                            listsAdapter.notifyItemRemoved(taskPosition)
-                        } else {
-                            fetchTasks()
-                        }
-                        updateNoTasksMessage()
-                    }
-                } else {
-                    Log.e("ListsFragment", "Error marking task complete: ${response.message()}")
-                }
-            } catch (e: Exception) {
-                Log.e("ListsFragment", "Exception marking task complete", e)
-            }
-        }
     }
 }
